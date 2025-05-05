@@ -1,0 +1,115 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Login.master.cs" Inherits="LoginMaster" %>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .btn {
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 15px 40px;
+            display: inline-block;
+            transition: all .2s;
+            /*position: absolute;*/
+            background-color: black;
+            border-radius: 100px;
+            font-size: large;
+            font:bolder;
+            color:ghostwhite;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-white {
+            /*background-color: #fff;*/
+            /*color: #777;*/
+        }
+
+        .btn::after {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            width: 100%;
+            border-radius: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            transition: all .4s;
+        }
+
+        .btn-white::after {
+            background-color: #fff;
+        }
+
+        .btn:hover::after {
+            transform: scaleX(1.4) scaleY(1.6);
+            opacity: 0;
+        }
+
+        .btn-animated {
+            animation: moveInBottom 5s ease-out;
+            animation-fill-mode: backwards;
+        }
+    </style>
+
+    <link href="Image/Background.css" rel="stylesheet" />
+    <title>Company Login</title>
+
+
+</head>
+<body style="background-color: #E6E6FA">
+    <form id="LoginScreen" runat="server">
+            <br/>
+        <div>
+            <div class="container-fluid">
+                    <div class="row" style="margin-left:80px">
+                            <img src="Image/Logo.png" />
+                    </div>
+                </div>
+        </div>
+            <div style="background-color: darkslategrey; width:400px; border-radius: 30px; opacity:0.8; margin-left:300px;">
+                <div>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <center>
+                                <div>
+                                    <br>
+                                    <asp:Label ID="Label" runat="server" Text="Company" Style="font-family:sans-serif;font-size:20px;font-weight: bold;color:ghostwhite"></asp:Label>
+                                    <asp:DropDownList ID="CompanyList" runat="server" Style="margin-top: 10px; height: 50px; width: 380px; border-radius: 10px; font-family:sans-serif;font-size:20px" AutoPostBack="True" OnSelectedIndexChanged="CompanyList_SelectedIndexChanged">
+                                    </asp:DropDownList>
+                                    <asp:TextBox ID="Company" runat="server" Visible="False"></asp:TextBox>
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+            </div>
+            <br/>
+            <div>
+                <div class="container-fluid">
+                        <div class="row">
+                            <center>
+                                <div>
+                                    <asp:Button ID="ButtonProceed" runat="server" class="btn btn-white btn-animated" Text="Proceed" 
+                                        AutoPostBack="True" OnClick="ButtonProceed_Click" BorderStyle="None" />
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+            </div>
+            <br/>
+        </div>
+    </form>
+</body>
+</html>
