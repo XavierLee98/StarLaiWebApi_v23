@@ -26,9 +26,10 @@ namespace StarLaiPortal.WebApi.API.Controller
                 //return Ok(rtn.ToList());
                 using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
                 {
-                    var val = conn.Query("exec sp_getdatalist 'Company'").ToList();
-                    return Ok(JsonConvert.SerializeObject(val, Formatting.Indented));
+                    var com = conn.Query<Companys>("select * from StarLai_Common..ODBC");
+                    return Ok(JsonConvert.SerializeObject(com, Formatting.Indented));
                 }
+                return NotFound();
             }
             catch (Exception ex)
             {

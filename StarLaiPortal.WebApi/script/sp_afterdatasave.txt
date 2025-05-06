@@ -1,0 +1,488 @@
+USE [GSG_Portal_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_afterdatasave]    Script Date: 15/3/2024 10:41:22 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[sp_afterdatasave]
+@tablename nvarchar(50),
+@json nvarchar(1024) = ''
+as
+begin
+DECLARE @userGuid AS uniqueidentifier;
+DECLARE @count INT = 0;
+
+	if @tablename = 'PickListDetailsActual'
+	begin
+		SELECT SUM(PickQty) [PickQty] FROM PickListDetailsActual
+		WHERE PickList = JSON_VALUE(@json, '$.picklist') AND PickListDetailOid= JSON_VALUE(@json, '$.picklistdetailoid')
+		GROUP BY ItemCode, ItemDesc
+		--;with cte as
+		--(
+		--	select T1.PickList, T1.SOBaseDoc, T1.SOBaseId, sum(case when T1.GCRecord is null then T1.PickQty else 0 end) as totalpick
+		--	from PickListDetailsActual T0 inner join PickListDetailsActual T1 on T0.PickList = T1.PickList and T0.SOBaseDoc = T1.SOBaseDoc and T0.SOBaseId = T1.SOBaseId
+		--	where T0.OID = JSON_VALUE(@json, '$.oid')
+		--	group by T1.PickList, T1.SOBaseDoc, T1.SOBaseId
+		--)
+		--update T0
+		--set T0.PickQty = cte.totalpick
+		--from PickListDetails T0 inner join cte on T0.PickList = cte.PickList and T0.SOBaseDoc = cte.SOBaseDoc and T0.SOBaseId = cte.SOBaseId
+
+		--;with cte as
+		--(
+		--	select T1.PickList, T1.PickListDetailOid, sum(case when T1.GCRecord is null then T1.PickQty else 0 end) as totalpick
+		--	from PickListDetailsActual T0 inner join PickListDetailsActual T1 on T0.PickList = T1.PickList and T0.PickListDetailOid = T1.PickListDetailOid
+		--	where T1.OID = JSON_VALUE(@json, '$.oid')
+		--	group by T1.PickList, T1.PickListDetailOid
+		--)
+		--update T0
+		--set T0.PickQty = cte.totalpick, T0.CopyTo = CASE WHEN cte.totalpick = T0.PlanQty THEN 1 ELSE 0 END
+		--from PickListDetails T0 inner join cte on T0.PickList = cte.PickList and cte.PickListDetailOid = T0.OID
+	end
+
+	if @tablename = 'PickListStatus'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		--UPDATE PickList SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[PickListDocTrail]
+		   ([CreateUser]
+		   ,[CreateDate]
+		   ,[UpdateUser]
+		   ,[UpdateDate]
+		   ,[DocStatus]
+		   ,[PickList]
+		   ,[OptimisticLockField]
+		   ,[GCRecord])
+		VALUES
+		(
+		@userGuid,
+		GETDATE(),
+		@userGuid,
+		GETDATE(),
+		1,
+		JSON_VALUE(@json, '$.oid'),
+		0,
+		null
+		)
+
+	end
+
+	if @tablename = 'PackListDraft'
+	begin
+		
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE PackList SET Status = 0 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[PackListDocTrail]
+		   ([CreateUser]
+           ,[CreateDate]
+           ,[UpdateUser]
+           ,[UpdateDate]
+           ,[DocStatus]
+		   ,[DocRemarks]
+           ,[PackList]
+           ,[OptimisticLockField]
+           ,[GCRecord])
+		VALUES
+		(
+		@userGuid,
+		GETDATE(),
+		@userGuid,
+		GETDATE(),
+		0,
+		'Draft Updated',
+		JSON_VALUE(@json, '$.oid'),
+		0,
+		null
+		)
+
+	end
+
+	if @tablename = 'PackList'
+	begin
+		
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE PackList SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[PackListDocTrail]
+		   ([CreateUser]
+           ,[CreateDate]
+           ,[UpdateUser]
+           ,[UpdateDate]
+           ,[DocStatus]
+           ,[PackList]
+           ,[OptimisticLockField]
+           ,[GCRecord])
+		VALUES
+		(
+		@userGuid,
+		GETDATE(),
+		@userGuid,
+		GETDATE(),
+		1,
+		JSON_VALUE(@json, '$.oid'),
+		0,
+		null
+		)
+
+	end
+
+	if @tablename = 'Loading'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE Load SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+
+		INSERT INTO [dbo].[LoadDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+		       ,[Load]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				1,
+				JSON_VALUE(@json, '$.oid'),
+				0,
+				null
+				)
+	end
+
+	if @tablename = 'WTDraft'
+	begin
+		UPDATE WarehouseTransferReq SET CopyTo = 1, Status = 3 WHERE OID = JSON_VALUE(@json, '$.reqOid');
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[WarehouseTransferReqDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+			   ,[WarehouseTransferReq]
+		       ,[DocRemarks]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				3,
+				JSON_VALUE(@json, '$.reqOid'),
+				null,
+				0,
+				null
+				)
+
+	end
+
+	if @tablename = 'WTPost'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE WarehouseTransfers SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[WarehouseTransfersDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+			   ,[WarehouseTransfers]
+		       ,[DocRemarks]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				1,
+				JSON_VALUE(@json, '$.oid'),
+				null,
+				0,
+				null
+				)
+	end
+
+	if @tablename = 'SalesReturns'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE SalesReturns SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[SalesReturnDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+		       ,[SalesReturns]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				3,
+				JSON_VALUE(@json, '$.oid'),
+				0,
+				null
+				)
+
+		UPDATE SalesReturnRequests SET CopyTo = 1, Status = 3 WHERE OID = JSON_VALUE(@json, '$.oidreq');
+
+		INSERT INTO [dbo].[SalesReturnRequestDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+		       ,[DocRemarks]
+		       ,[SalesReturnRequests]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				3,
+				null,
+				JSON_VALUE(@json, '$.oidreq'),
+				0,
+				null
+				)
+
+	end
+
+	if @tablename = 'PurchaseReturn'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		UPDATE PurchaseReturns SET Status = 1 WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		INSERT INTO [dbo].[PurchaseReturnDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+		       ,[DocRemarks]
+		       ,[PurchaseReturns]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				1,
+				null,
+				JSON_VALUE(@json, '$.oid'),
+				0,
+				null
+				)
+
+		UPDATE PurchaseReturnRequests SET CopyTo = 1, Status = 3 WHERE OID = JSON_VALUE(@json, '$.oidreq');
+
+		 INSERT INTO [dbo].[PurchaseReturnRequestDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+		       ,[DocRemarks]
+		       ,[PurchaseReturnRequests]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				3,
+				null,
+				JSON_VALUE(@json, '$.oidreq'),
+				0,
+				null
+				)
+
+	SELECT 1
+	end
+
+	if @tablename = 'CancelSRR'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[SalesReturnRequestDocTrail]
+		   ([CreateUser]
+		   ,[CreateDate]
+		   ,[UpdateUser]
+		   ,[UpdateDate]
+		   ,[DocStatus]
+		   ,[SalesReturnRequests]
+		   ,[OptimisticLockField]
+		   ,[GCRecord])
+			VALUES
+			(
+			@userGuid,
+			GETDATE(),
+			@userGuid,
+			GETDATE(),
+			2,
+			JSON_VALUE(@json, '$.oid'),
+			0,
+			null
+			)
+	end
+
+	if @tablename = 'CancelPRR'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[PurchaseReturnRequestDocTrail]
+		   ([CreateUser]
+		   ,[CreateDate]
+		   ,[UpdateUser]
+		   ,[UpdateDate]
+		   ,[DocStatus]
+		   ,[PurchaseReturnRequests]
+		   ,[OptimisticLockField]
+		   ,[GCRecord])
+			VALUES
+			(
+			@userGuid,
+			GETDATE(),
+			@userGuid,
+			GETDATE(),
+			2,
+			JSON_VALUE(@json, '$.oid'),
+			0,
+			null
+			)
+	end
+
+	if @tablename = 'CancelTransfer'
+	begin
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[WarehouseTransfersDocTrail]
+		   ([CreateUser]
+		   ,[CreateDate]
+		   ,[UpdateUser]
+		   ,[UpdateDate]
+		   ,[DocStatus]
+		   ,[WarehouseTransfers]
+		   ,[OptimisticLockField]
+		   ,[GCRecord])
+			VALUES
+			(
+			@userGuid,
+			GETDATE(),
+			@userGuid,
+			GETDATE(),
+			2,
+			JSON_VALUE(@json, '$.oid'),
+			0,
+			null
+			)
+	end
+
+	if @tablename = 'StockCountUpdate'
+	begin
+
+		SELECT @count = SUM(Quantity) FROM StockCountSheetCounted WHERE StockCountSheet = JSON_VALUE(@json, '$.oid') AND GCRecord is null;
+		UPDATE StockCountSheet SET Counted = @count WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[StockCountSheetDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+			   ,[StockCountSheet]
+		       ,[DocRemarks]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				0,
+				JSON_VALUE(@json, '$.oid'),
+				'Document Update',
+				0,
+				null
+				)
+	end
+
+	if @tablename = 'StockCountConfirm'
+	begin
+
+		SELECT @count = SUM(Quantity) FROM StockCountSheetCounted WHERE StockCountSheet = JSON_VALUE(@json, '$.oid') AND GCRecord is null;
+		UPDATE StockCountSheet SET Counted = @count WHERE OID = JSON_VALUE(@json, '$.oid');
+
+		SELECT @userGuid = Oid FROM [PermissionPolicyUser] where UserName = JSON_VALUE(@json, '$.username')
+
+		INSERT INTO [dbo].[StockCountSheetDocTrail]
+		       ([CreateUser]
+		       ,[CreateDate]
+		       ,[UpdateUser]
+		       ,[UpdateDate]
+		       ,[DocStatus]
+			   ,[StockCountSheet]
+		       ,[DocRemarks]
+		       ,[OptimisticLockField]
+		       ,[GCRecord])
+		 VALUES
+				(
+				@userGuid,
+				GETDATE(),
+				@userGuid,
+				GETDATE(),
+				1,
+				JSON_VALUE(@json, '$.oid'),
+				null,
+				0,
+				null
+				)
+	end
+
+end
