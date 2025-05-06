@@ -1,0 +1,29 @@
+CREATE TABLE [dbo].[AppPostLog](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[DocType] [nvarchar](50) NULL,
+	[AppUser] [nvarchar](50) NULL,
+	[RequestBody] [nvarchar](max) NULL,
+	[RequestTime] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+
+
+ALTER PROCEDURE [dbo].[sp_App_InsertAppPostLog]
+    @DocType NVARCHAR(50),
+    @AppUser NVARCHAR(100),
+    @RequestBody NVARCHAR(MAX)
+AS
+BEGIN
+    INSERT INTO [dbo].[AppPostLog]
+           ([DocType]
+           ,[AppUser]
+           ,[RequestBody]
+           ,[RequestTime])
+    VALUES
+           (@DocType
+           ,@AppUser
+           ,@RequestBody
+           ,GETDATE());
+END

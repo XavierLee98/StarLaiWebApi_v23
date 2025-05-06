@@ -1,0 +1,242 @@
+USE [GSG_Portal_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_beforedatasave]    Script Date: 15/3/2024 10:40:53 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER procedure [dbo].[sp_beforedatasave]
+@tablename nvarchar(50),
+@json nvarchar(1024) = ''
+as
+BEGIN
+	declare @error bit = 0
+	declare @errormessage nvarchar(1024) = ''
+
+	if @tablename = 'ValidatePickToPack' 
+	begin
+		SELECT COUNT(1) FROM PackListDetails WHERE PickListNo = JSON_VALUE(@json, '$.picklist') AND (JSON_VALUE(@json, '$.packlist') = -1 OR PackList != JSON_VALUE(@json, '$.packlist')) AND GCRecord IS NULL;
+	END
+
+	if @tablename ='ValidateStockBalance'
+	BEGIN
+	--IF NOT EXISTS (SELECT 1 FROM [GSG_SAP_Test]..[OIBQ] T0 
+	--	INNER JOIN [GSG_SAP_Test]..[OBIN] T1 ON T0.BinAbs = T1.AbsEntry WHERE T0.ItemCode = JSON_VALUE(@json, '$.itemcode') AND T1.BinCode = JSON_VALUE(@json, '$.bincode')) 
+		
+		IF NOT EXISTS (SELECT 1 FROM [vwBinStockBalance] T0 WHERE T0.ItemCode = JSON_VALUE(@json, '$.itemcode') AND T0.BinCode = JSON_VALUE(@json, '$.bincode'))
+		BEGIN
+			SET @error = 1;
+			SET @errormessage = JSON_VALUE(@json, '$.itemcode') + ' Not Enough Balance.';
+
+			SELECT @error AS Error ,@errormessage AS ErrorMessage;
+			RETURN;
+		END
+
+		DECLARE @currentQty decimal;
+		SELECT @currentQty = InStock FROM [vwBinStockBalance] T0 WHERE T0.ItemCode = JSON_VALUE(@json, '$.itemcode') AND T0.BinCode = JSON_VALUE(@json, '$.bincode')
+		--SELECT @currentQty = OnHandQty FROM [GSG_SAP_Test]..[OIBQ] T0 
+		--INNER JOIN [GSG_SAP_Test]..[OBIN] T1 ON T0.BinAbs = T1.AbsEntry WHERE T0.ItemCode = JSON_VALUE(@json, '$.itemcode') AND T1.BinCode = JSON_VALUE(@json, '$.bincode')
+
+		IF(@currentQty < JSON_VALUE(@json, '$.quantity'))
+		BEGIN
+			SET @error = 1;
+			SET @errormessage = JSON_VALUE(@json, '$.itemcode') + ' Not Enough Balance.';
+
+			SELECT @error AS Error ,@errormessage AS ErrorMessage;
+			RETURN;
+		END
+
+		SELECT 0 AS Error, '' AS ErrorMessage;
+		RETURN;
+	END
+
+	if @tablename = 'ValidateItemBinMaster'
+	BEGIN
+		IF((SELECT COUNT(1) FROM vwItemMasters WHERE ItemCode = JSON_VALUE(@json, '$.itemcode')) <= 0)
+		BEGIN
+			 SELECT 0 AS Error, 'Invalid Item.' AS ErrorMessage;
+			 RETURN;
+		END
+
+		IF((SELECT COUNT(1) FROM vwBin WHERE BinCode = JSON_VALUE(@json, '$.bincode')) <= 0)
+		BEGIN
+			 SELECT 0 AS Error, 'Invalid Bin.' AS ErrorMessage;
+			 RETURN;
+		END
+	END
+
+	if @tablename = 'ValidateBundle'
+	BEGIN
+		--Checking params missing
+		IF(JSON_VALUE(@json, '$.packlist') IS NULL)
+		BEGIN 
+				SET @error = 1;
+				SET @errormessage = 'PackList DocNum is missing';
+
+				SELECT @error AS Error ,@errormessage AS ErrorMessage;
+				RETURN;
+		END
+		IF(JSON_VALUE(@json, '$.bundleid') IS NULL)  
+		BEGIN 
+				SET @error = 1;
+				SET @errormessage = 'Bundle Id is missing';
+
+				SELECT @error AS Error ,@errormessage AS ErrorMessage;
+				RETURN;
+		END
+
+		--Checking bundle loaded
+		IF EXISTS (
+			SELECT 1 FROM LoadDetails T1 
+			INNER JOIN Load T2 ON T1.Load = T2.OID
+			WHERE T1.GCRecord is null AND T2.GCRecord is null AND T2.Status <> 2
+			AND T1.PackList = JSON_VALUE(@json, '$.packlist') AND T1.Bundle = JSON_VALUE(@json, '$.bundleid') )
+		BEGIN
+
+			DECLARE @bundle nVarChar(25) = JSON_VALUE(@json, '$.packlist') + '-' +
+			CAST((SELECT BundleID FROM BundleType WHERE OID = JSON_VALUE(@json, '$.bundleid')) AS nvarChar(2))
+			SET @error = 1;
+			SET @errormessage = 'Bundle '+@bundle+' already loaded.';
+
+			SELECT @error AS Error ,@errormessage AS ErrorMessage;
+			RETURN;
+		END
+
+		SELECT 0 AS Error, '' AS ErrorMessage;
+		RETURN;
+	END
+
+	IF @tablename = 'GetWarehouseFromPick'
+	BEGIN
+		SELECT T0.Warehouse FROM PickList T0
+		WHERE T0.DocNum IN (
+		SELECT DISTINCT CAST(value AS nvarchar(25))
+		FROM OPENJSON(@json, '$.PickLists')
+		)
+	END
+
+	IF @tablename = 'GetWarehouseFromPack'
+	BEGIN
+		SELECT T0.Warehouse FROM PackList T0 
+		WHERE T0.GCRecord IS NULL AND T0.DocNum IN (
+		SELECT CAST(value AS nvarchar(20))
+		FROM OPENJSON(@json, '$.Packlistid')
+		)
+	END
+	
+	IF @tablename = 'GetPickDistinctSONumber'
+	BEGIN
+
+		SELECT DISTINCT T3.DocNum [SODocNum] FROM PickList T0
+		INNER JOIN PickListDetails T1 ON T0.Oid = T1.PickList
+		INNER JOIN SalesOrderDetails T2 ON T1.SOBaseId = T2.OID 
+		INNER JOIN SalesOrder T3 ON T1.SOBaseDoc = T3.DocNum
+		WHERE T0.DocNum IN (
+		SELECT DISTINCT CAST(value AS nvarchar(25))
+		FROM OPENJSON(@json, '$.PickLists')
+		)
+		ORDER BY T3.DocNum;
+
+	END
+
+	IF @tablename = 'GetPickDistinctSAPSONo'
+	BEGIN
+	
+		SELECT DISTINCT T3.SAPDocNum [SAPDocNum] FROM PickList T0
+		INNER JOIN PickListDetails T1 ON T0.Oid = T1.PickList AND T1.GCRecord IS NULL
+		INNER JOIN SalesOrderDetails T2 ON T1.SOBaseId = T2.OID AND T2.GCRecord IS NULL
+		INNER JOIN SalesOrder T3 ON T1.SOBaseDoc = T3.DocNum AND T3.GCRecord IS NULL
+		WHERE T0.DocNum IN (
+		SELECT DISTINCT CAST(value AS nvarchar(25))
+		FROM OPENJSON(@json, '$.PickLists')
+		)
+		ORDER BY T3.SAPDocNum;
+	END
+
+	IF @tablename = 'GetPickPriority'
+	BEGIN
+
+		SELECT Max(T1.Priority) [Priority] FROM PickList T0
+		INNER JOIN PickListDetails T1 ON T0.Oid = T1.PickList AND T1.GCRecord IS NULL
+		WHERE T0.DocNum IN (
+		SELECT DISTINCT CAST(value AS nvarchar(25))
+		FROM OPENJSON(@json, '$.PickLists')
+		)
+		Group By T0.OID;
+	END
+
+	IF @tablename = 'GetPickCustomerGroup'
+	BEGIN
+		SELECT Max(T0.CustomerGroup) [CustomerGroup] FROM PickList T0
+		WHERE T0.DocNum IN (
+		SELECT DISTINCT CAST(value AS nvarchar(25))
+		FROM OPENJSON(@json, '$.PickLists')
+		)
+		Group By T0.OID;
+	END
+
+	IF @tablename = 'GetPickCustomer'
+	BEGIN
+		SELECT TT2.BPName [Customer]  FROM 
+		(
+			SELECT Max(T1.Customer) [Customer] FROM PickList T0
+			INNER JOIN PickListDetails T1 ON T0.Oid = T1.PickList AND T1.GCRecord IS NULL
+			WHERE T0.DocNum IN (
+			SELECT DISTINCT CAST(value AS nvarchar(25))
+			FROM OPENJSON(@json, '$.PickLists')
+			)
+			Group By T0.OID
+		) AS TT1
+		INNER JOIN vwBusniessPartner TT2 ON TT1.Customer collate SQL_Latin1_General_CP850_CI_AS = TT2.BPCode collate SQL_Latin1_General_CP850_CI_AS; 
+	END
+
+	IF @tablename = 'GetPackSONumber'
+	BEGIN
+		--WITH CTE AS(
+		--	SELECT 
+		--	CAST(JSON_VALUE([value], '$.PackListID') AS nvarchar) AS PackList,
+		--	CAST(JSON_VALUE([value], '$.Bundle') AS decimal) AS BundleId
+		--	FROM OPENJSON(@json, '$.PackBundle')
+		--)
+
+		--SELECT DISTINCT T3.SOBaseDoc FROM PackList T0
+		--INNER JOIN PackListDetails T1 ON T0.OID = T1.PackList AND T1.GCRecord IS NULL
+		--INNER JOIN PickListDetailsActual T3 ON T1.BaseId = T3.OID 
+		--INNER JOIN CTE T4 ON T0.DocNum = T4.PackList AND T1.Bundle = T4.BundleId
+		--WHERE T0.GCRecord IS NULL 
+
+		SELECT DISTINCT T3.SOBaseDoc FROM PackList T0
+		INNER JOIN PackListDetails T1 ON T0.OID = T1.PackList AND T1.GCRecord IS NULL
+		INNER JOIN PickListDetailsActual T3 ON T1.BaseId = T3.OID 
+		WHERE T0.GCRecord IS NULL AND T0.DocNum IN (
+		SELECT CAST(value AS nvarchar(20))
+		FROM OPENJSON(@json, '$.Packlistid')
+		)
+	END
+
+	IF @tablename = 'GetPackPriority'
+	BEGIN
+		SELECT Max(ISNULL(T0.Priority,0)) [Priority] FROM PackList T0
+		WHERE T0.DocNum IN (
+		SELECT CAST(value AS nvarchar(20))
+		FROM OPENJSON(@json, '$.Packlistid')
+		)
+		Group By T0.OID;
+	END
+
+	IF @tablename = 'DeletePackDetail'
+	BEGIN
+		UPDATE PackListDetails SET GCRecord = -1 WHERE PackList = JSON_VALUE(@json, '$.packoid');
+	END
+
+	--if @tablename = 'StockCountCountedDelete'
+	--begin
+	--	UPDATE StockCountSheetCounted SET GCRecord = -1 WHERE StockCountSheet = JSON_VALUE(@json, '$.oid')
+	--end
+
+	if @tablename = 'ValidateBarCode'
+	begin
+		SELECT ItemCode FROM vwItemBarCodeFull WHERE BcdCode = JSON_VALUE(@json, '$.barcode');
+	end
+
+END

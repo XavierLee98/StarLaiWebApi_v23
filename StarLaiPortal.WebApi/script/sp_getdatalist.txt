@@ -1,0 +1,632 @@
+USE [GSG_Portal_Live]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_getdatalist]    Script Date: 15/3/2024 10:39:06 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[sp_getdatalist]
+@type nvarchar(50),
+@json nvarchar(1024) = null
+as
+begin
+
+	if @type = 'AppVersion'
+	begin
+		SELECT AppName, AppVersion FROM [OperationLivePortal_Common]..VersionControl WHERE AppName = JSON_VALUE(@json, '$.appName') AND RIGHT(DB_NAME(),4) = 'LIVE'
+		UNION
+		SELECT AppName, AppVersion FROM [OperationTestPortal_Common]..VersionControl WHERE AppName = JSON_VALUE(@json, '$.appName') AND RIGHT(DB_NAME(),4) <> 'LIVE'
+	end
+
+	if @type = 'ValidateRole'
+	begin
+		SELECT COUNT(1) FROM PermissionPolicyUser T0
+		INNER JOIN PermissionPolicyUserUsers_PermissionPolicyRoleRoles T1 ON T0.Oid = T1.Users 
+		INNER JOIN PermissionPolicyRole T2 ON T1.Roles = T2.Oid AND T2.GCRecord IS NULL
+		WHERE T0.Oid = JSON_VALUE(@json, '$.userId') And T2.Name in ('Administrators','WhsAccessRole')
+	end
+
+	if @type = 'CompanyPrefix'
+	begin
+		SELECT CompanyPrefix FROM [OperationLivePortal_Common]..ODBC WHERE DBName = JSON_VALUE(@json, '$.dbName') AND RIGHT(DB_NAME(),4) = 'LIVE'  
+		UNION ALL
+		SELECT CompanyPrefix FROM [OperationTestPortal_Common]..ODBC WHERE DBName = JSON_VALUE(@json, '$.dbName') AND RIGHT(DB_NAME(),4) <> 'LIVE' 
+	end
+
+	if @type = 'Company'
+	begin
+		SELECT DBName, Description, WebapiUrl FROM [OperationLivePortal_Common]..ODBC WHERE RIGHT(DB_NAME(),4) = 'LIVE'
+		UNION ALL
+		SELECT DBName, Description, WebapiUrl FROM [OperationTestPortal_Common]..ODBC WHERE RIGHT(DB_NAME(),4) <> 'LIVE'
+	end
+
+	if @type = 'ItemBarCode'
+	begin
+		SELECT T0.BcdCode, T0.ItemCode, T0.ItemName, T0.UomCode, T1.CatalogNo, T1.LegacyItemCode AS [LegacyCode] FROM [vwItemBarCode] T0
+		INNER JOIN [vwItemMasters] T1 ON T0.ItemCode = T1.ItemCode
+		WHERE BcdCode = JSON_VALUE(@json, '$.code') 
+	end
+
+	if @type = 'SalesPerson'
+	begin
+		if (@json is null or @json = '')
+		begin
+			select SlpCode, SlpName
+			from vwSalesPerson
+		end
+		else if @json like '%"code"%'
+		begin
+			EXECUTE sp_executesql N'select SlpCode, SlpName
+			from vwSalesPerson
+			where SlpCode = JSON_VALUE(@json, ''$.code'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end	
+
+	if @type = 'Transporter'
+	begin
+		if (@json is null or @json = '')
+		begin
+			select TransporterID, TransporterName
+			from vwTransporter
+		end
+	end	
+
+	if @type = 'Driver'
+	begin
+		if (@json is null or @json = '')
+		begin
+			SELECT DriverCode, DriverName FROM vwDriver
+		end
+	end	
+
+	if @type = 'Vehicle'
+	begin
+		if (@json is null or @json = '')
+		begin
+			SELECT VehicleCode, VehicleName FROM vwVehicle
+		end
+	end	
+
+	if @type = 'PackBundle'
+	begin
+
+		if @json like '%"packbundleid"%'
+		begin
+			SELECT TT1.PackBundleID, TT1.PackOID, TT1.PackDocNum, TT2.Bin AS [BinCode], TT3.AbsEntry [BinAbs], TT1.BundleOID, TT1.BundleID, TT1.ItemCode, TT1.ItemDesc, TT1.CatalogNo, TT1.UOM, TT1.LegacyCode, TT1.Transporter, TT1.Quantity FROM 
+			(
+				SELECT T1.DocNum + '-' + T2.BundleID AS [PackBundleID], T1.OID AS [PackOID], T1.DocNum AS [PackDocNum], T1.PackingLocation, T0.Bundle AS [BundleOID],T2.BundleID, T0.ItemCode,T0.ItemDesc, T0.CatalogNo, T4.UOM, T0.LegacyItemCode AS [LegacyCode], T5.TransporterName AS [Transporter], T0.Quantity FROM PackListDetails T0
+				INNER JOIN PackList  T1 ON T0.PackList = T1.OID AND T1.GCRecord is null
+				INNER JOIN BundleType T2 ON T0.Bundle = T2.OID AND T2.GCRecord is null
+				LEFT JOIN vwItemMasters T4 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T4.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+				LEFT JOIN vwTransporter T5 On T0.Transporter  = T5.TransporterID COLLATE SQL_Latin1_General_CP1_CI_AS
+			) AS TT1
+			
+			INNER JOIN vwBundleBalance TT2 ON TT1.PackBundleID = TT2.BundleID
+			LEFT JOIN vwBin TT3 ON TT2.Bin COLLATE SQL_Latin1_General_CP1_CI_AS = TT3.BinCode COLLATE SQL_Latin1_General_CP1_CI_AS
+			WHERE TT1.PackBundleID = JSON_VALUE(@json, '$.packbundleid') 
+		end
+	end
+
+	if @type = 'BundleType'
+	begin
+		if (@json is null or @json = '')
+		begin
+			select OID, BundleID
+			from BundleType
+			where IsActive = 1 and GCRecord is null
+		end
+		else if @json like '%"code"%'
+		begin
+			EXECUTE sp_executesql N'select OID, BundleID
+			from BundleType
+			where IsActive = 1 and GCRecord is null
+			and BundleID = JSON_VALUE(@json, ''$.code'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'OpenPLA'
+	begin
+		if (@json is null or @json = '')
+		begin
+			SELECT TT1.OID, TT1.DocNum, TT1.DocDate, TT1.ToBin, TT1.SOTransporter, TT1.SOTransporterID, TT1.SOSalesperson AS [SlpName] , T10.Name AS [Priority], TT1.Remarks [Remark], T11.BPName AS [Customer], TT1.Warehouse  FROM
+			(
+				SELECT T1.OID, T1.DocNum, MAX(T1.DocDate) as DocDate, T2.ToBin, MAX(T2.SOTransporter) as SOTransporter, MAX(T5.TransporterID) as SOTransporterID, MAX(T2.SOSalesperson) as SOSalesperson, MAX(T4.Priority) as Priority, MAX(T3.Customer) as Customer, Max(T1.Remarks) as Remarks, Max(T1.Warehouse) AS Warehouse
+				FROM PickList T1
+				INNER JOIN PickListDetailsActual T2 ON T1.Oid = T2.PickList AND T2.GCRecord IS NULL
+				INNER JOIN PickListDetails T3 ON T1.Oid = T3.PickList AND T3.GCRecord IS NULL
+				INNER JOIN SalesOrder T4 ON T4.DocNum = T3.SOBaseDoc AND T4.GCRecord IS NULL
+				LEFT JOIN vwTransporter T5 ON T2.SOTransporter = T5.TransporterName COLLATE SQL_Latin1_General_CP850_CI_AS
+				WHERE T1.Status = 1 AND T1.Sap = 1 AND T1.GCRecord IS NULL 
+				GROUP BY T1.OID, T1.DocNum, T2.ToBin
+			) AS TT1
+			LEFT JOIN vwPriority T10 ON TT1.Priority = T10.Priority
+			LEFT JOIN vwBusniessPartner T11 on T11.BPCode COLLATE SQL_Latin1_General_CP850_CI_AS = TT1.Customer
+			LEFT JOIN PackListDetails T12 ON TT1.DocNum = T12.PickListNo AND T12.GCRecord IS NULL
+			WHERE T12.PickListNo is null
+
+		end
+		else if @json like '%"oid"%' and @json like '%tobin%'
+		begin
+		
+			EXECUTE sp_executesql N'SELECT T0.OID, T0.PickList AS [PickListOID], T2.OID [PickDetailOID], T1.DocNum [PickListDocNum], T1.DocNum, T0.ToBin, T1.DocDate, SUM(T0.PickQty) AS PickQty, T0.ItemCode, T0.ItemDesc, T4.UOM, T0.CatalogNo, T4.LegacyItemCode [LegacyCode], T3.TransporterID AS [SOTransporterID], T3.TransporterName AS [SOTransporter], T2.SOSalesperson AS [SlpName], T2.SOBaseDoc, T2.SOBaseId, Max(T2.Customer) AS Customer
+			FROM PickListDetailsActual T0
+			INNER JOIN PickList T1 ON T0.PickList = T1.OID AND T1.GCRecord IS NULL
+			INNER JOIN PickListDetails T2 ON T0.PickList = T2.PickList AND T0.PickListDetailOid = T2.Oid AND T0.ItemCode = T2.ItemCode AND T2.GCRecord IS NULL
+			LEFT JOIN vwTransporter T3 on T2.SOTransporter collate SQL_Latin1_General_CP850_CI_AS = T3.TransporterName collate SQL_Latin1_General_CP850_CI_AS
+			LEFT JOIN vwItemMasters T4 ON T0.ItemCode collate SQL_Latin1_General_CP850_CI_AS = T4.ItemCode collate SQL_Latin1_General_CP850_CI_AS
+			WHERE T0.GCRecord IS NULL AND T0.PickList = JSON_VALUE(@json, ''$.oid'') AND T0.ToBin = JSON_VALUE(@json, ''$.tobin'') 
+			GROUP BY T0.OID, T0.PickList, T2.OID, T1.DocNum, T1.DocNum, T0.ToBin, T1.DocDate, T0.ItemCode, T0.ItemDesc, T3.TransporterID, T2.SOSalesperson, T2.SOBaseDoc, T2.SOBaseId, T0.CatalogNo, T4.UOM, T4.LegacyItemCode, T3.TransporterName
+			', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"tobin"%'
+		begin
+			--EXECUTE sp_executesql N'SELECT TT1.OID, TT1.DocNum, TT1.DocDate, TT1.ToBin, TT1.SOTransporter, TT1.SOSalesperson AS [SlpName] , T10.Name AS [Priority], T11.BPName AS [Customer]  FROM
+			--						(
+			--							SELECT T1.OID, T1.DocNum, MAX(T1.DocDate) as DocDate, T2.ToBin, MAX(T2.SOTransporter) as SOTransporter, MAX(T2.SOSalesperson) as SOSalesperson, MAX(T4.Priority) as Priority, MAX(T3.Customer) as Customer
+			--							FROM PickList T1
+			--							INNER JOIN PickListDetailsActual T2 ON T1.Oid = T2.PickList AND T2.GCRecord IS NULL
+			--							INNER JOIN PickListDetails T3 ON T1.Oid = T3.PickList AND T3.GCRecord IS NULL
+			--							INNER JOIN SalesOrder T4 ON T4.DocNum = T3.SOBaseDoc AND T4.GCRecord IS NULL
+			--							WHERE T1.Status = 1 AND T1.GCRecord IS NULL AND T2.ToBin = JSON_VALUE(@json, ''$.tobin'')
+			--							GROUP BY T1.OID, T1.DocNum, T2.ToBin
+			--						) AS TT1
+			--						LEFT JOIN vwPriority T10 ON TT1.Priority = T10.Priority
+			--						LEFT JOIN vwBusniessPartner T11 on T11.BPCode COLLATE SQL_Latin1_General_CP850_CI_AS = TT1.Customer COLLATE SQL_Latin1_General_CP850_CI_AS
+			--						LEFT JOIN PackListDetails T12 ON TT1.DocNum = T12.PickListNo AND T12.GCRecord IS NULL
+			--						WHERE T12.PickListNo is null', N'@json nvarchar(1024)', @json = @json
+			EXECUTE sp_executesql N'SELECT T1.OID, T1.DocNum, MAX(T1.DocDate) as [DocDate], T2.ToBin, MAX(T2.SOTransporter) as SOTransporter, MAX(T2.SOSalesperson) as [SlpName], MAX(T4.Name) as [Priority], MAX(T3.CustomerName) as [Customer]
+									FROM PickList T1
+									INNER JOIN PickListDetailsActual T2 ON T1.Oid = T2.PickList AND T2.GCRecord IS NULL
+									INNER JOIN SalesOrder T3 ON T3.DocNum = T2.SOBaseDoc AND T3.GCRecord IS NULL and T3.Status = 6
+									LEFT JOIN vwPriority T4 ON T3.Priority = T4.Priority
+									LEFT JOIN PackListDetails T12 ON T1.DocNum = T12.PickListNo AND T12.GCRecord IS NULL
+									WHERE T1.Status = 1 AND T1.GCRecord IS NULL AND T12.PickListNo is null AND T2.ToBin = JSON_VALUE(@json, ''$.tobin'')
+									GROUP BY T1.OID, T1.DocNum, T2.ToBin', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'PartialPackList'
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Customer, T1.AbsEntry [PackingLocationOID], T0.PackingLocation, T0.DocDate, T0.SONumber, T0.PickListNo, T0.ExpectedDeliveryDate, T0.Priority FROM PackList T0 
+		INNER JOIN vwBin T1 ON T0.PackingLocation COLLATE SQL_Latin1_General_CP850_CI_AS = T1.BinCode COLLATE SQL_Latin1_General_CP850_CI_AS
+		WHERE T0.Status = 0 AND T0.GCRecord IS NULL 
+		AND CAST(T0.DocDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) 
+		AND CAST(T0.DocDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+		AND T0.CreateUser = JSON_VALUE(@json, '$.userId')
+	end
+
+	if @type = 'GetExistingPackDetails'
+	begin
+
+		SELECT T0.BaseId [OID], T2.OID [PickListOID], T4.OID [PickDetailOID], T2.DocNum [PickListDocNum], T2.DocNum, MAX(T3.ToBin) AS [ToBin], MAX(T2.DocDate) AS [DocDate], SUM(T0.Quantity) AS [PickQty], SUM(T0.Quantity) AS [PackQty], 
+		T0.ItemCode, MAX(T0.ItemDesc) AS [ItemDesc], MAX(T0.CatalogNo) AS [CatalogNo], MAX(T0.LegacyItemCode) [LegacyCode], MAX(T1.Warehouse) AS [Warehouse], MAX(T4.SOSalesperson) AS [SlpName], 
+		T4.SOBaseDoc, T4.SOBaseId, Max(T6.BPName) AS [Customer], Max(T6.BPCode) AS [CustomerID], MAX(T2.Remarks) AS [Remark], MAX(T7.TransporterID) AS [SOTransporterID], MAX(T7.TransporterName) AS [SOTransporter]
+		FROM PackListDetails T0
+		INNER JOIN PackList T1 ON T0.PackList = T1.OID AND T1.GCRecord IS NULL
+		INNER JOIN PickList T2 ON T0.BaseDoc = T2.DocNum AND T2.GCRecord IS NULL
+		INNER JOIN PickListDetailsActual T3 ON T0.BaseID = T3.OID AND T2.OID = T3.PickList AND T3.GCRecord IS NULL
+		INNER JOIN PicklistDetails T4 ON T3.PickListDetailOid = T4.OID AND T3.PickList = T4.PickList AND T4.GCRecord IS NULL
+		--LEFT JOIN vwItemMasters T5 ON T0.ItemCode collate SQL_Latin1_General_CP850_CI_AS = T5.ItemCode collate SQL_Latin1_General_CP850_CI_AS , MAX(T5.UOM) AS [UOM]
+		LEFT JOIN vwBusniessPartner T6 on T6.BPCode COLLATE SQL_Latin1_General_CP850_CI_AS = T4.Customer COLLATE SQL_Latin1_General_CP850_CI_AS
+		LEFT JOIN vwTransporter T7 ON T4.SOTransporter COLLATE SQL_Latin1_General_CP850_CI_AS = T7.TransporterName COLLATE SQL_Latin1_General_CP850_CI_AS
+		
+		WHERE T0.GCRecord IS NULL AND T1.OID = JSON_VALUE(@json, '$.oid')
+		GROUP BY T0.BaseId, T2.OID, T4.OID, T2.DocNum, T0.ItemCode, T4.SOBaseDoc, T4.SOBaseId
+
+	end
+
+	
+	if @type = 'GetExistingBundle'
+	begin
+		SELECT T0.Bundle [BundleOID], T2.BundleName [BundleName], CAST(T0.Quantity AS INT) [BundleQty] FROM PackListDetails T0
+		INNER JOIN PackList T1 ON T0.PackList = T1.OID AND T1.GCRecord IS NULL
+		INNER JOIN BundleType T2 ON T0.Bundle = T2.OID 
+		WHERE T0.GCRecord IS NULL AND T1.OID = JSON_VALUE(@json, '$.oid') AND BaseId = JSON_VALUE(@json, '$.baseid')
+	end
+
+	if @type = 'OpenPL'
+	begin
+		if (@json like '%"userGuid"%')
+		begin
+			SELECT T0.OID, T0.DocNum, T0.DocDate, Max(T1.SOTransporter) AS [SOTransporter], Max(T1.SOSalesperson) AS [SlpName], MAX(T3.Customer) AS Customer, MAX(T3.CustomerName) AS [CustomerName], T0.Picker,MAX(T4.Name) AS [Priority], MAX(T0.Warehouse) AS [Warehouse], Max(T1.SOBaseDoc) AS SOBaseDoc
+			FROM [PickList] T0
+			inner join PickListDetails T1 on T1.PickList = T0.OID and T1.GCRecord is null and T1.PlanQty > 0
+			inner join SalesOrder T3 ON T1.SOBaseDoc = T3.DocNum AND T3.GCRecord IS NULL
+			left join vwPriority T4 ON T3.Priority = T4.Priority
+			where T0.Status = 0 AND T0.DocNum is not null AND T0.GCRecord IS NULL AND (T0.Picker = JSON_VALUE(@json, '$.userGuid') OR T0.Picker IS NULL)
+			group by T0.OID, T0.DocNum, T0.DocDate, T0.Picker
+			ORDER BY T0.OID
+		end
+		else if @json like '%"oid"%'
+		begin
+			EXECUTE sp_executesql N';with cte as (
+				select T0.ItemCode as ItemCode,
+				T1.ItemName as ItemDesc,
+				T0.WhsCode as WhsCode, T3.AbsEntry as BinAbs, T3.BinCode as BinCode,ISNULL(T4.OnHandQty, 0) as InStock
+				from [GSG_SAP_LIVE]..OITW T0
+				INNER join [GSG_SAP_LIVE]..OITM T1 on T0.ItemCode = T1.ItemCode
+				--INNER join [GSG_SAP_LIVE]..OWHS T2 on T0.WhsCode = T2.WhsCode
+				INNER join [GSG_SAP_LIVE]..OBIN T3 on T0.DftBinAbs = T3.AbsEntry
+				LEFT JOIN [GSG_SAP_LIVE]..OIBQ T4 on T0.ItemCode = T4.ItemCode and T0.WhsCode = T4.WhsCode and T0.DftBinAbs = T4.BinAbs
+				)
+				SELECT T0.OID, T0.PickList, T0.ItemCode, T0.ItemDesc, T3.UOM, T0.CatalogNo, T3.LegacyItemCode [LegacyCode], T0.Warehouse, T0.PlanQty, T0.PickQty, T0.Customer, T0.SOBaseDoc, T0.SOBaseId, T0.SOCreateDate, T0.SOExpectedDate,T0.SORemarks, cte.BinAbs, cte.BinCode, ISNULL(cte.InStock,0) AS [InStock] 
+				, T0.SOTransporter, T0.SOSalesperson, T0.SODeliveryDate AS [SODeliveryDate], T0.Priority AS [PriorityId]
+				FROM PickListDetails T0
+				left join cte on T0.ItemCode collate database_default = cte.ItemCode collate database_default and T0.[Warehouse] collate database_default = cte.WhsCode collate database_default
+				inner join PickList T1 on T1.OID = T0.PickList AND T1.GCRecord IS NULL
+				--left join vwSalesPerson T2 on T0.SOSalesperson = T2.SlpCode
+				inner join vwItemMasters T3 on T0.ItemCode collate database_default = T3.ItemCode collate database_default 
+				where T0.PlanQty >= PickQty and T0.GCRecord is null
+				and T0.PickList = JSON_VALUE(@json, ''$.oid'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'ReasonCode'
+	begin
+		SELECT OID, ReasonCodeID [ReasonCode], ReasonCodeDesc [ReasonName] FROM DiscrepancyReason WHERE IsActive = 1 AND GCRecord IS NULL
+	end
+
+	if @type = 'SalesOrderDetails'
+	begin
+		if @json like '%"oid"%'
+		begin
+			EXECUTE sp_executesql N';with cte as (
+			select T0.ItemCode + ''-'' + T0.WhsCode as PriKey, T0.ItemCode as ItemCode,
+			T1.ItemName as ItemDesc, 
+			T0.WhsCode as WhsCode, ''DummyBin'' + T0.WhsCode as BinCode,ISNULL(
+			CASE
+			WHEN (ISNULL(NULLIF(T0.IsCommited,0), 0) - (ISNULL(NULLIF(T0.IsCommited,0), 0) - ISNULL(NULLIF(T0.OnHand,0), 0))) < 0 THEN 0
+			WHEN (ISNULL(NULLIF(T0.IsCommited,0), 0) - (ISNULL(NULLIF(T0.IsCommited,0), 0) - ISNULL(NULLIF(T0.OnHand,0), 0))) > 0 
+			THEN (ISNULL(NULLIF(T0.IsCommited,0), 0) - (ISNULL(NULLIF(T0.IsCommited,0), 0) - ISNULL(NULLIF(T0.OnHand,0), 0))) END,0) as InStock
+			from [GSG_SAP_LIVE]..OITW T0
+			inner join [GSG_SAP_LIVE]..OITM T1 on T0.ItemCode = T1.ItemCode
+			left join [GSG_SAP_LIVE]..OBIN T2 on T0.DftBinAbs = T2.AbsEntry
+			)
+			  SELECT T0.OID, T0.ItemCode, T0.ItemDesc, T0.CatalogNo, T0.Warehouse, T0.PlanQty, T0.PickQty, T0.Customer, T0.SOBaseDoc, T0.SOCreateDate, T0.SOExpectedDate,T0.SORemarks, T0.SOTransporter, cte.BinCode, ''100'' as InStock  FROM PickListDetails T0
+			inner join cte on T0.ItemCode collate database_default = cte.ItemCode collate database_default and T0.[Warehouse] collate database_default = cte.WhsCode collate database_default
+			where T0.PickList = JSON_VALUE(@json, ''$.oid'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'Warehouse'
+	begin
+		if(@json is null or @json = '')
+		begin
+			SELECT WarehouseCode, WarehouseName from vwWarehouse
+		end
+		if @json like '%"code"%'
+		begin
+			EXECUTE sp_executesql N'SELECT WarehouseCode, WarehouseName from vwWarehouse
+			where WhsCode = JSON_VALUE(@json, ''$.code'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'WarehouseBin'
+	begin
+		if (@json is null or @json = '')
+		begin
+			SELECT T1.BinCode as [DefaultBinCode], T1.AbsEntry as [DefaultBinAbs], T0.WarehouseCode as [WarehouseCode], T0.WarehouseName as [WarehouseName]  FROM vwWarehouse T0
+			LEFT JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse AND T0.DftBinAbs = T1.AbsEntry
+			--SELECT T1.BinCode as [DefaultBinCode], T1.AbsEntry as [DefaultBinAbs], T0.WhsCode as [WarehouseCode], T0.WhsName as [WarehouseName]  FROM [STL_SAP_LIVE]..OWHS T0 
+			--left join [STL_SAP_LIVE]..OBIN T1 on T0.WhsCode = T1.WhsCode AND T0.DftBinAbs = T1.AbsEntry
+			--where T0.Inactive = 'N' AND T0.BinActivat = 'Y'
+		end
+		else if @json like '%"whscode"%' and @json like '%"bincode"%' and @json like '%"count"%' and @json like '%rows%' and @json like '%isExclPackBin%'
+		begin
+			EXECUTE sp_executesql N'
+			SELECT T1.BinCode as BinCode, T1.AbsEntry as BinAbs, T0.WarehouseCode, T0.WarehouseName 
+		    FROM vwWarehouse T0
+			INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+			where T0.WarehouseCode = JSON_VALUE(@json, ''$.whscode'') 
+			AND (JSON_VALUE(@json, ''$.isExclPackBin'') = 0 OR U_ExclPickFr != ''Y'') 
+			AND (JSON_VALUE(@json, ''$.bincode'') IS NULL OR T1.BinCode LIKE ''%'' + JSON_VALUE(@json, ''$.bincode'') + ''%'')
+			ORDER BY T1.AbsEntry
+			offset CAST(JSON_VALUE(@json, ''$.count'') AS INT) row fetch next CAST(JSON_VALUE(@json, ''$.rows'') AS INT) row only', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"whscode"%' and @json like '%"bincode"%' and @json like '%"count"%' and @json like '%rows%'
+		begin
+			EXECUTE sp_executesql N'
+			SELECT T1.BinCode as BinCode, T1.AbsEntry as BinAbs, T0.WarehouseCode, T0.WarehouseName 
+		    FROM vwWarehouse T0
+			INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+			where T0.WarehouseCode = JSON_VALUE(@json, ''$.whscode'') 
+			AND (JSON_VALUE(@json, ''$.bincode'') IS NULL OR T1.BinCode LIKE ''%'' + JSON_VALUE(@json, ''$.bincode'') + ''%'')
+			ORDER BY T1.AbsEntry
+			offset CAST(JSON_VALUE(@json, ''$.count'') AS INT) row fetch next CAST(JSON_VALUE(@json, ''$.rows'') AS INT) row only', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"bincode"%' and @json like '%isExclPackBin%'
+		begin
+			EXECUTE sp_executesql N'SELECT T1.BinCode as BinCode, T1.AbsEntry as BinAbs, T0.WarehouseCode, T0.WarehouseName 
+		    FROM vwWarehouse T0
+			INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+			where T1.BinCode = JSON_VALUE(@json, ''$.bincode'')
+			AND (JSON_VALUE(@json, ''$.isExclPackBin'') = 0 OR U_ExclPickFr != ''Y'')', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"bincode"%'
+		begin
+			EXECUTE sp_executesql N'SELECT T1.BinCode as BinCode, T1.AbsEntry as BinAbs, T0.WarehouseCode, T0.WarehouseName 
+		    FROM vwWarehouse T0
+			INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+			where T1.BinCode = JSON_VALUE(@json, ''$.bincode'')', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"whscode"%'
+		begin
+			EXECUTE sp_executesql N'SELECT T1.BinCode as BinCode, T1.AbsEntry as BinAbs, T0.WarehouseCode, T0.WarehouseName 
+			FROM vwWarehouse T0
+			INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+			where T0.WarehouseCode = JSON_VALUE(@json, ''$.whscode'')', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+
+	if @type = 'WarehouseBinCount'
+	begin
+		if  @json like '%isExclPackBin%'
+		begin
+			EXECUTE sp_executesql N'
+					SELECT COUNT(1)
+					FROM vwWarehouse T0
+					INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+					WHERE T0.WarehouseCode = JSON_VALUE(@json, ''$.whscode'') 
+					AND (JSON_VALUE(@json, ''$.isExclPackBin'') = 0 OR U_ExclPickFr != ''Y'') 
+					AND (JSON_VALUE(@json, ''$.bincode'') IS NULL OR T1.BinCode LIKE ''%'' + JSON_VALUE(@json, ''$.bincode'') + ''%'')
+					', N'@json nvarchar(1024)', @json = @json
+					--ORDER BY T1.AbsEntry
+					--offset CAST(JSON_VALUE(@json, '$.count') AS INT) row fetch next CAST(JSON_VALUE(@json, '$.rows') AS INT) row only
+		end
+		else 
+		begin
+			EXECUTE sp_executesql N'
+				SELECT COUNT(1)
+				FROM vwWarehouse T0
+				INNER JOIN vwBin T1 ON T0.WarehouseCode = T1.Warehouse 
+				AND T0.WarehouseCode = JSON_VALUE(@json, ''$.whscode'') 
+				AND (JSON_VALUE(@json, ''$.bincode'') IS NULL OR T1.BinCode LIKE ''%'' + JSON_VALUE(@json, ''$.bincode'') + ''%'')
+				', N'@json nvarchar(1024)', @json = @json
+
+		end
+	end
+
+	if @type = 'StockBalance'
+	begin
+		if (@json is null or @json = '')
+		begin
+			SELECT T0.ItemCode  [ItemCode], T1.ItemName [ItemDesc], T2.BinCode [BinCode], T0.BinAbs [BinAbs], T0.WhsCode [WhsCode], T0.OnHandQty [InStock] FROM [GSG_SAP_LIVE]..[OIBQ] T0
+			INNER JOIN [GSG_SAP_LIVE]..[OITM] T1 ON T0.ItemCode = T1.ItemCode
+			INNER JOIN [GSG_SAP_LIVE]..[OBIN] T2 ON T0.BinAbs = T2.AbsEntry
+		end
+		else if @json like '%"itemcode"%' and @json like '%"bincode"%'
+		begin
+			EXECUTE sp_executesql N'
+			WITH CTE AS 
+			(
+				SELECT T0.ItemCode  [ItemCode], T0.ItemDesc [ItemDesc], T0.FromBin [BinCode], T0.FromWarehouse [WhsCode], T0.Quantity [Qty] FROM WarehouseTransferDetails T0
+				INNER JOIN WarehouseTransfers T1 ON T0.WarehouseTransfers = T1.OID
+				WHERE T1.Status IN (0,1)
+			)
+			SELECT T0.ItemCode  [ItemCode], T1.ItemName [ItemDesc], T2.BinCode [BinCode], T0.BinAbs [BinAbs], T0.WhsCode [WhsCode], T0.OnHandQty, (ISNULL(T0.OnHandQty,0) - ISNULL(CTE.Qty,0)) [InStock] FROM [GSG_SAP_LIVE]..[OIBQ] T0
+			INNER JOIN [GSG_SAP_LIVE]..[OITM] T1 ON T0.ItemCode = T1.ItemCode
+			INNER JOIN [GSG_SAP_LIVE]..[OBIN] T2 ON T0.BinAbs = T2.AbsEntry
+			LEFT JOIN CTE ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.ItemCode AND T2.BinCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.BinCode AND T0.WhsCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.WhsCode
+			where T0.ItemCode = JSON_VALUE(@json, ''$.itemcode'') and T2.BinCode = JSON_VALUE(@json, ''$.bincode'')
+			order by T0.WhsCode, T2.BinCode, T0.ItemCode', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"itemcode"%' and @json like '%"whscode"%'
+		begin
+			EXECUTE sp_executesql N'
+			SELECT T0.ItemCode  [ItemCode], T1.ItemName [ItemDesc], T2.BinCode [BinCode], T0.BinAbs [BinAbs], T0.WhsCode [WhsCode], T0.OnHandQty [InStock] FROM [GSG_SAP_LIVE]..[OIBQ] T0
+			INNER JOIN [GSG_SAP_LIVE]..[OITM] T1 ON T0.ItemCode = T1.ItemCode
+			INNER JOIN [GSG_SAP_LIVE]..[OBIN] T2 ON T0.BinAbs = T2.AbsEntry
+			where T0.ItemCode = JSON_VALUE(@json, ''$.itemcode'') and T0.WhsCode = JSON_VALUE(@json, ''$.whscode'')
+			order by T0.WhsCode, T2.BinCode, T0.ItemCode', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"itemcode"%'
+		begin
+			EXECUTE sp_executesql N'
+			SELECT T0.ItemCode  [ItemCode], T1.ItemName [ItemDesc], T2.BinCode [BinCode], T0.BinAbs [BinAbs], T0.WhsCode [WhsCode], T0.OnHandQty [InStock] FROM [GSG_SAP_LIVE]..[OIBQ] T0
+			INNER JOIN [GSG_SAP_LIVE]..[OITM] T1 ON T0.ItemCode = T1.ItemCode
+			INNER JOIN [GSG_SAP_LIVE]..[OBIN] T2 ON T0.BinAbs = T2.AbsEntry
+			where T0.ItemCode = JSON_VALUE(@json, ''$.itemcode'')
+			order by WhsCode, BinCode, ItemCode', N'@json nvarchar(1024)', @json = @json
+		end
+		else if @json like '%"bincode"%'
+		begin
+			EXECUTE sp_executesql N'
+			SELECT T0.ItemCode  [ItemCode], T1.ItemName [ItemDesc], T2.BinCode [BinCode], T0.BinAbs [BinAbs], T0.WhsCode [WhsCode], T0.OnHandQty [InStock] FROM [GSG_SAP_LIVE]..[OIBQ] T0
+			INNER JOIN [GSG_SAP_LIVE]..[OITM] T1 ON T0.ItemCode = T1.ItemCode
+			INNER JOIN [GSG_SAP_LIVE]..[OBIN] T2 ON T0.BinAbs = T2.AbsEntry
+			where T2.BinCode = JSON_VALUE(@json, ''$.bincode'')
+			order by WhsCode, BinCode, ItemCode', N'@json nvarchar(1024)', @json = @json
+		end
+	end
+
+	if @type = 'WTRequestList' 
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Picker, T0.TransferDate, T0.FromWarehouse, T0.ToWarehouse, T0.Supplier, T0.Remarks FROM WarehouseTransferReq T0
+		WHERE T0.Status = 1 AND T0.CopyTo = 0 AND T0.AppStatus in (0,1) AND T0.GCRecord IS NULL
+		AND CAST(T0.TransferDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.TransferDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+	
+	if @type= 'TransferDetailsReq'
+	begin
+	   SELECT T0.OID, T0.WarehouseTransferReq, T0.ItemCode, T0.ItemDesc, T0.UOM, T0.CatalogNo, T3.LegacyItemCode [LegacyCode], T4.BinCode [FromBin], T0.ToBin, T0.Quantity 
+	   FROM WarehouseTransferReqDetails T0
+	   INNER JOIN vwItemMasters T3 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T3.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+	   INNER JOIN vwBinStockBalance T4 ON T0.FromBin COLLATE SQL_Latin1_General_CP1_CI_AS = T4.Prikey COLLATE SQL_Latin1_General_CP1_CI_AS
+	   WHERE T0.GCRecord IS NULL AND T0.WarehouseTransferReq = JSON_VALUE(@json, '$.oid')
+	end
+
+	if @type = 'WTDraftList' 
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Picker, T0.TransferDate, T0.FromWarehouse, T0.ToWarehouse, T0.Supplier, T0.Remarks FROM WarehouseTransfers T0 
+		WHERE T0.Status = 0 AND T0.TransferType = 1 AND T0.GCRecord IS NULL --AND T0.Picker = JSON_VALUE(@json, '$.userName')
+		AND CAST(T0.TransferDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.TransferDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'GetAvaillableItemFromBin'
+	begin
+		--with cte as (
+		--select T0.ItemCode as ItemCode,
+		--T1.ItemName as ItemDesc,
+		--T0.WhsCode as WhsCode, T2.AbsEntry as BinAbs, T2.BinCode as BinCode
+		--from [GSG_SAP_LIVE]..OITW T0
+		--INNER JOIN [GSG_SAP_LIVE]..OITM T1 on T0.ItemCode = T1.ItemCode
+		--INNER JOIN [GSG_SAP_LIVE]..OBIN T2 on T0.DftBinAbs = T2.AbsEntry
+		--)
+		
+		--SELECT T0.ItemCode,T2.ItemName AS [ItemDesc], T2.LegacyItemCode AS [LegacyCode], T2.UOM, T2.CatalogNo, T0.BinAbs AS [DefaultBinAbs], T1.BinCode AS [DefaultBinCode], T0.OnHandQty AS [Quantity] FROM [GSG_SAP_LIVE]..OIBQ T0
+		--INNER JOIN [GSG_SAP_LIVE]..OBIN T1 ON T0.BinAbs = T1.AbsEntry 
+		--INNER JOIN vwItemMasters T2 ON T0.ItemCode = T2.ItemCode
+		--LEFT JOIN cte T3 ON T0.ItemCode = T3.ItemCode
+		--WHERE T1.BinCode = JSON_VALUE(@json, '$.bincode') AND T0.OnHandQty > 0 
+
+		WITH CTE AS 
+		(
+			SELECT T0.ItemCode  [ItemCode], T0.ItemDesc [ItemDesc], T0.FromBin [BinCode], T0.FromWarehouse [WhsCode], T0.Quantity [Qty] FROM WarehouseTransferDetails T0
+			INNER JOIN WarehouseTransfers T1 ON T0.WarehouseTransfers = T1.OID
+			WHERE T1.Status IN (0,1)
+		)
+
+		SELECT T0.ItemCode,T2.ItemName AS [ItemDesc], T2.LegacyItemCode AS [LegacyCode], T2.UOM, T2.CatalogNo, T0.WhsCode [DefaultWhsCode], T0.BinAbs AS [DefaultBinAbs], T1.BinCode AS [DefaultBinCode], T0.OnHandQty AS [OnHand], (ISNULL(T0.OnHandQty,0) - ISNULL(CTE.Qty,0)) [Quantity] FROM [GSG_SAP_LIVE]..OIBQ T0
+		INNER JOIN [GSG_SAP_LIVE]..OBIN T1 ON T0.BinAbs = T1.AbsEntry 
+		INNER JOIN vwItemMasters T2 ON T0.ItemCode = T2.ItemCode
+		LEFT JOIN CTE ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.ItemCode AND T1.BinCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.BinCode AND T0.WhsCode COLLATE SQL_Latin1_General_CP1_CI_AS = CTE.WhsCode
+		--LEFT JOIN cte T3 ON T0.ItemCode = T3.ItemCode
+		WHERE T1.BinCode = JSON_VALUE(@json, '$.bincode') AND (ISNULL(T0.OnHandQty,0) - ISNULL(CTE.Qty,0)) > 0 
+	end
+
+	if @type = 'WarehouseTransferDetails'
+	begin
+	   SELECT T0.OID, T0.WarehouseTransfers, T0.BaseId, T0.BaseDoc, T0.ItemCode, T0.ItemDesc, T0.UOM, T0.CatalogNo, T3.LegacyItemCode [LegacyCode], T0.FromBin, T5.ToBin [DefaultToBin], T0.Quantity, T0.BundleID AS [PackBundleID] FROM WarehouseTransferDetails T0
+	   INNER JOIN vwItemMasters T3 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T3.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+	   INNER JOIN WarehouseTransferReq T4 ON T0.BaseDoc = T4.DocNum
+	   INNER JOIN WarehouseTransferReqDetails T5 ON T4.OID = T5.WarehouseTransferReq AND T0.BaseId = T5.OID
+	   WHERE T0.GCRecord IS NULL AND T0.WarehouseTransfers = JSON_VALUE(@json, '$.oid')
+	end	
+
+	if @type= 'TransferDetails'
+	begin
+	   SELECT T0.OID, T0.WarehouseTransfers, T0.BaseId, T0.BaseDoc, T0.ItemCode, T0.ItemDesc, T0.UOM, T0.CatalogNo, T3.LegacyItemCode [LegacyCode], T0.FromBin, T0.ToBin, T0.Quantity, T0.BundleID AS [PackBundleID] FROM WarehouseTransferDetails T0
+	   INNER JOIN vwItemMasters T3 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T3.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+	   WHERE T0.GCRecord IS NULL AND T0.WarehouseTransfers = JSON_VALUE(@json, '$.oid')
+	end
+
+	if @type = 'PWDraftList'
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Picker, T0.TransferDate, T0.FromWarehouse, T0.ToWarehouse, T0.Supplier, T0.Remarks FROM WarehouseTransfers T0 
+		WHERE T0.Status = 0 AND T0.TransferType = 2  AND T0.GCRecord IS NULL AND  T0.Picker = JSON_VALUE(@json, '$.userName')
+		AND CAST(T0.TransferDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.TransferDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'BTDraftList'
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Picker, T0.TransferDate, T0.FromWarehouse, T0.ToWarehouse, T0.Supplier, T0.Remarks FROM WarehouseTransfers T0 
+		WHERE T0.Status = 0 AND T0.TransferType = 3 AND T0.GCRecord IS NULL --AND T0.Picker = JSON_VALUE(@json, '$.userName')
+		AND CAST(T0.TransferDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.TransferDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'BundleTransferDraftList'
+	begin
+		SELECT T0.OID, T0.DocNum, T0.Picker, T0.TransferDate, T0.FromWarehouse, T0.ToWarehouse, T0.Supplier, T0.Remarks FROM WarehouseTransfers T0 
+		WHERE T0.Status = 0 AND T0.TransferType = 4 AND T0.GCRecord IS NULL --AND T0.Picker = JSON_VALUE(@json, '$.userName')
+		AND CAST(T0.TransferDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.TransferDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'PurchaseReturnRequestList'
+	begin
+		SELECT T0.Oid, T0.DocNum, T0.Supplier, T0.SupplierName, T1.TransporterName [Transporter], T0.Transporter [TransporterOID], T0.DocDate, T0.ETD, T0.Reference, T0.Remarks, 
+		T0.BillingAddress, T0.BillingAddressfield, T0.ShippingAddress, T0.ShippingAddressfield
+		FROM PurchaseReturnRequests T0
+		LEFT JOIN vwTransporter T1 ON T0.Transporter = T1.TransporterID COLLATE SQL_Latin1_General_CP1_CI_AS
+		WHERE  T0.Status = 1 AND T0.CopyTo = 0 AND T0.AppStatus in (0,1) AND T0.GCRecord IS NULL
+		AND CAST(T0.ETD AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.ETD AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'PurchaseReturnRequestDetails'
+		begin
+			SELECT T0.Oid, T0.PurchaseReturnRequests, T0.ItemCode, T0.ItemDesc, T1.CatalogNo, T1.LegacyItemCode [LegacyCode], 
+			T1.Model, T0.ItemDetails, T0.DefBarcode, T0.UOM, T0.Warehouse, T0.RtnQuantity [Quantity], T0.Price, T0.Total, T0.BaseDoc, T0.BaseId, T0.ReasonCode, T2.ReasonName,
+			CASE WHEN T0.Bin is null or T0.Bin = '' 
+			THEN
+			(
+				SELECT TT1.BinCode COLLATE SQL_Latin1_General_CP1_CI_AS AS [BIN] FROM [GSG_SAP_LIVE]..OWHS TT0
+				LEFT JOIN [GSG_SAP_LIVE]..OBIN TT1 ON TT0.DftBinAbs = TT1.AbsEntry
+				WHERE T0.Warehouse COLLATE SQL_Latin1_General_CP1_CI_AS = TT0.WhsCode COLLATE SQL_Latin1_General_CP1_CI_AS
+				GROUP BY TT0.WhsCode, TT1.BinCode
+			) 
+			ELSE
+				T0.Bin 
+			END
+			AS Bin
+			
+			FROM PurchaseReturnRequestDetails T0
+			INNER JOIN vwItemMasters T1 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T1.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+			LEFT JOIN vwReasonCode T2 ON T0.ReasonCode = T2.Prikey COLLATE SQL_Latin1_General_CP1_CI_AS AND T2.Type='PurchaseReturn'
+	        WHERE T0.GCRecord IS NULL AND T0.PurchaseReturnRequests = JSON_VALUE(@json, '$.oid')
+	end
+
+	if @type = 'ReasonList'
+	begin
+		SELECT Prikey, ReasonCode, ReasonName, GLAcc, Responsible FROM vwReasonCode WHERE Type = JSON_VALUE(@json, '$.type')
+	end	
+
+	if @type = 'SalesReturnRequestList'
+	begin
+		SELECT T0.Oid, T0.DocNum, T0.Customer, T0.CustomerName, T1.TransporterName [Transporter], T0.Transporter [TransporterOID], T0.DocDate, T0.PostingDate, T0.Reference, T0.Remarks, 
+		T0.BillingAddress, T0.BillingAddressfield, T0.ShippingAddress, T0.ShippingAddressfield
+		FROM SalesReturnRequests T0
+		LEFT JOIN vwTransporter T1 ON T0.Transporter = T1.TransporterID COLLATE SQL_Latin1_General_CP1_CI_AS
+		WHERE T0.Status = 1 AND T0.CopyTo = 0 AND T0.AppStatus in (0,1) AND T0.GCRecord IS NULL
+		AND CAST(T0.PostingDate AS date) >=  CAST(JSON_VALUE(@json, '$.startdate') AS date) AND CAST(T0.PostingDate AS date) <=  CAST(JSON_VALUE(@json, '$.enddate') AS date)
+	end
+
+	if @type = 'SalesReturnRequestDetails'
+	begin
+		SELECT T0.Oid, T0.SalesReturnRequests, T0.ItemCode, T0.ItemDesc, T1.CatalogNo, T1.LegacyItemCode [LegacyCode], T1.Model, T0.ItemDetails, T0.DefBarcode, T0.UOM, T0.Warehouse, T0.Quantity, T0.RtnQuantity, T0.Price, ISNULL(T0.UnitCost,0) AS [UnitCost], T0.Total, T0.BaseDoc, T0.BaseId, T0.ReasonCode, T2.ReasonName,
+			CASE WHEN T0.Bin is null or T0.Bin = '' 
+			THEN
+			(
+				SELECT TT1.BinCode COLLATE SQL_Latin1_General_CP1_CI_AS AS [BIN] FROM [GSG_SAP_LIVE]..OWHS TT0
+				LEFT JOIN [GSG_SAP_LIVE]..OBIN TT1 ON TT0.DftBinAbs = TT1.AbsEntry
+				WHERE T0.Warehouse COLLATE SQL_Latin1_General_CP1_CI_AS = TT0.WhsCode COLLATE SQL_Latin1_General_CP1_CI_AS
+				GROUP BY TT0.WhsCode, TT1.BinCode
+			) 
+			ELSE
+				T0.Bin 
+			END
+			AS Bin
+			FROM SalesReturnRequestDetails T0
+		LEFT JOIN vwReasonCode T2 ON T0.ReasonCode = T2.Prikey COLLATE SQL_Latin1_General_CP1_CI_AS AND T2.Type='SalesReturn'
+		INNER JOIN vwItemMasters T1 ON T0.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS = T1.ItemCode COLLATE SQL_Latin1_General_CP1_CI_AS
+	    WHERE T0.GCRecord IS NULL AND T0.SalesReturnRequests = JSON_VALUE(@json, '$.oid')
+	end
+
+	if @type = 'CountSheet'
+	begin
+		if @json like '%"startdate"%' AND @json like '%"enddate"%'
+		begin
+			SELECT T0.*,T1.StatusName [Status] FROM StockCountSheet T0 
+			INNER JOIN vwStatus T1 ON T0.Status = T1.Status
+			WHERE CAST(T0.StockCountActualDate AS date) >= CAST(JSON_VALUE(@json, '$.startdate') AS date) 
+			AND CAST(T0.StockCountActualDate AS date) <= CAST(JSON_VALUE(@json, '$.enddate') AS date)
+			AND T0.Counter = JSON_VALUE(@json, '$.userId')
+			AND T0.Status = 0
+
+		end
+		else if @json like '%"oid"%'
+		begin
+			SELECT CASE WHEN (T0.ItemBarCode is null ) THEN T0.ItemCode ELSE T0.ItemBarCode END AS [ItemBarCode],
+		    CASE WHEN (T0.BinBarCode is null ) THEN T0.Bin ELSE T0.BinBarCode END AS [BinBarCode],
+			
+			T0.OID,T1.Docnum ,T0.ItemCode, T0.LegacyItemCode, T0.ItemDesc, T0.Warehouse, T0.Bin AS [Bincode], T0.Quantity AS [CountQty], T0.UpdateDate [UpdateDate] FROM StockCountSheetCounted T0 
+			INNER JOIN StockCountSheet T1 ON T0.StockCountSheet	 = T1.OID
+			WHERE StockCountSheet = JSON_VALUE(@json, '$.oid') AND T0.GCRecord is null
+		end
+	end
+
+	if @type = 'CountTargetList'
+	begin
+		SELECT ItemCode, LegacyItemCode, ItemDesc, Warehouse, Bin AS [Bincode], Quantity AS [CountQty] FROM StockCountSheetTarget WHERE StockCountSheet = JSON_VALUE(@json, '$.oid') AND GCRecord is null
+	end
+end
