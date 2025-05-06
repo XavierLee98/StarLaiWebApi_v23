@@ -1,0 +1,44 @@
+USE [STL_Portal_LIVE]
+GO
+/****** Object:  StoredProcedure [dbo].[ValidateJsonInput]    Script Date: 8/5/2024 9:21:15 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[ValidateJsonInput]
+@type nvarchar(50),
+@json nvarchar(max)
+AS
+BEGIN	
+
+	IF (@type = 'PickListDetailsActual')
+	BEGIN
+
+		DECLARE @PickDocNum NVARCHAR(50);
+		DECLARE @ItemCode NVARCHAR(50);
+
+		SELECT TOP 1 @PickDocNum = D3.DocNum, @ItemCode = D1.ItemCode From PickListDetails D1 
+		INNER JOIN
+		(
+			SELECT T1.SOBaseId, T1.PickList From PickList T0 
+			INNER JOIN PickListDetails T1 on T0.OID = T1.PickList and T1.GCRecord is null 
+			WHERE T0.GCRecord is null AND T0.OID = JSON_VALUE(@json,'$.PickOid')
+		) 
+		D2 on D1.SOBaseId = D2.SOBaseId and D1.PickList<> D2.PickList 
+		INNER JOIN PickList D3 on D1.PickList = D3.OID 
+		WHERE D3.Status = 1
+
+		IF @ItemCode IS NOT NULL
+		BEGIN
+		    SELECT 1 AS ERROR, @ItemCode + ' already exist in picked Document ('+ @PickDocNum +').' AS ErrorMessage;
+		END
+		ELSE
+		BEGIN
+			SELECT 0 AS ERROR;
+		END
+	END
+
+	SELECT 0 AS ERROR;
+
+	--select @error as Error, @errormessage as ErrorMessage
+END

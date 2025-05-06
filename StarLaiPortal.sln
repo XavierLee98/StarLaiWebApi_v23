@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarLaiPortal.Module.Win", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarLaiPortal.Win", "StarLaiPortal.Win\StarLaiPortal.Win.csproj", "{E0532C7A-C509-4FA0-B4A9-64BDDC4F661A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StarLaiPortal.WebApi", "StarLaiPortal.WebApi\StarLaiPortal.WebApi.csproj", "{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalIntegration", "PortalIntegration\PortalIntegration.csproj", "{97407731-9302-4EDF-8308-AABD51056AE2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admiral.ImportData", "Admiral.ImportData\Admiral.ImportData.csproj", "{C05EA8DC-F315-4A0D-A9C7-269C515457FF}"
@@ -43,6 +41,8 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "LoginScreen", "LoginScreen\
 		VWDPort = "63079"
 		SlnRelativePath = "LoginScreen\"
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StarLaiPortal.WebApi", "StarLaiPortal.WebApi\StarLaiPortal.WebApi.csproj", "{F505850E-04CB-405B-905C-DC4020D9C157}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,12 +81,6 @@ Global
 		{E0532C7A-C509-4FA0-B4A9-64BDDC4F661A}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
 		{E0532C7A-C509-4FA0-B4A9-64BDDC4F661A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0532C7A-C509-4FA0-B4A9-64BDDC4F661A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.EasyTest|Any CPU.ActiveCfg = EasyTest|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F52FC0CD-0315-447C-9E3D-DFA6FEB3ED77}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97407731-9302-4EDF-8308-AABD51056AE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{97407731-9302-4EDF-8308-AABD51056AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97407731-9302-4EDF-8308-AABD51056AE2}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
@@ -117,6 +111,12 @@ Global
 		{4734276C-A357-4B22-9689-47E7D07A6EEC}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{4734276C-A357-4B22-9689-47E7D07A6EEC}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{4734276C-A357-4B22-9689-47E7D07A6EEC}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.EasyTest|Any CPU.ActiveCfg = EasyTest|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F505850E-04CB-405B-905C-DC4020D9C157}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
