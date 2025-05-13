@@ -183,6 +183,7 @@ namespace StarLaiPortal.Module.Controllers
             //if (DateTime.Now.Minute.ToString("00").Substring(1, 1) == "0" || 
             //    DateTime.Now.Minute.ToString("00").Substring(1, 1) == "5")
             //{
+            bool upd = false;
             SqlConnection conn = new SqlConnection(getConnectionString());
             string getRMBool = "SELECT ReleaseMemory FROM [" + ConfigurationManager.AppSettings.Get("CommonTable").ToString() + "]..ODBC WHERE " +
                 "DBName = '" + conn.Database + "'";
@@ -198,28 +199,33 @@ namespace StarLaiPortal.Module.Controllers
                 if (reader.GetBoolean(0) == false)
                 {
                     MemoryManagement.FlushGCMemory();
+                    upd = true;
+
                 }
             }
             cmd.Dispose();
             conn.Close();
 
-            SqlCommand TransactionNotification = new SqlCommand("", conn);
-            TransactionNotification.CommandTimeout = 600;
-
-            if (conn.State == ConnectionState.Open)
+            if (upd == true)
             {
+                SqlCommand TransactionNotification = new SqlCommand("", conn);
+                TransactionNotification.CommandTimeout = 600;
+
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+
+                conn.Open();
+
+                TransactionNotification.CommandText = "UPDATE [" + ConfigurationManager.AppSettings.Get("CommonTable").ToString() + "]..ODBC " +
+                    "SET ReleaseMemory = 1 WHERE DBName = '" + conn.Database + "'";
+
+                SqlDataReader UpdReader = TransactionNotification.ExecuteReader();
+
+                TransactionNotification.Dispose();
                 conn.Close();
             }
-
-            conn.Open();
-
-            TransactionNotification.CommandText = "UPDATE [" + ConfigurationManager.AppSettings.Get("CommonTable").ToString() + "]..ODBC " +
-                "SET ReleaseMemory = 1 WHERE DBName = '" + conn.Database + "'";
-
-            SqlDataReader UpdReader = TransactionNotification.ExecuteReader();
-
-            TransactionNotification.Dispose();
-            conn.Close();
             //}
             // End ver 1.0.15
         }
