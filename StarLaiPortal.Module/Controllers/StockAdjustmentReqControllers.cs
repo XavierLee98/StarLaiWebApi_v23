@@ -12,6 +12,7 @@ using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.Validation;
 using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Item_Inquiry;
+using StarLaiPortal.Module.BusinessObjects.Sales_Quotation;
 using StarLaiPortal.Module.BusinessObjects.Setup;
 using StarLaiPortal.Module.BusinessObjects.Stock_Adjustment;
 using StarLaiPortal.Module.BusinessObjects.View;
@@ -157,7 +158,12 @@ namespace StarLaiPortal.Module.Controllers
 
         private void SARInquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            StockAdjustmentRequests trx = (StockAdjustmentRequests)View.CurrentObject;
+            // Start ver 1.0.22
+            //StockAdjustmentRequests trx = (StockAdjustmentRequests)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            StockAdjustmentRequests trx = (StockAdjustmentRequests)masterview.CurrentObject;
+            // End ver 1.0.22
+
             string docprefix = genCon.GetDocPrefix();
 
             if (trx.DocNum == null)

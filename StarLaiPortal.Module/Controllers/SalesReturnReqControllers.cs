@@ -14,6 +14,7 @@ using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using StarLaiPortal.Module.BusinessObjects.Item_Inquiry;
 using StarLaiPortal.Module.BusinessObjects.Sales_Order;
+using StarLaiPortal.Module.BusinessObjects.Sales_Quotation;
 using StarLaiPortal.Module.BusinessObjects.Sales_Return;
 using StarLaiPortal.Module.BusinessObjects.Setup;
 using StarLaiPortal.Module.BusinessObjects.View;
@@ -559,7 +560,11 @@ namespace StarLaiPortal.Module.Controllers
 
         private void SRRInquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            SalesReturnRequests trx = (SalesReturnRequests)View.CurrentObject;
+            // Start ver 1.0.22
+            //SalesReturnRequests trx = (SalesReturnRequests)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            SalesReturnRequests trx = (SalesReturnRequests)masterview.CurrentObject;
+            // End ver 1.0.22
 
             if (trx.DocNum == null)
             {

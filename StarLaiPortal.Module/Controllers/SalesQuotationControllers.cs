@@ -567,7 +567,11 @@ namespace StarLaiPortal.Module.Controllers
         private void InquiryItem_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             // Start ver 1.0.14
-            SalesQuotation selectedObject = (SalesQuotation)e.CurrentObject;
+            // Start ver 1.0.22
+            //SalesQuotation selectedObject = (SalesQuotation)e.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            SalesQuotation selectedObject = (SalesQuotation)masterview.CurrentObject;
+            // End ver 1.0.22
 
             IObjectSpace os = Application.CreateObjectSpace();
             SalesQuotation sq = os.FindObject<SalesQuotation>(new BinaryOperator("Oid", selectedObject.Oid));
@@ -585,7 +589,11 @@ namespace StarLaiPortal.Module.Controllers
 
         private void InquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            SalesQuotation trx = (SalesQuotation)View.CurrentObject;
+            // Start ver 1.0.22
+            //SalesQuotation trx = (SalesQuotation)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            SalesQuotation trx = (SalesQuotation)masterview.CurrentObject;
+            // End ver 1.0.22
 
             if (trx.DocNum == null)
             {

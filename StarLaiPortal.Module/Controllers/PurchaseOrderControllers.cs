@@ -20,6 +20,7 @@ using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Item_Inquiry;
 using StarLaiPortal.Module.BusinessObjects.Purchase_Order;
 using StarLaiPortal.Module.BusinessObjects.Sales_Order;
+using StarLaiPortal.Module.BusinessObjects.Sales_Quotation;
 using StarLaiPortal.Module.BusinessObjects.Setup;
 using StarLaiPortal.Module.BusinessObjects.View;
 using System;
@@ -548,7 +549,11 @@ namespace StarLaiPortal.Module.Controllers
         private void POInquiryItem_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
             // Start ver 1.0.14
-            PurchaseOrders selectedObject = (PurchaseOrders)e.CurrentObject;
+            // Start ver 1.0.22
+            //PurchaseOrders selectedObject = (PurchaseOrders)e.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            PurchaseOrders selectedObject = (PurchaseOrders)masterview.CurrentObject;
+            // End ver 1.0.22
 
             IObjectSpace os = Application.CreateObjectSpace();
             PurchaseOrders po = os.FindObject<PurchaseOrders>(new BinaryOperator("Oid", selectedObject.Oid));
@@ -567,7 +572,12 @@ namespace StarLaiPortal.Module.Controllers
 
         private void POInquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            PurchaseOrders trx = (PurchaseOrders)View.CurrentObject;
+            // Start ver 1.0.22
+            //PurchaseOrders trx = (PurchaseOrders)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            PurchaseOrders trx = (PurchaseOrders)masterview.CurrentObject;
+            // End ver 1.0.22
+
             string docprefix = genCon.GetDocPrefix();
 
             if (trx.DocNum == null)

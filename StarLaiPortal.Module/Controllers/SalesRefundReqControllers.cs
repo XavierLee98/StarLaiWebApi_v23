@@ -13,6 +13,7 @@ using DevExpress.Persistent.Validation;
 using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Item_Inquiry;
 using StarLaiPortal.Module.BusinessObjects.Purchase_Return;
+using StarLaiPortal.Module.BusinessObjects.Sales_Quotation;
 using StarLaiPortal.Module.BusinessObjects.Sales_Refund;
 using StarLaiPortal.Module.BusinessObjects.Setup;
 using StarLaiPortal.Module.BusinessObjects.View;
@@ -155,7 +156,11 @@ namespace StarLaiPortal.Module.Controllers
 
         private void SFRInquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            SalesRefundRequests trx = (SalesRefundRequests)View.CurrentObject;
+            // Start ver 1.0.22
+            //SalesRefundRequests trx = (SalesRefundRequests)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            SalesRefundRequests trx = (SalesRefundRequests)masterview.CurrentObject;
+            // End ver 1.0.22
 
             if (trx.IsNew == true)
             {

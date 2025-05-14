@@ -277,7 +277,11 @@ namespace StarLaiPortal.Module.Controllers
 
         private void WTRInquiryItem_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            WarehouseTransferReq trx = (WarehouseTransferReq)View.CurrentObject;
+            // Start ver 1.0.22
+            //WarehouseTransferReq trx = (WarehouseTransferReq)View.CurrentObject;
+            DetailView masterview = Application.MainWindow.View as DetailView;
+            WarehouseTransferReq trx = (WarehouseTransferReq)masterview.CurrentObject;
+            // End ver 1.0.22
 
             if (trx.DocNum == null)
             {
