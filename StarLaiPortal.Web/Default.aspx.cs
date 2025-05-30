@@ -21,35 +21,35 @@ public partial class Default : BaseXafPage {
         }
     }
 
-    protected DateTime LastActivity
-    {
-        get
-        {
-            if (Session[LastActivityTag] != null)
-            {
-                return (DateTime)Session[LastActivityTag];
-            }
-            else
-            {
-                return DateTime.Now;
-            }
-        }
-        set { Session[LastActivityTag] = value; }
-    }
+    //protected DateTime LastActivity
+    //{
+    //    get
+    //    {
+    //        if (Session[LastActivityTag] != null)
+    //        {
+    //            return (DateTime)Session[LastActivityTag];
+    //        }
+    //        else
+    //        {
+    //            return DateTime.Now;
+    //        }
+    //    }
+    //    set { Session[LastActivityTag] = value; }
+    //}
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
-        if (System.Web.HttpContext.Current.Request.Form["__CALLBACKID"] != ASPxCallback1.ClientID)
-        {
-            LastActivity = DateTime.Now;
-        }
+        //if (System.Web.HttpContext.Current.Request.Form["__CALLBACKID"] != ASPxCallback1.ClientID)
+        //{
+        //    LastActivity = DateTime.Now;
+        //}
     }
-    protected void ASPxCallback1_Callback(object source, DevExpress.Web.CallbackEventArgs e)
-    {
-        if (DevExpress.ExpressApp.Web.WebWindow.CurrentRequestWindow is DevExpress.ExpressApp.Web.PopupWindow) return;
-        if (DateTime.Now.Subtract(LastActivity).TotalSeconds > ActivityTimeout)
-        {
-            WebApplication.Instance.LogOff();
-        }
-    }
+    //protected void ASPxCallback1_Callback(object source, DevExpress.Web.CallbackEventArgs e)
+    //{
+    //    if (DevExpress.ExpressApp.Web.WebWindow.CurrentRequestWindow is DevExpress.ExpressApp.Web.PopupWindow) return;
+    //    if (DateTime.Now.Subtract(LastActivity).TotalSeconds > ActivityTimeout)
+    //    {
+    //        WebApplication.Instance.LogOff();
+    //    }
+    //}
 }

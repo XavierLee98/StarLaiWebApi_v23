@@ -104,6 +104,10 @@ namespace Admiral.ImportData
                     {
                         query = "SELECT 1 FROM [" + conn.Database + "]..StockCountConfirm where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
                     }
+                    else if (option.Type == "ASN")
+                    {
+                        query = "SELECT 1 FROM [" + conn.Database + "]..ASN where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
+                    }
 
                     if (conn.State == ConnectionState.Open)
                     {

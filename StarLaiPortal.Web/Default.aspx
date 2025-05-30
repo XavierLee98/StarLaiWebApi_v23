@@ -61,8 +61,8 @@ background-blend-mode: screen;">
     <form id="form2" runat="server">
     <cc4:ASPxProgressControl ID="ProgressControl" runat="server" />
     <div runat="server" id="Content" />
-      <dx:ASPxCallback ID="ASPxCallback1" runat="server" OnCallback="ASPxCallback1_Callback"></dx:ASPxCallback>  
-      <dx:ASPxTimer ID="ASPxTimer1" runat="server" Interval="5000" Enabled="true" ClientSideEvents-Tick="function(s,e){ ASPxCallback1.PerformCallback(''); }"></dx:ASPxTimer>
+     <%-- <dx:ASPxCallback ID="ASPxCallback1" runat="server" OnCallback="ASPxCallback1_Callback"></dx:ASPxCallback>  
+      <dx:ASPxTimer ID="ASPxTimer1" runat="server" Interval="5000" Enabled="true" ClientSideEvents-Tick="function(s,e){ ASPxCallback1.PerformCallback(''); }"></dx:ASPxTimer>--%>
     </form>
 </body>
 </html>
