@@ -893,7 +893,7 @@ namespace StarLaiPortal.Module.Controllers
                             // End ver 1.0.22
 
                             // Start ver 1.0.22
-                            if (periodlock == false)
+                            if ((periodlock == false && p.AppStatus == ApprovalActions.Yes) || (periodlock == true && p.AppStatus != ApprovalActions.Yes))
                             {
                             // End ver 1.0.22
                                 ApprovalStatusType appstatus = ApprovalStatusType.Required_Approval;
@@ -1044,8 +1044,11 @@ namespace StarLaiPortal.Module.Controllers
                         {
                             if (readerperiod.GetString(3) != "N")
                             {
-                                showMsg("Error", "Posting period locked.", InformationType.Error);
-                                return;
+                                if (p.AppStatus == ApprovalActions.Yes)
+                                {
+                                    showMsg("Error", "Posting period locked.", InformationType.Error);
+                                    return;
+                                }
                             }
                         }
                         cmdperiod.Dispose();
