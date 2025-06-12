@@ -677,7 +677,7 @@ namespace StarLaiPortal.Module.Controllers
                 "D2 on D1.SOBaseId = D2.SOBaseId and D1.PickList<> D2.PickList " +
                 "INNER JOIN PickList D3 on D1.PickList = D3.OID " +
                 "INNER JOIN SalesOrderDetails D4 on D2.SOBaseId = D4.OID " +
-                "WHERE D3.Status = 1 AND D1.PickQty + D2.PickQty > D4.Quantity";
+                "WHERE D3.Status = 5 AND D1.PickQty + D2.PickQty > D4.Quantity";
             if (conn.State == ConnectionState.Open)
             {
                 conn.Close();
