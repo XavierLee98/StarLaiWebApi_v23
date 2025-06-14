@@ -100,6 +100,10 @@ namespace Admiral.ImportData
                     {
                         query = "SELECT 1 FROM [" + conn.Database + "]..StockCountSheet where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
                     }
+                    else if (option.Type == "StockCountSheetTarget")
+                    {
+                        query = "SELECT 1 FROM [" + conn.Database + "]..StockCountSheet where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
+                    }
                     else if (option.Type == "StockCountConfirm")
                     {
                         query = "SELECT 1 FROM [" + conn.Database + "]..StockCountConfirm where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
@@ -107,6 +111,10 @@ namespace Admiral.ImportData
                     else if (option.Type == "ASN")
                     {
                         query = "SELECT 1 FROM [" + conn.Database + "]..ASN where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
+                    }
+                    else if (option.Type == "GoodsReceiptPO")
+                    {
+                        query = "SELECT 1 FROM [" + conn.Database + "]..GRN where [Status] <> 0 AND DocNum = '" + option.DocNum + "'";
                     }
 
                     if (conn.State == ConnectionState.Open)
