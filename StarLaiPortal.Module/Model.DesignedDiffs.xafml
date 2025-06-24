@@ -527,7 +527,7 @@
     <LayoutManagerOptions RequiredFieldMark="*" />
   </Options>
   <SchemaModules>
-    <SchemaModule Name="SystemModule" Version="22.2.3.0" IsNewNode="True" />
+    <SchemaModule Name="SystemModule" Version="23.1.14.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
     <DetailView Id="AddPickList_DetailView">
@@ -1498,7 +1498,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="GlobalItemInquiry_GlobalItemInquiryDetails_ListView">
+    <ListView Id="GlobalItemInquiry_GlobalItemInquiryDetails_ListView" DataAccessMode="DataView">
       <Columns>
         <ColumnInfo Id="ItemCode" SortIndex="-1" SortOrder="None" />
       </Columns>
@@ -1915,7 +1915,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="ItemInquiry_ItemInquiryDetails_ListView" MasterDetailMode="ListViewOnly" FreezeColumnIndices="False">
+    <ListView Id="ItemInquiry_ItemInquiryDetails_ListView" MasterDetailMode="ListViewOnly" FreezeColumnIndices="False" DataAccessMode="DataView">
       <Columns>
         <ColumnInfo Id="PriceList3" Index="-1" />
         <ColumnInfo Id="PriceList4" Index="-1" />
@@ -1934,7 +1934,7 @@
       </Columns>
       <SplitLayout Direction="Vertical" />
     </ListView>
-    <ListView Id="ItemInquiry_ItemInquiryDetails_ListView_Report" ClassName="StarLaiPortal.Module.BusinessObjects.Item_Inquiry.ItemInquiryDetails" DataAccessMode="Client" FreezeColumnIndices="False" DetailViewID="ItemInquiryDetails_DetailView_Report" MasterDetailView="ItemInquiryDetails_DetailView" IsNewNode="True">
+    <ListView Id="ItemInquiry_ItemInquiryDetails_ListView_Report" ClassName="StarLaiPortal.Module.BusinessObjects.Item_Inquiry.ItemInquiryDetails" DataAccessMode="DataView" FreezeColumnIndices="False" DetailViewID="ItemInquiryDetails_DetailView_Report" MasterDetailView="ItemInquiryDetails_DetailView" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Barcode" PropertyName="Barcode" Index="-1" IsNewNode="True" />
         <ColumnInfo Id="HierarchyLevel1" PropertyName="HierarchyLevel1" Index="-1" IsNewNode="True" />
@@ -2318,7 +2318,7 @@
     <DetailView Id="LoadingInquiryResult_DetailView" AllowEdit="False" />
     <DetailView Id="OrderStatus_DetailView" AllowEdit="False" />
     <DetailView Id="OrderStatusList_DetailView" AllowEdit="True" />
-    <ListView Id="OrderStatusList_Orderstatus_ListView">
+    <ListView Id="OrderStatusList_Orderstatus_ListView" DataAccessMode="Client">
       <Columns>
         <ColumnInfo Id="ItemName" SortIndex="-1" SortOrder="None" />
       </Columns>
@@ -3724,6 +3724,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="SalesHistoryList_Sales_ListView" DataAccessMode="Client" />
     <ListView Id="SalesOrder_AuditTrail_ListView" AllowDelete="False" AllowLink="False" AllowNew="False">
       <Columns>
         <ColumnInfo Id="PropertyName" Index="-1" />

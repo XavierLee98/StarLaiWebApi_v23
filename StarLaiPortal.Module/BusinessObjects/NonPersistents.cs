@@ -305,6 +305,8 @@ namespace StarLaiPortal.Module.BusinessObjects
         {
             orderstatus = new BindingList<OrderStatus>();
         }
+
+        [XafDisplayName("Order Status")]
         public BindingList<OrderStatus> Orderstatus { get { return orderstatus; } }
     }
     // End ver 1.0.13

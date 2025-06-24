@@ -31,7 +31,7 @@ namespace StarLaiPortal.Web {
             security.RegisterXPOAdapterProviders();
             DevExpress.ExpressApp.Web.Templates.DefaultVerticalTemplateContentNew.ClearSizeLimit();
             WebApplication.Instance.Settings.DefaultVerticalTemplateContentPath = "DefaultVerticalTemplateContent1.ascx";
-            DevExpress.ExpressApp.Model.Core.ModelNode.UseGlobalLockObject = true;
+            //DevExpress.ExpressApp.Model.Core.ModelNode.UseGlobalLockObject = true;
             DefaultVerticalTemplateContent1.ClearSizeLimit();
             WebApplication.Instance.SwitchToNewStyle();
             //WebApplication.EnableMultipleBrowserTabsSupport = false;

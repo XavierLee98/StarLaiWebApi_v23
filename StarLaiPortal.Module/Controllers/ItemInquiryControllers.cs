@@ -25,6 +25,7 @@ using StarLaiPortal.Module.BusinessObjects.Stock_Adjustment;
 using StarLaiPortal.Module.BusinessObjects.View;
 using StarLaiPortal.Module.BusinessObjects.Warehouse_Transfer;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -43,6 +44,7 @@ using System.Web;
 // 2024-10-08 - add whse - ver 1.0.21
 // 2025-02-04 - add global item inquiry - ver 1.0.22
 // 2025-02-25 - block add item if not in draft - ver 1.0.22
+// 2025-06-25 - change item inquiry to dataview mode - ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -311,7 +313,20 @@ namespace StarLaiPortal.Module.Controllers
 
         private void ViewSales_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
+            // Start ver 1.0.23
+            //ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
+
+            ArrayList selectedHdr = new ArrayList();
+            string OrderStatusItemCode = "";
+
+            if (View.SelectedObjects.Count > 0)
+            {
+                foreach (var selectedObject in View.SelectedObjects)
+                {
+                    selectedHdr.Add((ItemInquiryDetails)ObjectSpace.GetObject(selectedObject));
+                }
+            }
+            // End ver 1.0.23
 
             IObjectSpace objectSpace = Application.CreateObjectSpace(typeof(SalesHistory));
 
@@ -319,7 +334,10 @@ namespace StarLaiPortal.Module.Controllers
             var nonPersistentOS = Application.CreateObjectSpace(typeof(SalesHistoryList));
             SalesHistoryList saleslist = nonPersistentOS.CreateObject<SalesHistoryList>();
 
-            if (iteminquiry != null)
+            // Start ver 1.0.23
+            //if (iteminquiry != null)
+            foreach (ItemInquiryDetails iteminquiry in selectedHdr)
+            // End ver 1.0.23
             {
                 SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetSales", new OperandValue(iteminquiry.ItemCode));
 
@@ -348,6 +366,10 @@ namespace StarLaiPortal.Module.Controllers
                             // End ver 1.0.21
                             saleslist.Sales.Add(item);
 
+                            // Start ver 1.0.23
+                            OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                            // End ver 1.0.23
+
                             i++;
                         }
                     }
@@ -360,10 +382,15 @@ namespace StarLaiPortal.Module.Controllers
 
             DetailView detailView = Application.CreateDetailView(nonPersistentOS, saleslist);
             detailView.ViewEditMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
-            if (iteminquiry != null)
+            //if (iteminquiry != null)
+            //{
+            //    ((SalesHistoryList)detailView.CurrentObject).ItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+            //}
+            if (OrderStatusItemCode != "")
             {
-                ((SalesHistoryList)detailView.CurrentObject).ItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                ((SalesHistoryList)detailView.CurrentObject).ItemCode = OrderStatusItemCode;
             }
+            // End ver 1.0.23
             e.View = detailView;
             e.DialogController.SaveOnAccept = false;
             e.DialogController.CancelAction.Active["NothingToCancel"] = false;
@@ -781,41 +808,79 @@ namespace StarLaiPortal.Module.Controllers
 
         private void ViewItemPicture_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
+            // Start ver 1.0.23
+            ArrayList selectedHdr = new ArrayList();
+            // End ver 1.0.23
+
             // Start ver 1.0.22
             if (View.ObjectTypeInfo.Type == typeof(ItemInquiryDetails))
             {
-                ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
+                // Start ver 1.0.23
+                //ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
 
-                if (iteminquiry.PictureName != null)
+                if (View.SelectedObjects.Count > 0)
                 {
-                    string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                        ConfigurationManager.AppSettings.Get("ItemPicturePath").ToString() + iteminquiry.PictureName;
-                    var script = "window.open('" + url + "');";
+                    foreach (var selectedObject in View.SelectedObjects)
+                    {
+                        selectedHdr.Add((ItemInquiryDetails)ObjectSpace.GetObject(selectedObject));
+                    }
+                }
+                // End ver 1.0.23
 
-                    WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
-                }
-                else
+                // Start ver 1.0.23
+                foreach (ItemInquiryDetails iteminquiry in selectedHdr)
                 {
-                    showMsg("Error", "No picture file.", InformationType.Error);
+                // End ver 1.0.23
+                    if (iteminquiry.PictureName != null)
+                    {
+                        string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                            ConfigurationManager.AppSettings.Get("ItemPicturePath").ToString() + iteminquiry.PictureName;
+                        var script = "window.open('" + url + "');";
+
+                        WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+                    }
+                    else
+                    {
+                        showMsg("Error", "No picture file.", InformationType.Error);
+                    }
+                    // Start ver 1.0.23
                 }
+                // End ver 1.0.23
             }
 
             if (View.ObjectTypeInfo.Type == typeof(GlobalItemInquiryDetails))
             {
-                GlobalItemInquiryDetails iteminquiry = (GlobalItemInquiryDetails)View.CurrentObject;
+                // Start ver 1.0.23
+                //GlobalItemInquiryDetails iteminquiry = (GlobalItemInquiryDetails)View.CurrentObject;
 
-                if (iteminquiry.PictureName != null)
+                if (View.SelectedObjects.Count > 0)
                 {
-                    string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                        ConfigurationManager.AppSettings.Get("ItemPicturePath").ToString() + iteminquiry.PictureName;
-                    var script = "window.open('" + url + "');";
+                    foreach (var selectedObject in View.SelectedObjects)
+                    {
+                        selectedHdr.Add((GlobalItemInquiryDetails)ObjectSpace.GetObject(selectedObject));
+                    }
+                }
+                // End ver 1.0.23
 
-                    WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
-                }
-                else
+                // Start ver 1.0.23
+                foreach (GlobalItemInquiryDetails iteminquiry in selectedHdr)
                 {
-                    showMsg("Error", "No picture file.", InformationType.Error);
+                // End ver 1.0.23
+                    if (iteminquiry.PictureName != null)
+                    {
+                        string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                            ConfigurationManager.AppSettings.Get("ItemPicturePath").ToString() + iteminquiry.PictureName;
+                        var script = "window.open('" + url + "');";
+
+                        WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+                    }
+                    else
+                    {
+                        showMsg("Error", "No picture file.", InformationType.Error);
+                    }
+                    // Start ver 1.0.23
                 }
+                // End ver 1.0.23
             }
             // End ver 1.0.22
         }
@@ -827,9 +892,22 @@ namespace StarLaiPortal.Module.Controllers
             SqlConnection conn = new SqlConnection(genCon.getConnectionString());
             int oid = 0;
 
-            //if (selectedObject == null)
-            //{
-            foreach (ItemInquiryDetails dtl in e.SelectedObjects)
+            // Start ver 1.0.23
+            ArrayList selectedHdr = new ArrayList();
+
+            if (View.SelectedObjects.Count > 0)
+            {
+                foreach (var selectedObject in View.SelectedObjects)
+                {
+                    selectedHdr.Add((ItemInquiryDetails)ObjectSpace.GetObject(selectedObject));
+                }
+            }
+            // End ver 1.0.23
+
+            // Start ver 1.0.23
+            //foreach (ItemInquiryDetails dtl in e.SelectedObjects)
+            foreach (ItemInquiryDetails dtl in selectedHdr)
+            // End ver 1.0.23
             {
                 oid = dtl.ItemInquiry.Oid;
                 if (dtl.ItemInquiry.DocType == DocTypeList.SQ)
@@ -1239,7 +1317,20 @@ namespace StarLaiPortal.Module.Controllers
 
         private void ViewOrderStatus_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
+            // Start ver 1.0.23
+            //ItemInquiryDetails iteminquiry = (ItemInquiryDetails)View.CurrentObject;
+
+            ArrayList selectedHdr = new ArrayList();
+            string OrderStatusItemCode = "";
+
+            if (View.SelectedObjects.Count > 0)
+            {
+                foreach (var selectedObject in View.SelectedObjects)
+                {
+                    selectedHdr.Add((ItemInquiryDetails)ObjectSpace.GetObject(selectedObject));
+                }
+            }
+            // End ver 1.0.23
 
             IObjectSpace objectSpace = Application.CreateObjectSpace(typeof(OrderStatus));
 
@@ -1247,7 +1338,10 @@ namespace StarLaiPortal.Module.Controllers
             var nonPersistentOS = Application.CreateObjectSpace(typeof(OrderStatusList));
             OrderStatusList orderstatuslist = nonPersistentOS.CreateObject<OrderStatusList>();
 
-            if (iteminquiry != null)
+            // Start ver 1.0.23
+            //if (iteminquiry != null)
+            foreach (ItemInquiryDetails iteminquiry in selectedHdr)
+            // End ver 1.0.23
             {
                 SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOrderStatus", new OperandValue(iteminquiry.ItemCode));
 
@@ -1278,6 +1372,10 @@ namespace StarLaiPortal.Module.Controllers
 
                             orderstatuslist.Orderstatus.Add(item);
 
+                            // Start ver 1.0.23
+                            OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                            // End ver 1.0.23
+
                             i++;
                         }
                     }
@@ -1290,10 +1388,16 @@ namespace StarLaiPortal.Module.Controllers
 
             DetailView detailView = Application.CreateDetailView(nonPersistentOS, orderstatuslist);
             detailView.ViewEditMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
-            if (iteminquiry != null)
+            // Start ver 1.0.23
+            //if (iteminquiry != null)
+            //{
+            //    ((OrderStatusList)detailView.CurrentObject).ItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+            //}
+            if (OrderStatusItemCode != "")
             {
-                ((OrderStatusList)detailView.CurrentObject).ItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                ((OrderStatusList)detailView.CurrentObject).ItemCode = OrderStatusItemCode;
             }
+            // End ver 1.0.23
             e.View = detailView;
             e.DialogController.SaveOnAccept = false;
             e.DialogController.CancelAction.Active["NothingToCancel"] = false;
