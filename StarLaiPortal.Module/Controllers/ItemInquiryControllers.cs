@@ -382,6 +382,7 @@ namespace StarLaiPortal.Module.Controllers
 
             DetailView detailView = Application.CreateDetailView(nonPersistentOS, saleslist);
             detailView.ViewEditMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
+            // Start ver 1.0.23
             //if (iteminquiry != null)
             //{
             //    ((SalesHistoryList)detailView.CurrentObject).ItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
