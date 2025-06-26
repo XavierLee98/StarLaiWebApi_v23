@@ -45,6 +45,7 @@ using System.Web;
 // 2025-02-04 - add global item inquiry - ver 1.0.22
 // 2025-02-25 - block add item if not in draft - ver 1.0.22
 // 2025-06-25 - change item inquiry to dataview mode - ver 1.0.23
+// 2025-06-26 - Add check performance feature - ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -1459,5 +1460,154 @@ namespace StarLaiPortal.Module.Controllers
             }
         }
         // End ver 1.0.22
+
+        //// Start ver 1.0.23
+        //#region Performance Optimization - Simple Caching Methods
+
+        //private static readonly Dictionary<string, CacheItem> _simpleCache = new Dictionary<string, CacheItem>();
+        //private static readonly object _cacheLock = new object();
+
+        //private class CacheItem
+        //{
+        //    public SelectedData Data { get; set; }
+        //    public DateTime ExpiryTime { get; set; }
+
+        //    public bool IsExpired => DateTime.Now > ExpiryTime;
+        //}
+
+        ///// <summary>
+        ///// Try to get cached sales data
+        ///// </summary>
+        //private SelectedData TryGetCachedSalesData(string cacheKey)
+        //{
+        //    try
+        //    {
+        //        lock (_cacheLock)
+        //        {
+        //            if (_simpleCache.TryGetValue(cacheKey, out CacheItem item))
+        //            {
+        //                if (!item.IsExpired)
+        //                {
+        //                    return item.Data;
+        //                }
+        //                else
+        //                {
+        //                    // Remove expired item
+        //                    _simpleCache.Remove(cacheKey);
+        //                }
+        //            }
+        //        }
+        //        return null;
+        //    }
+        //    catch
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Cache sales data with expiration
+        ///// </summary>
+        //private void CacheSalesData(string cacheKey, SelectedData data, TimeSpan expiry)
+        //{
+        //    try
+        //    {
+        //        lock (_cacheLock)
+        //        {
+        //            var cacheItem = new CacheItem
+        //            {
+        //                Data = data,
+        //                ExpiryTime = DateTime.Now.Add(expiry)
+        //            };
+
+        //            _simpleCache[cacheKey] = cacheItem;
+
+        //            // Clean up expired items (simple cleanup)
+        //            if (_simpleCache.Count > 100)
+        //            {
+        //                CleanupExpiredItems();
+        //            }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        // Silently fail if caching doesn't work
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Clear cache for specific item
+        ///// </summary>
+        //private void ClearItemCache(string itemCode)
+        //{
+        //    try
+        //    {
+        //        string cacheKey = $"sales_history_{itemCode}";
+        //        lock (_cacheLock)
+        //        {
+        //            _simpleCache.Remove(cacheKey);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        // Silently fail
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Clean up expired cache items
+        ///// </summary>
+        //private static void CleanupExpiredItems()
+        //{
+        //    var expiredKeys = new List<string>();
+        //    foreach (var kvp in _simpleCache)
+        //    {
+        //        if (kvp.Value.IsExpired)
+        //        {
+        //            expiredKeys.Add(kvp.Key);
+        //        }
+        //    }
+
+        //    foreach (var key in expiredKeys)
+        //    {
+        //        _simpleCache.Remove(key);
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Get cache statistics for performance monitoring
+        ///// </summary>
+        //public static SimpleCacheStats GetCacheStats()
+        //{
+        //    lock (_cacheLock)
+        //    {
+        //        CleanupExpiredItems(); // Clean before counting
+        //        return new SimpleCacheStats
+        //        {
+        //            ItemCount = _simpleCache.Count,
+        //            EstimatedSizeMB = _simpleCache.Count * 10 // Rough estimate: 10KB per item
+        //        };
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Clear all cached items
+        ///// </summary>
+        //public static void ClearAllCache()
+        //{
+        //    lock (_cacheLock)
+        //    {
+        //        _simpleCache.Clear();
+        //    }
+        //}
+
+        //public class SimpleCacheStats
+        //{
+        //    public int ItemCount { get; set; }
+        //    public long EstimatedSizeMB { get; set; }
+        //}
+
+        //#endregion
+        //// End ver 1.0.23
     }
 }

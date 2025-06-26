@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.ForceReleaseMemory = new DevExpress.ExpressApp.Actions.SimpleAction(this.components);
             this.ForceFlushGC = new DevExpress.ExpressApp.Actions.SimpleAction(this.components);
+            this.PerformanceFunc = new DevExpress.ExpressApp.Actions.SingleChoiceAction(this.components);
             // 
             // ForceReleaseMemory
             // 
@@ -50,10 +51,20 @@
             this.ForceFlushGC.ToolTip = null;
             this.ForceFlushGC.Execute += new DevExpress.ExpressApp.Actions.SimpleActionExecuteEventHandler(this.ForceFlushGC_Execute);
             // 
+            // PerformanceFunc
+            // 
+            this.PerformanceFunc.Caption = "Performance Func";
+            this.PerformanceFunc.Category = "ObjectsCreation";
+            this.PerformanceFunc.ConfirmationMessage = null;
+            this.PerformanceFunc.Id = "PerformanceFunc";
+            this.PerformanceFunc.ToolTip = null;
+            this.PerformanceFunc.Execute += new DevExpress.ExpressApp.Actions.SingleChoiceActionExecuteEventHandler(this.PerformanceFunc_Execute);
+            // 
             // MemoryManagementController
             // 
             this.Actions.Add(this.ForceReleaseMemory);
             this.Actions.Add(this.ForceFlushGC);
+            this.Actions.Add(this.PerformanceFunc);
 
         }
 
@@ -61,5 +72,6 @@
 
         private DevExpress.ExpressApp.Actions.SimpleAction ForceReleaseMemory;
         private DevExpress.ExpressApp.Actions.SimpleAction ForceFlushGC;
+        private DevExpress.ExpressApp.Actions.SingleChoiceAction PerformanceFunc;
     }
 }
