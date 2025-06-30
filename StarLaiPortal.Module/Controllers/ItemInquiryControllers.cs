@@ -46,6 +46,7 @@ using System.Web;
 // 2025-02-25 - block add item if not in draft - ver 1.0.22
 // 2025-06-25 - change item inquiry to dataview mode - ver 1.0.23
 // 2025-06-26 - Add check performance feature - ver 1.0.23
+// 2025-06-30 - Not allow search with no keyword - ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -201,59 +202,95 @@ namespace StarLaiPortal.Module.Controllers
                     //}
 
                     // Start ver 1.0.15
+                    // Start ver 1.0.23
                     if (selectedObject.Search != null)
                     {
-                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItem", new OperandValue(selectedObject.Search),
-                            new OperandValue(selectedObject.Exclude),
-                            new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
-                            new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
-                            new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
-                            // Start ver 1.0.8
-                            new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
-                            // End ver 1.0.8
-                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                        if (!string.IsNullOrEmpty(selectedObject.Search.Trim(' ')))
+                        // End ver 1.0.23
+                        {
+                            XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                            SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItem", new OperandValue(selectedObject.Search),
+                                new OperandValue(selectedObject.Exclude),
+                                new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
+                                new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
+                                new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
+                                // Start ver 1.0.8
+                                new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
+                                // End ver 1.0.8
+                                new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                        persistentObjectSpace.Session.DropIdentityMap();
-                        persistentObjectSpace.Dispose();
+                            persistentObjectSpace.Session.DropIdentityMap();
+                            persistentObjectSpace.Dispose();
+                        }
+                        // Start ver 1.0.23
+                        else
+                        {
+                            genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                            return;
+                        }
+                        // End ver 1.0.23
                     }
                     // End ver 1.0.15 
 
                     // Start ver 1.0.15
+                    // Start ver 1.0.23
                     if (selectedObject.OldCode != null)
                     {
-                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOldCode", new OperandValue(selectedObject.OldCode),
-                            new OperandValue(selectedObject.Exclude),
-                            new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
-                            new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
-                            new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
-                            // Start ver 1.0.8
-                            new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
-                            // End ver 1.0.8
-                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                        if (!string.IsNullOrEmpty(selectedObject.OldCode.Trim(' ')))
+                        // End ver 1.0.23
+                        {
+                            XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                            SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOldCode", new OperandValue(selectedObject.OldCode),
+                                new OperandValue(selectedObject.Exclude),
+                                new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
+                                new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
+                                new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
+                                // Start ver 1.0.8
+                                new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
+                                // End ver 1.0.8
+                                new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                        persistentObjectSpace.Session.DropIdentityMap();
-                        persistentObjectSpace.Dispose();
+                            persistentObjectSpace.Session.DropIdentityMap();
+                            persistentObjectSpace.Dispose();
+                        }
+                        // Start ver 1.0.23
+                        else
+                        {
+                            genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                            return;
+                        }
+                        // End ver 1.0.23
                     }
                     // End ver 1.0.15 
 
                     // Start ver 1.0.15
+                    // Start ver 1.0.23
                     if (selectedObject.CatalogNumber != null)
                     {
-                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemCatalogNumber", new OperandValue(selectedObject.CatalogNumber),
-                            new OperandValue(selectedObject.Exclude),
-                            new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
-                            new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
-                            new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
-                            // Start ver 1.0.8
-                            new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
-                            // End ver 1.0.8
-                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                        if (!string.IsNullOrEmpty(selectedObject.CatalogNumber.Trim(' ')))
+                        // End ver 1.0.23
+                        {
+                            XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                            SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemCatalogNumber", new OperandValue(selectedObject.CatalogNumber),
+                                new OperandValue(selectedObject.Exclude),
+                                new OperandValue(selectedObject.PriceList1.ListNum), new OperandValue(selectedObject.PriceList2.ListNum),
+                                new OperandValue(selectedObject.PriceList3.ListNum), new OperandValue(selectedObject.PriceList4.ListNum),
+                                new OperandValue(selectedObject.Stock1.WarehouseCode), new OperandValue(selectedObject.Stock2.WarehouseCode),
+                                // Start ver 1.0.8
+                                new OperandValue(selectedObject.Stock3.WarehouseCode), new OperandValue(selectedObject.Stock4.WarehouseCode),
+                                // End ver 1.0.8
+                                new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                        persistentObjectSpace.Session.DropIdentityMap();
-                        persistentObjectSpace.Dispose();
+                            persistentObjectSpace.Session.DropIdentityMap();
+                            persistentObjectSpace.Dispose();
+                        }
+                        // Start ver 1.0.23
+                        else
+                        {
+                            genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                            return;
+                        }
+                        // End ver 1.0.23
                     }
                     // End ver 1.0.15 
 
@@ -1417,37 +1454,73 @@ namespace StarLaiPortal.Module.Controllers
                 selectedObject.Search == null && selectedObject.OldCode == null && selectedObject.CatalogNumber != null ||
                 selectedObject.Search == null && selectedObject.OldCode == null && selectedObject.CatalogNumber == null)
             {
+                // Start ver 1.0.23
                 if (selectedObject.Search != null)
                 {
-                    XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                    SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemGlobal", new OperandValue(selectedObject.Search),
-                        new OperandValue(selectedObject.Exclude),
-                        new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                    if (!string.IsNullOrEmpty(selectedObject.Search.Trim(' ')))
+                    // End ver 1.0.23
+                    {
+                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemGlobal", new OperandValue(selectedObject.Search),
+                            new OperandValue(selectedObject.Exclude),
+                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                    persistentObjectSpace.Session.DropIdentityMap();
-                    persistentObjectSpace.Dispose();
+                        persistentObjectSpace.Session.DropIdentityMap();
+                        persistentObjectSpace.Dispose();
+                    }
+                    // Start ver 1.0.23
+                    else
+                    {
+                        genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                        return;
+                    }
+                    // End ver 1.0.23
                 }
 
+                // Start ver 1.0.23
                 if (selectedObject.OldCode != null)
                 {
-                    XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                    SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOldCodeGlobal", new OperandValue(selectedObject.OldCode),
-                        new OperandValue(selectedObject.Exclude),
-                        new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                    if (!string.IsNullOrEmpty(selectedObject.OldCode.Trim(' ')))
+                    // End ver 1.0.23
+                    {
+                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOldCodeGlobal", new OperandValue(selectedObject.OldCode),
+                            new OperandValue(selectedObject.Exclude),
+                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                    persistentObjectSpace.Session.DropIdentityMap();
-                    persistentObjectSpace.Dispose();
+                        persistentObjectSpace.Session.DropIdentityMap();
+                        persistentObjectSpace.Dispose();
+                    }
+                    // Start ver 1.0.23
+                    else
+                    {
+                        genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                        return;
+                    }
+                    // End ver 1.0.23
                 }
 
+                // Start ver 1.0.23
                 if (selectedObject.CatalogNumber != null)
                 {
-                    XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
-                    SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemCatalogNumberGlobal", new OperandValue(selectedObject.CatalogNumber),
-                        new OperandValue(selectedObject.Exclude),
-                        new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
+                    if (!string.IsNullOrEmpty(selectedObject.CatalogNumber.Trim(' ')))
+                    // End ver 1.0.23
+                    {
+                        XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                        SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemCatalogNumberGlobal", new OperandValue(selectedObject.CatalogNumber),
+                            new OperandValue(selectedObject.Exclude),
+                            new OperandValue(selectedObject.Method), new OperandValue(cardcode), new OperandValue(selectedObject.Oid));
 
-                    persistentObjectSpace.Session.DropIdentityMap();
-                    persistentObjectSpace.Dispose();
+                        persistentObjectSpace.Session.DropIdentityMap();
+                        persistentObjectSpace.Dispose();
+                    }
+                    // Start ver 1.0.23
+                    else
+                    {
+                        genCon.showMsg("Fail", "Not allow to search without any keyword.", InformationType.Error);
+                        return;
+                    }
+                    // End ver 1.0.23
                 }
 
                 ObjectSpace.CommitChanges();

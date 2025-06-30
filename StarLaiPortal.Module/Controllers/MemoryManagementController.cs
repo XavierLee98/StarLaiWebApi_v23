@@ -156,6 +156,9 @@ namespace StarLaiPortal.Module.Controllers
             {
                 try
                 {
+                    SqlConnectionStringBuilder cnnBuilder = new SqlConnectionStringBuilder(genCon.getConnectionString());
+                    bool isPooling = cnnBuilder.Pooling;
+
                     string performanceInfo = GetPerformanceInfo();
 
                     Application.ShowViewStrategy.ShowMessage(
