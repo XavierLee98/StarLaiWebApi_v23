@@ -356,6 +356,7 @@ namespace StarLaiPortal.Module.Controllers
 
             ArrayList selectedHdr = new ArrayList();
             string OrderStatusItemCode = "";
+            string OrderStatusCode = "";
 
             if (View.SelectedObjects.Count > 0)
             {
@@ -377,7 +378,13 @@ namespace StarLaiPortal.Module.Controllers
             foreach (ItemInquiryDetails iteminquiry in selectedHdr)
             // End ver 1.0.23
             {
-                SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetSales", new OperandValue(iteminquiry.ItemCode));
+                // Start ver 1.0.23
+                OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                OrderStatusCode = iteminquiry.ItemCode;
+                // End ver 1.0.23
+
+                SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetSales", new OperandValue(iteminquiry.ItemCode),
+                    new OperandValue(DateTime.Today.AddMonths(-3).Date), new OperandValue(DateTime.Today.AddDays(1).Date));
 
                 int i = 1;
 
@@ -404,10 +411,6 @@ namespace StarLaiPortal.Module.Controllers
                             // End ver 1.0.21
                             saleslist.Sales.Add(item);
 
-                            // Start ver 1.0.23
-                            OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
-                            // End ver 1.0.23
-
                             i++;
                         }
                     }
@@ -428,6 +431,10 @@ namespace StarLaiPortal.Module.Controllers
             if (OrderStatusItemCode != "")
             {
                 ((SalesHistoryList)detailView.CurrentObject).ItemCode = OrderStatusItemCode;
+            }
+            if (OrderStatusCode != "")
+            {
+                ((SalesHistoryList)detailView.CurrentObject).Code = OrderStatusCode;
             }
             // End ver 1.0.23
             e.View = detailView;
@@ -1382,6 +1389,10 @@ namespace StarLaiPortal.Module.Controllers
             foreach (ItemInquiryDetails iteminquiry in selectedHdr)
             // End ver 1.0.23
             {
+                // Start ver 1.0.23
+                OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
+                // End ver 1.0.23
+
                 SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetItemOrderStatus", new OperandValue(iteminquiry.ItemCode));
 
                 int i = 1;
@@ -1410,10 +1421,6 @@ namespace StarLaiPortal.Module.Controllers
                             // End ver 1.0.14
 
                             orderstatuslist.Orderstatus.Add(item);
-
-                            // Start ver 1.0.23
-                            OrderStatusItemCode = iteminquiry.ItemCode + " - " + iteminquiry.ItemDesc;
-                            // End ver 1.0.23
 
                             i++;
                         }

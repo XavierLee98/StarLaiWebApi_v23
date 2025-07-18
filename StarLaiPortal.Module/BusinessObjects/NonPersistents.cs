@@ -22,6 +22,7 @@ using System.Text;
 // 2024-04-01 - add paymentso and paymentgroup - ver 1.0.15
 // 2024-06-01 - add Salesperson - ver 1.0.17
 // 2024-10-08 - add whse - ver 1.0.21
+// 2025-07-16 - add code to store itemcode only - ver 1.0.23
 
 namespace StarLaiPortal.Module.BusinessObjects
 {
@@ -98,17 +99,29 @@ namespace StarLaiPortal.Module.BusinessObjects
     [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
     public class SalesHistoryList
     {
+        [DevExpress.ExpressApp.Data.Key, Browsable(false)]
+        public int Oid;
+
         [XafDisplayName("Item Code")]
         [Index(0), VisibleInListView(true), VisibleInDetailView(true), VisibleInLookupListView(true)]
         [Appearance("ItemCode", Enabled = false)]
         public string ItemCode { get; set; }
 
-        private BindingList<SalesHistory> saleshistory;
+        // Start ver 1.0.23
+        [XafDisplayName("Code")]
+        [Index(1), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [Appearance("Code", Enabled = false)]
+        public string Code { get; set; }
+        // End ver 1.0.23
+
+
         public SalesHistoryList()
         {
             saleshistory = new BindingList<SalesHistory>();
         }
+        private BindingList<SalesHistory> saleshistory;
         public BindingList<SalesHistory> Sales { get { return saleshistory; } }
+
     }
 
     [DomainComponent]

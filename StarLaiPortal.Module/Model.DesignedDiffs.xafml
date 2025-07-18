@@ -3712,14 +3712,18 @@
     </ListView>
     <DetailView Id="SalesHistory_DetailView" AllowEdit="False" />
     <DetailView Id="SalesHistoryList_DetailView">
+      <Items>
+        <ActionContainerViewItem Id="DocumentFilter" ActionContainer="ListView" Caption="DocumentFilter" IsNewNode="True" />
+      </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="8.25515947467167">
-            <LayoutGroup Id="SalesHistoryList" RelativeSize="100">
-              <LayoutItem Id="ItemCode" RelativeSize="100" />
+          <LayoutGroup Id="SimpleEditors" RelativeSize="15.848214285714286">
+            <LayoutGroup Id="SalesHistoryList" RelativeSize="100" Caption="Item Code">
+              <LayoutItem Id="ItemCode" RelativeSize="47.887323943661968" />
+              <LayoutItem Id="DocumentFilter" ViewItem="DocumentFilter" Index="1" RelativeSize="52.112676056338032" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutItem Id="Sales" ViewItem="Sales" Index="1" RelativeSize="91.744840525328328" IsNewNode="True" />
+          <LayoutItem Id="Sales" ViewItem="Sales" Index="1" RelativeSize="84.151785714285708" IsNewNode="True" />
           <LayoutGroup Id="Sales_Group" Removed="True" />
         </LayoutGroup>
       </Layout>

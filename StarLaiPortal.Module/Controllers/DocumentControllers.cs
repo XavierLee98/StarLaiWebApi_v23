@@ -25,8 +25,13 @@ using StarLaiPortal.Module.BusinessObjects.Pick_List;
 using StarLaiPortal.Module.BusinessObjects.Pack_List;
 using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using StarLaiPortal.Module.BusinessObjects.Load;
+using DevExpress.ExpressApp.Xpo;
+using StarLaiPortal.Module.BusinessObjects.Item_Inquiry;
+using System.Runtime.InteropServices;
+using DevExpress.Office.Utils;
 
 // 2024-07-26 - sales history add date filter - ver 1.0.19
+// 2025-07-16 - enhance saleshistory - ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -48,6 +53,11 @@ namespace StarLaiPortal.Module.Controllers
             this.DocumentDateTo.Active.SetItemValue("Enabled", false);
             this.DocumentStatus.Active.SetItemValue("Enabled", false);
             this.DocumentFilter.Active.SetItemValue("Enabled", false);
+            // Start ver 1.0.23
+            this.SalesHistoryDTFrom.Active.SetItemValue("Enabled", false);
+            this.SalesHistoryDTTo.Active.SetItemValue("Enabled", false);
+            this.SalesHistoryDocFilter.Active.SetItemValue("Enabled", false);
+            // End ver 1.0.23
 
             if (typeof(SalesOrder).IsAssignableFrom(View.ObjectTypeInfo.Type))
             {
@@ -272,34 +282,54 @@ namespace StarLaiPortal.Module.Controllers
             }
             // End ver 1.0.15
 
+            // Start ver 1.0.23
             // Start ver 1.0.19
-            if (typeof(SalesHistory).IsAssignableFrom(View.ObjectTypeInfo.Type))
+            //if (typeof(SalesHistory).IsAssignableFrom(View.ObjectTypeInfo.Type))
+            //{
+            //    if (View.ObjectTypeInfo.Type == typeof(SalesHistory))
+            //    {
+            //        if (View.Id == "SalesHistoryList_Sales_ListView")
+            //        {
+            //            this.DocumentStatus.Active.SetItemValue("Enabled", true);
+            //            DocumentStatus.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
+            //            DocumentStatus.CustomizeControl += action_CustomizeControl;
+
+            //            this.DocumentDateFrom.Active.SetItemValue("Enabled", true);
+            //            this.DocumentDateFrom.Value = DateTime.Today.AddMonths(-3);
+            //            DocumentDateFrom.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
+            //            this.DocumentDateFrom.CustomizeControl += DateActionFrom_CustomizeControl;
+
+            //            this.DocumentDateTo.Active.SetItemValue("Enabled", true);
+            //            this.DocumentDateTo.Value = DateTime.Today;
+            //            DocumentDateTo.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
+            //            this.DocumentDateTo.CustomizeControl += DateActionTo_CustomizeControl;
+
+            //            this.DocumentFilter.Active.SetItemValue("Enabled", true);
+
+            //            ((ListView)View).CollectionSource.Criteria["Filter1"] = CriteriaOperator.Parse("SalesDate >= ? and SalesDate <= ?", DateTime.Today.AddMonths(-3), DateTime.Today.AddDays(1));
+            //        }
+            //    }
+            //}
+            // End ver 1.0.19
+
+            if (typeof(SalesHistoryList).IsAssignableFrom(View.ObjectTypeInfo.Type))
             {
-                if (View.ObjectTypeInfo.Type == typeof(SalesHistory))
+                if (View.ObjectTypeInfo.Type == typeof(SalesHistoryList))
                 {
-                    if (View.Id == "SalesHistoryList_Sales_ListView")
-                    {
-                        this.DocumentStatus.Active.SetItemValue("Enabled", true);
-                        DocumentStatus.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
-                        DocumentStatus.CustomizeControl += action_CustomizeControl;
+                    this.SalesHistoryDTFrom.Active.SetItemValue("Enabled", true);
+                    this.SalesHistoryDTFrom.Value = DateTime.Today.AddMonths(-3);
+                    SalesHistoryDTFrom.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
+                    this.SalesHistoryDTFrom.CustomizeControl += DateActionFrom_CustomizeControl;
 
-                        this.DocumentDateFrom.Active.SetItemValue("Enabled", true);
-                        this.DocumentDateFrom.Value = DateTime.Today.AddMonths(-3);
-                        DocumentDateFrom.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
-                        this.DocumentDateFrom.CustomizeControl += DateActionFrom_CustomizeControl;
+                    this.SalesHistoryDTTo.Active.SetItemValue("Enabled", true);
+                    this.SalesHistoryDTTo.Value = DateTime.Today;
+                    SalesHistoryDTTo.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
+                    this.SalesHistoryDTTo.CustomizeControl += DateActionTo_CustomizeControl;
 
-                        this.DocumentDateTo.Active.SetItemValue("Enabled", true);
-                        this.DocumentDateTo.Value = DateTime.Today;
-                        DocumentDateTo.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
-                        this.DocumentDateTo.CustomizeControl += DateActionTo_CustomizeControl;
-
-                        this.DocumentFilter.Active.SetItemValue("Enabled", true);
-
-                        ((ListView)View).CollectionSource.Criteria["Filter1"] = CriteriaOperator.Parse("SalesDate >= ? and SalesDate <= ?", DateTime.Today.AddMonths(-3), DateTime.Today.AddDays(1));
-                    }
+                    this.SalesHistoryDocFilter.Active.SetItemValue("Enabled", true);
                 }
             }
-            // End ver 1.0.19
+            // End ver 1.0.23
         }
         protected override void OnViewControlsCreated()
         {
@@ -605,12 +635,62 @@ namespace StarLaiPortal.Module.Controllers
             }
             // End ver 1.0.15
 
-            // Start ver 1.0.19
-            if (View.ObjectTypeInfo.Type == typeof(SalesHistory))
-            {
-                ((ListView)View).CollectionSource.Criteria["Filter1"] = CriteriaOperator.Parse("SalesDate >= ? and SalesDate <= ?", Fromdate, Todate.AddDays(1));
-            }
-            // End ver 1.0.19
+            // Start ver 1.0.23
+            //// Start ver 1.0.19
+            //if (View.ObjectTypeInfo.Type == typeof(SalesHistory))
+            //{
+            //    ((ListView)View).CollectionSource.Criteria["Filter1"] = CriteriaOperator.Parse("SalesDate >= ? and SalesDate <= ?", Fromdate, Todate.AddDays(1));
+            //}
+            //// End ver 1.0.19
+            // End ver 1.0.23
         }
+
+        // Start ver 1.0.23
+        private void SalesHistoryDocFilter_Execute(object sender, SimpleActionExecuteEventArgs e)
+        {
+            if (View.ObjectTypeInfo.Type == typeof(SalesHistoryList))
+            {
+                SalesHistoryList header = (SalesHistoryList)e.CurrentObject;
+
+                header.Sales.Clear();
+
+                XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+
+                header.Sales.Clear();
+
+                SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetSales", new OperandValue(header.Code),
+                  new OperandValue(Fromdate), new OperandValue(Todate.AddDays(1)));
+
+                int i = 1;
+
+                if (sprocData.ResultSet.Count() > 0)
+                {
+                    if (sprocData.ResultSet[0].Rows.Count() > 0)
+                    {
+                        foreach (SelectStatementResultRow row in sprocData.ResultSet[0].Rows)
+                        {
+                            SalesHistory item = new SalesHistory();
+                            item.Id = i;
+                            item.No = i;
+                            item.Customer = row.Values[1].ToString();
+                            item.SalesDate = (DateTime)row.Values[2];
+                            item.Quantity = (decimal)row.Values[3];
+                            item.UnitPrice = (decimal)row.Values[4];
+                            item.SAPInvoiceNo = row.Values[5].ToString();
+                            item.Salesperson = row.Values[6].ToString();
+                            item.Whse = row.Values[7].ToString();
+                            header.Sales.Add(item);
+                        }
+                    }
+                }
+
+                persistentObjectSpace.Session.DropIdentityMap();
+                persistentObjectSpace.Dispose();
+
+                ObjectSpace.CommitChanges();
+                ObjectSpace.Refresh();
+            }
+        }
+        // End ver 1.0.23
     }
 }

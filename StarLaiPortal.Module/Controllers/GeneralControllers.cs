@@ -49,6 +49,7 @@ using System.Text;
 // 2024-04-04 add generateinstock ver 1.0.15
 // 2024-06-12 e-invoice - ver 1.0.18
 // 2025-04-03 Consolidate same SO but different packing - ver 1.0.22
+// 2025-07-11 Fix generate Doc num for SO - ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -126,26 +127,13 @@ namespace StarLaiPortal.Module.Controllers
         {
             string DocNum = null;
 
-            if (doctype == DocTypeList.WT)
+            // Start ver 1.0.23
+            try
             {
-                DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
-
-                if (DocNum == null)
+            // End ver 1.0.23
+                if (doctype == DocTypeList.WT)
                 {
-                    DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
-                }
-
-                snumber.CurrectDocNum = snumber.NextDocNum;
-                snumber.NextDocNum = snumber.NextDocNum + 1;
-
-                os.CommitChanges();
-
-            }
-            else
-            {
-                if (series != 0)
-                {
-                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
+                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
 
                     if (DocNum == null)
                     {
@@ -156,22 +144,46 @@ namespace StarLaiPortal.Module.Controllers
                     snumber.NextDocNum = snumber.NextDocNum + 1;
 
                     os.CommitChanges();
+
                 }
                 else
                 {
-                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
-
-                    if (DocNum == null)
+                    if (series != 0)
                     {
-                        DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
+
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
+
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
                     }
+                    else
+                    {
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
 
-                    snumber.CurrectDocNum = snumber.NextDocNum;
-                    snumber.NextDocNum = snumber.NextDocNum + 1;
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
 
-                    os.CommitChanges();
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
+                    }
                 }
+            // Start ver 1.0.23
             }
+            catch (Exception)
+            {
+                return DocNum;
+            }
+            // End ver 1.0.23
 
             return DocNum;
         }
@@ -239,6 +251,69 @@ namespace StarLaiPortal.Module.Controllers
         }
         // End ver 1.0.11
 
+        // Start ver 1.0.23
+        public string GenerateSODocNum(DocTypeList doctype, IObjectSpace os, TransferType transfertype, int series, string companyprefix)
+        {
+            string DocNum = null;
+
+            try
+            {
+                if (doctype == DocTypeList.WT)
+                {
+                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
+
+                    if (DocNum == null)
+                    {
+                        DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                    }
+
+                    snumber.CurrectDocNum = snumber.NextDocNum;
+                    snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                    os.CommitChanges();
+
+                }
+                else
+                {
+                    if (series != 0)
+                    {
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
+
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
+
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
+                    }
+                    else
+                    {
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
+
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
+
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return DocNum;
+            }
+
+            return DocNum;
+        }
+        // End ver 1.0.23
+
         public string GetDocPrefix()
         {
             string prefix = null;
@@ -258,6 +333,10 @@ namespace StarLaiPortal.Module.Controllers
             {
                 prefix = reader.GetString(0);
             }
+            // Start ver 1.0.23
+            cmd.Dispose();
+            conn.Close();
+            // End ver 1.0.23
 
             return prefix;
         }
@@ -1679,13 +1758,32 @@ namespace StarLaiPortal.Module.Controllers
         {
             decimal instock = 0;
 
-            vwStockBalance avail = os.FindObject<vwStockBalance>(CriteriaOperator.Parse("ItemCode = ? and WhsCode = ?",
-                ItemCode, Warehouse));
+            // Start ver 1.0.23
+            //vwStockBalance avail = os.FindObject<vwStockBalance>(CriteriaOperator.Parse("ItemCode = ? and WhsCode = ?",
+            //    ItemCode, Warehouse));
 
-            if (avail != null)
+            //if (avail != null)
+            //{
+            //    instock = (decimal)avail.InStock;
+            //}
+
+            SqlConnection conn = new SqlConnection(getConnectionString());
+
+            string getstock = "SELECT InStock FROM vwStockBalance WHERE ItemCode = '" + ItemCode + "' AND WhsCode = '" + Warehouse + "'";
+            if (conn.State == ConnectionState.Open)
             {
-                instock = (decimal)avail.InStock;
+                conn.Close();
             }
+            conn.Open();
+            SqlCommand cmdstock = new SqlCommand(getstock, conn);
+            SqlDataReader readerstock = cmdstock.ExecuteReader();
+            while (readerstock.Read())
+            {
+                instock = readerstock.GetDecimal(0);
+            }
+            cmdstock.Dispose();
+            conn.Close();
+            // End ver 1.0.23
 
             return instock;
         }

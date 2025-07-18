@@ -58,6 +58,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 // 2025-01-23 Update Posted in picking - ver 1.0.22
 // 2025-03-24 Picking post with systedate instead if screen date - ver 1.0.22
 // 2025-04-03 Consolidate same SO but different packing - ver 1.0.22
+// 2025-07-11 - Fix generate Doc num for SO - ver 1.0.23
 
 namespace PortalIntegration
 {
@@ -91,6 +92,32 @@ namespace PortalIntegration
                 string temp = "";
                 IObjectSpace ListObjectSpace = ObjectSpaceProvider.CreateObjectSpace();
                 IObjectSpace securedObjectSpace = ObjectSpaceProvider.CreateObjectSpace();
+
+                // Start 1.0.23
+                #region Update SO DocNum
+                string getSO = "SELECT OID FROM SalesOrder WHERE DocNum is null and GCRecord is null";
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+                conn.Open();
+                SqlCommand cmdso = new SqlCommand(getSO, conn);
+                SqlDataReader readerso = cmdso.ExecuteReader();
+                while (readerso.Read())
+                {
+                    IObjectSpace updso = ObjectSpaceProvider.CreateObjectSpace();
+                    SalesOrder updtrx = updso.FindObject<SalesOrder>(new BinaryOperator("Oid", readerso.GetInt32(0)));
+
+                    GeneralControllers genCon = new GeneralControllers();
+                    string docprefix = GetDocPrefix();
+                    updtrx.DocNum = genCon.GenerateSODocNum(DocTypeList.SO, updso, TransferType.NA, 0, docprefix);
+
+                    updso.CommitChanges();
+                }
+                cmdso.Dispose();
+                conn.Close();
+                #endregion
+                // End ver 1.0.23
 
                 temp = ConfigurationManager.AppSettings["SOPost"].ToString().ToUpper();
                 if (temp == "Y" || temp == "YES" || temp == "TRUE" || temp == "1")
@@ -1638,7 +1665,7 @@ namespace PortalIntegration
                 }
                 // End ver 1.0.12
 
-                #region Update DocNum
+                #region Update SAP DocNum
                     SqlCommand TransactionNotification = new SqlCommand("", conn);
                 TransactionNotification.CommandTimeout = 600;
 
