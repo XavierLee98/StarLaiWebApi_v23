@@ -35,6 +35,7 @@ using System.Web;
 // 2023-04-09 fix speed issue ver 1.0.8.1
 // 2023-09-25 add copyto qty ver 1.0.10
 // 2023-12-04 add outstanding qty ver 1.0.13
+// 2025-07-21 enhance speed ver 1.0.23
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -296,7 +297,16 @@ namespace StarLaiPortal.Module.Controllers
                             trx.PortalPONo = null;
                             trx.SAPPONo = null;
                             SqlConnection conn = new SqlConnection(genCon.getConnectionString());
-                            string getporef = "SELECT PONo, ISNULL(PORefNo, '') From GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo";
+                            // Start ver 1.0.23
+                            //string getporef = "SELECT PONo, ISNULL(PORefNo, '') From GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo";
+                            string getporef = "SELECT STRING_AGG(T1.PONo, ', ') as PONo, STRING_AGG(PORefNo, ', ')  as PORefNo " +
+                            "FROM GRN T0 " +
+                            "INNER JOIN " +
+                            "( " +
+                            "SELECT PONo, ISNULL(PORefNo, '') as PORefNo, GRN From GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo, GRN " +
+                            ") T1 on T0.OID = T1.GRN " +
+                            "GROUP by T0.OID";
+                            // End ver 1.0.23
                             if (conn.State == ConnectionState.Open)
                             {
                                 conn.Close();
@@ -306,27 +316,37 @@ namespace StarLaiPortal.Module.Controllers
                             SqlDataReader reader = cmd.ExecuteReader();
                             while (reader.Read())
                             {
-                                if (reader.GetString(1) != "")
-                                {
-                                    if (trx.PortalPONo != null)
-                                    {
-                                        trx.PortalPONo = trx.PortalPONo + ", " + reader.GetString(1);
-                                    }
-                                    else
-                                    {
-                                        trx.PortalPONo = reader.GetString(1);
-                                    }
-                                }
+                            // Start 1.0.23
+                            //if (reader.GetString(1) != "")
+                            //{
+                            //    if (trx.PortalPONo != null)
+                            //    {
+                            //        trx.PortalPONo = trx.PortalPONo + ", " + reader.GetString(1);
+                            //    }
+                            //    else
+                            //    {
+                            //        trx.PortalPONo = reader.GetString(1);
+                            //    }
+                            //}
 
-                                if (trx.SAPPONo != null)
-                                {
-                                    trx.SAPPONo = trx.SAPPONo + ", " + reader.GetString(0);
-                                }
-                                else
-                                {
-                                    trx.SAPPONo = reader.GetString(0);
-                                }
+                            //if (trx.SAPPONo != null)
+                            //{
+                            //    trx.SAPPONo = trx.SAPPONo + ", " + reader.GetString(0);
+                            //}
+                            //else
+                            //{
+                            //    trx.SAPPONo = reader.GetString(0);
+                            //}
+                            if (reader.GetString(1) != ", ")
+                            {
+                                trx.PortalPONo = reader.GetString(1);
                             }
+                            if (reader.GetString(0) != ", ")
+                            {
+                                trx.SAPPONo = reader.GetString(0);
+                            }
+                            // End ver 1.0.23
+                        }
                             cmd.Dispose();
                             conn.Close();
                         }
@@ -583,7 +603,16 @@ namespace StarLaiPortal.Module.Controllers
                         trx.PortalPONo = null;
                         trx.SAPPONo = null;
                         SqlConnection conn = new SqlConnection(genCon.getConnectionString());
-                        string getporef = "SELECT PONo, ISNULL(PORefNo, '') FROM GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo";
+                        // Start ver 1.0.23
+                        //string getporef = "SELECT PONo, ISNULL(PORefNo, '') FROM GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo";
+                        string getporef = "SELECT STRING_AGG(T1.PONo, ', ') as PONo, STRING_AGG(PORefNo, ', ')  as PORefNo " +
+                            "FROM GRN T0 " +
+                            "INNER JOIN " +
+                            "( " +
+                            "SELECT PONo, ISNULL(PORefNo, '') as PORefNo, GRN From GRNDetails WHERE GRN = " + trx.Oid + " GROUP BY PONo, PORefNo, GRN " +
+                            ") T1 on T0.OID = T1.GRN " +
+                            "GROUP by T0.OID";
+                        // End ver 1.0.23
                         if (conn.State == ConnectionState.Open)
                         {
                             conn.Close();
@@ -593,26 +622,37 @@ namespace StarLaiPortal.Module.Controllers
                         SqlDataReader reader = cmd.ExecuteReader();
                         while (reader.Read())
                         {
-                            if (reader.GetString(1) != "")
-                            {
-                                if (trx.PortalPONo != null)
-                                {
-                                    trx.PortalPONo = trx.PortalPONo + ", " + reader.GetString(1);
-                                }
-                                else
-                                {
-                                    trx.PortalPONo = reader.GetString(1);
-                                }
-                            }
+                            // Start ver 1.0.23
+                            //if (reader.GetString(1) != "")
+                            //{
+                            //    if (trx.PortalPONo != null)
+                            //    {
+                            //        trx.PortalPONo = trx.PortalPONo + ", " + reader.GetString(1);
+                            //    }
+                            //    else
+                            //    {
+                            //        trx.PortalPONo = reader.GetString(1);
+                            //    }
+                            //}
 
-                            if (trx.SAPPONo != null)
+                            //if (trx.SAPPONo != null)
+                            //{
+                            //    trx.SAPPONo = trx.SAPPONo + ", " + reader.GetString(0);
+                            //}
+                            //else
+                            //{
+                            //    trx.SAPPONo = reader.GetString(0);
+                            //}
+
+                            if (reader.GetString(1) != ", ")
                             {
-                                trx.SAPPONo = trx.SAPPONo + ", " + reader.GetString(0);
+                                trx.PortalPONo = reader.GetString(1);
                             }
-                            else
+                            if (reader.GetString(0) != ", ")
                             {
                                 trx.SAPPONo = reader.GetString(0);
                             }
+                            // End ver 1.0.23
                         }
                         cmd.Dispose();
                         conn.Close();
