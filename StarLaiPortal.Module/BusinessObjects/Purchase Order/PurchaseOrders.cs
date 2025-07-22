@@ -15,8 +15,9 @@ using System.Linq;
 using System.Text;
 
 // 2023-07-20 - hide copy from so button for series indent - ver 1.0.6 (LIVE)
-// 2023-09-25 change date format ver 1.0.10
-// 2024-01-30 Add import update button ver 1.0.14
+// 2023-09-25 - change date format - ver 1.0.10
+// 2024-01-30 - Add import update button - ver 1.0.14
+// 2025-07-22 - change exchangerate to 6 decimal - ver 1.0.23
 
 namespace StarLaiPortal.Module.BusinessObjects.Purchase_Order
 {
@@ -632,7 +633,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Purchase_Order
         private decimal _CurrencyRate;
         [ImmediatePostData]
         [DbType("numeric(18,6)")]
-        [ModelDefault("DisplayFormat", "{0:n2}")]
+        // Start ver 1.0.23
+        //[ModelDefault("DisplayFormat", "{0:n2}")]
+        [ModelDefault("DisplayFormat", "{0:n6}")]
+        // End ver 1.0.23
         [XafDisplayName("Currency Rate")]
         [Appearance("CurrencyRate", Enabled = false)]
         [Index(53), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
