@@ -250,7 +250,7 @@
   </BOModel>
   <NavigationItems StartupNavigationItem="">
     <Items>
-      <Item Id="Dashboards" Index="0">
+      <Item Id="Dashboards" Index="0" Visible="True">
         <Items>
           <Item Id="Dashboards_ListView" Visible="False" Index="0" />
           <Item Id="DashboardsSales_ListView" Index="1" />
@@ -258,7 +258,7 @@
           <Item Id="DashboardsWarehouse_ListView" Index="3" />
         </Items>
       </Item>
-      <Item Id="Default" Index="1">
+      <Item Id="Default" Index="1" Visible="True">
         <Items>
           <Item Id="AddPickList_ListView" Removed="True" />
           <Item Id="AddPickListDetails_ListView" Removed="True" />
@@ -364,28 +364,32 @@
           <Item Id="WarehouseTransfersDocTrail_ListView" Removed="True" />
         </Items>
       </Item>
-      <Item Id="Reports" Index="2">
+      <Item Id="Reports" Index="2" Visible="True">
         <Items>
-          <Item Id="ReportsV2" Index="0" />
-          <Item Id="vwInquiryStockBalance_ListView" Index="1" />
-          <Item Id="vwInquiryStockBalancebyWhs_ListView" Index="2" />
+          <Item Id="ReportsV2" Index="0" Visible="True" />
+          <Item Id="vwInquiryStockBalance_ListView" Index="1" Visible="True" />
+          <Item Id="vwInquiryStockBalancebyWhs_ListView" Index="2" Visible="True" />
           <Item Id="vwInquiryStockMovement_ListView" Index="3" Visible="False" />
-          <Item Id="StockMovement_ListView" Index="4" />
+          <Item Id="StockMovement_ListView" Index="4" Visible="True" />
           <Item Id="StockReorderingReport_ListView" Visible="False" Index="5" />
           <Item Id="ItemInquiry_ListView_Report" Caption="Item Inquiry" Index="6" ViewId="ItemInquiry_ListView_Report" IsNewNode="True" />
-          <Item Id="vwInquiryCurrentARAging_ListView" Index="7" />
-          <Item Id="vwInquiryCustomer_ListView" Index="8" />
-          <Item Id="vwInquiryOrderTemplateMapping_ListView" Index="9" />
+          <Item Id="vwInquiryCurrentARAging_ListView" Index="7" Visible="True" />
+          <Item Id="vwInquiryCustomer_ListView" Index="8" Visible="True" />
+          <Item Id="vwInquiryOrderTemplateMapping_ListView" Index="9" Visible="True" />
+          <Item Id="GlobalItemInquiry_ListView" Visible="True" />
+          <Item Id="vwInquiryBusinessPartner_ListView" Visible="True" />
+          <Item Id="vwInquiryStockBalanceTransfer_ListView" Visible="True" />
+          <Item Id="vwInquiryStockPendingPost_ListView" Visible="True" />
         </Items>
       </Item>
-      <Item Id="SAP" Index="3" />
-      <Item Id="Setup" Index="4">
+      <Item Id="SAP" Index="3" Visible="True" />
+      <Item Id="Setup" Index="4" Visible="True">
         <Items>
           <Item Id="Transporter_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Print Module" Index="5" />
-      <Item Id="Sales Quotation" Index="6">
+      <Item Id="Print Module" Index="5" Visible="True" />
+      <Item Id="Sales Quotation" Index="6" Visible="True">
         <Items>
           <Item Id="SalesQuotation_ListView" Index="0" />
           <Item Id="Sales Quotation Approval" Caption="Sales Quotation - Approval" Index="1" ViewId="SalesQuotation_ListView_Approval" IsNewNode="True" />
@@ -393,7 +397,7 @@
           <Item Id="vwInquirySalesQuotationDetails_ListView" QuickAccessItem="True" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Sales Order" Index="7">
+      <Item Id="Sales Order" Index="7" Visible="True">
         <Items>
           <Item Id="SalesOrder_ListView" Index="0" />
           <Item Id="SalesOrderCollection_ListView" Index="1" />
@@ -403,20 +407,20 @@
           <Item Id="vwInquirySalesOrderDetails_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Manual Credit Note Request" Index="8">
+      <Item Id="Manual Credit Note Request" Index="8" Visible="True">
         <Items>
           <Item Id="SalesRefundRequests_ListView" Index="0" />
           <Item Id="Manual Credit Note Request - Approval" Index="1" ViewId="SalesRefundRequests_ListView_Approval" Caption="Manual Credit Note Request - Approval" IsNewNode="True" />
           <Item Id="SalesRefunds_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="AR Downpayment Cancellation" Index="9">
+      <Item Id="AR Downpayment Cancellation" Index="9" Visible="True">
         <Items>
           <Item Id="ARDownpaymentCancel_ListView" Index="0" />
           <Item Id="AR Downpayment Cancellation Approval" Caption="AR Downpayment Cancellation Approval" Index="1" ViewId="ARDownpaymentCancel_ListView_Approval" IsNewNode="True" />
         </Items>
       </Item>
-      <Item Id="Pick List" Index="10">
+      <Item Id="Pick List" Index="10" Visible="True">
         <Items>
           <Item Id="PickList_ListView" Index="0" Visible="False" />
           <Item Id="Pick List By Date" Caption="Pick List By Date" Index="1" ViewId="PickList_ListView_ByDate" IsNewNode="True" />
@@ -426,7 +430,7 @@
           <Item Id="PickListDetailsInquiry_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Pack List" Index="11">
+      <Item Id="Pack List" Index="11" Visible="True">
         <Items>
           <Item Id="PackList_ListView" Index="0" Visible="False" />
           <Item Id="Pack List By Date" Caption="Pack List By Date" Index="1" ViewId="PackList_ListView_ByDate" IsNewNode="True" />
@@ -436,7 +440,7 @@
           <Item Id="PackListInquiry_ListView" Index="5" />
         </Items>
       </Item>
-      <Item Id="Loading Bay" Index="12">
+      <Item Id="Loading Bay" Index="12" Visible="True">
         <Items>
           <Item Id="Load_ListView" Index="0" Visible="False" />
           <Item Id="Loading By Date" Caption="Loading By Date" ViewId="Load_ListView_ByDate" Index="1" IsNewNode="True" />
@@ -445,7 +449,7 @@
           <Item Id="LoadingInquiry_ListView" Index="4" />
         </Items>
       </Item>
-      <Item Id="Delivery Order" Index="13">
+      <Item Id="Delivery Order" Index="13" Visible="True">
         <Items>
           <Item Id="DeliveryOrder_ListView" Index="0" Visible="False" />
           <Item Id="Delivery Order By Date" Caption="Delivery Order By Date" Index="1" ViewId="DeliveryOrder_ListView_ByDate" IsNewNode="True" />
@@ -456,7 +460,7 @@
           <Item Id="DailyDeliveryOrders_ListView" Index="6" />
         </Items>
       </Item>
-      <Item Id="Purchase Order" Index="14">
+      <Item Id="Purchase Order" Index="14" Visible="True">
         <Items>
           <Item Id="PurchaseOrders_ListView" Index="0" />
           <Item Id="Purchase Order Approval" Caption="Purchase Order - Approval" ViewId="PurchaseOrders_ListView_Approval" Index="1" IsNewNode="True" />
@@ -464,19 +468,19 @@
           <Item Id="PurchaseOrderInquiry_ListView" Index="3" />
         </Items>
       </Item>
-      <Item Id="GRPO" Index="15">
+      <Item Id="GRPO" Index="15" Visible="True">
         <Items>
           <Item Id="GRN_ListView" Index="0" />
           <Item Id="vwInquiryGRN_ListView" Index="1" Visible="False" />
           <Item Id="GRPOInquiry_ListView" Index="2" />
         </Items>
       </Item>
-      <Item Id="Advanced Shipment Notice" Index="16">
+      <Item Id="Advanced Shipment Notice" Index="16" Visible="True">
         <Items>
           <Item Id="vwInquiryASN_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Purchase Return" Index="17">
+      <Item Id="Purchase Return" Index="17" Visible="True">
         <Items>
           <Item Id="PurchaseReturnRequests_ListView" Index="0" />
           <Item Id="Purchase Return Request - Approval" Caption="Purchase Return Request - Approval" Index="1" ViewId="PurchaseReturnRequests_ListView_Approval" IsNewNode="True" />
@@ -484,7 +488,7 @@
           <Item Id="vwInquiryPurchaseReturn_ListView" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Sales Return" Index="18">
+      <Item Id="Sales Return" Index="18" Visible="True">
         <Items>
           <Item Id="SalesReturnRequests_ListView" Index="0" />
           <Item Id="Sales Return Request - Approval" Caption="Sales Return Request - Approval" Index="1" ViewId="SalesReturnRequests_ListView_Approval" IsNewNode="True" />
@@ -494,7 +498,7 @@
           <Item Id="vwInquiryCreditMemo_ListView" Index="5" Visible="False" />
         </Items>
       </Item>
-      <Item Id="Warehouse Transfer" Index="19">
+      <Item Id="Warehouse Transfer" Index="19" Visible="True">
         <Items>
           <Item Id="WarehouseTransferReq_ListView" Index="0" />
           <Item Id="Warehouse Transfer Request - Approval" Caption="Warehouse Transfer Request - Approval" Index="1" ViewId="WarehouseTransferReq_ListView_Approval" IsNewNode="True" />
@@ -506,7 +510,7 @@
           <Item Id="vwInquiryOpenBundleTransferDetails_ListView" Index="7" />
         </Items>
       </Item>
-      <Item Id="Stock Adjustment" Index="20">
+      <Item Id="Stock Adjustment" Index="20" Visible="True">
         <Items>
           <Item Id="StockAdjustmentRequests_ListView" Index="0" />
           <Item Id="Stock Adjustment Request - Approval" Caption="Stock Adjustment Request - Approval" Index="1" ViewId="StockAdjustmentRequests_ListView_Approval" IsNewNode="True" />

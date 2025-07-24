@@ -95,7 +95,7 @@ namespace PortalIntegration
 
                 // Start 1.0.23
                 #region Update SO DocNum
-                string getSO = "SELECT OID FROM SalesOrder WHERE DocNum is null and GCRecord is null";
+                string getSO = "SELECT OID FROM SalesOrder WHERE DocNum is null and GCRecord is null and Customer is not null";
                 if (conn.State == ConnectionState.Open)
                 {
                     conn.Close();
