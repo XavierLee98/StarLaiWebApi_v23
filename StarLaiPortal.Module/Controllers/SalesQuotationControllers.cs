@@ -1922,25 +1922,27 @@ namespace StarLaiPortal.Module.Controllers
                     // Start ver 1.0.23
                     //if (selectedObject.IsValid4 == false)
                     //{
-
-                    string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
-                                 "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
-                                 "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
-                                 "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + selectedObject.Oid;
-                    if (conn.State == ConnectionState.Open)
+                    if (selectedObject.Series.SeriesName != "BackOrdP" && selectedObject.Series.SeriesName != "BackOrdS")
                     {
+                        string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
+                             "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
+                             "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
+                             "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + selectedObject.Oid;
+                        if (conn.State == ConnectionState.Open)
+                        {
+                            conn.Close();
+                        }
+                        conn.Open();
+                        SqlCommand cmdnostock = new SqlCommand(getnostock, conn);
+                        SqlDataReader readernostock = cmdnostock.ExecuteReader();
+                        while (readernostock.Read())
+                        {
+                            showMsg("Error", "Sales qty not allow over warehouse available qty.", InformationType.Error);
+                            return;
+                        }
+                        cmdnostock.Dispose();
                         conn.Close();
                     }
-                    conn.Open();
-                    SqlCommand cmdnostock = new SqlCommand(getnostock, conn);
-                    SqlDataReader readernostock = cmdnostock.ExecuteReader();
-                    while (readernostock.Read())
-                    {
-                        showMsg("Error", "Sales qty not allow over warehouse available qty.", InformationType.Error);
-                        return;
-                    }
-                    cmdnostock.Dispose();
-                    conn.Close();
                     // End ver 1.0.23
 
                     selectedObject.Status = DocStatus.Submitted;

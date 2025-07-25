@@ -680,6 +680,8 @@ namespace StarLaiPortal.Module.Controllers
                             item.Salesperson = row.Values[6].ToString();
                             item.Whse = row.Values[7].ToString();
                             header.Sales.Add(item);
+
+                            i++;
                         }
                     }
                 }
