@@ -181,6 +181,7 @@ namespace StarLaiPortal.Module.Controllers
             }
             catch (Exception)
             {
+                DocNum = null;
                 return DocNum;
             }
             // End ver 1.0.23
