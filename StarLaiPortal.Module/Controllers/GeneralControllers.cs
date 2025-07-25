@@ -260,7 +260,7 @@ namespace StarLaiPortal.Module.Controllers
             {
                 if (doctype == DocTypeList.WT)
                 {
-                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
+                    DocTypes snumber = ObjectSpace.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
 
                     if (DocNum == null)
                     {
@@ -270,14 +270,14 @@ namespace StarLaiPortal.Module.Controllers
                     snumber.CurrectDocNum = snumber.NextDocNum;
                     snumber.NextDocNum = snumber.NextDocNum + 1;
 
-                    os.CommitChanges();
+                    ObjectSpace.CommitChanges();
 
                 }
                 else
                 {
                     if (series != 0)
                     {
-                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
+                        DocTypes snumber = ObjectSpace.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
 
                         if (DocNum == null)
                         {
@@ -287,11 +287,11 @@ namespace StarLaiPortal.Module.Controllers
                         snumber.CurrectDocNum = snumber.NextDocNum;
                         snumber.NextDocNum = snumber.NextDocNum + 1;
 
-                        os.CommitChanges();
+                        ObjectSpace.CommitChanges();
                     }
                     else
                     {
-                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
+                        DocTypes snumber = ObjectSpace.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
 
                         if (DocNum == null)
                         {
@@ -301,12 +301,13 @@ namespace StarLaiPortal.Module.Controllers
                         snumber.CurrectDocNum = snumber.NextDocNum;
                         snumber.NextDocNum = snumber.NextDocNum + 1;
 
-                        os.CommitChanges();
+                        ObjectSpace.CommitChanges();
                     }
                 }
             }
             catch (Exception)
             {
+                DocNum = null;
                 return DocNum;
             }
 
