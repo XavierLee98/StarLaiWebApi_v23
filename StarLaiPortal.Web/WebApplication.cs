@@ -8,6 +8,12 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using StarLaiPortal.Module.BusinessObjects;
 using System.Configuration;
+using DevExpress.XtraCharts.Native;
+using System.Data.SqlClient;
+using System.Data;
+using System.Web;
+using System.Net.Http;
+using Microsoft.Owin;
 
 // 2024-04-04 add login new loginpage ver 1.0.15
 

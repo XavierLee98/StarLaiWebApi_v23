@@ -39,6 +39,7 @@
             this.CloseASN = new DevExpress.ExpressApp.Actions.PopupWindowShowAction(this.components);
             this.ExportASN = new DevExpress.ExpressApp.Actions.SimpleAction(this.components);
             this.ImportASN = new DevExpress.ExpressApp.Actions.PopupWindowShowAction(this.components);
+            this.ChoicePrintASN = new DevExpress.ExpressApp.Actions.SingleChoiceAction(this.components);
             // 
             // ASNCopyFromPO
             // 
@@ -154,6 +155,15 @@
             this.ImportASN.CustomizePopupWindowParams += new DevExpress.ExpressApp.Actions.CustomizePopupWindowParamsEventHandler(this.ImportASN_CustomizePopupWindowParams);
             this.ImportASN.Execute += new DevExpress.ExpressApp.Actions.PopupWindowShowActionExecuteEventHandler(this.ImportASN_Execute);
             // 
+            // ChoicePrintASN
+            // 
+            this.ChoicePrintASN.Caption = "Print";
+            this.ChoicePrintASN.Category = "ObjectsCreation";
+            this.ChoicePrintASN.ConfirmationMessage = null;
+            this.ChoicePrintASN.Id = "ChoicePrintASN";
+            this.ChoicePrintASN.ToolTip = null;
+            this.ChoicePrintASN.Execute += new DevExpress.ExpressApp.Actions.SingleChoiceActionExecuteEventHandler(this.ChoicePrintASN_Execute);
+            // 
             // ASNControllers
             // 
             this.Actions.Add(this.ASNCopyFromPO);
@@ -166,6 +176,7 @@
             this.Actions.Add(this.CloseASN);
             this.Actions.Add(this.ExportASN);
             this.Actions.Add(this.ImportASN);
+            this.Actions.Add(this.ChoicePrintASN);
 
         }
 
@@ -181,5 +192,6 @@
         private DevExpress.ExpressApp.Actions.PopupWindowShowAction CloseASN;
         private DevExpress.ExpressApp.Actions.SimpleAction ExportASN;
         private DevExpress.ExpressApp.Actions.PopupWindowShowAction ImportASN;
+        private DevExpress.ExpressApp.Actions.SingleChoiceAction ChoicePrintASN;
     }
 }

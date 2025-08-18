@@ -36,6 +36,7 @@ using System.Web;
 // 2023-09-25 add copyto qty ver 1.0.10
 // 2023-12-04 add outstanding qty ver 1.0.13
 // 2025-07-21 enhance speed ver 1.0.23
+// 2025-08-18 not allow submit if PO line closed ver 1.0.24
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -694,6 +695,10 @@ namespace StarLaiPortal.Module.Controllers
 
         private void SubmitGRN_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
         {
+            // Start ver 1.0.24
+            SqlConnection conn = new SqlConnection(genCon.getConnectionString());
+            string closedpo = "";
+            // End ver 1.0.24
             GRN selectedObject = (GRN)e.CurrentObject;
             StringParameters p = (StringParameters)e.PopupWindow.View.CurrentObject;
             if (p.IsErr) return;
@@ -727,6 +732,38 @@ namespace StarLaiPortal.Module.Controllers
                 return;
             }
             // End ver 1.0.9
+
+            // Start ver 1.0.24
+            string getclosedpo = "SELECT D0.PONum, STRING_AGG(D0.LineNum, ', ') FROM " +
+                "(SELECT 'PO' + T0.PONO as PONum, T1.ItemCode, T1.DocEntry, T1.LineNum + 1 as LineNum FROM GRNDetails T0 " +
+                "INNER JOIN [" + ConfigurationManager.AppSettings.Get("SAPDB").ToString() + "]..POR1 T1 on T0.ASNPOBaseDoc = T1.DocEntry and T0.ASNPOBaseId = T1.LineNum " +
+                "WHERE T0.GRN = " + selectedObject.Oid + " AND T0.BaseType = 'ASN' AND T1.LineStatus <> 'O' " +
+                "UNION ALL " +
+                "SELECT 'PO' + T0.PONO as PONum, T1.ItemCode, T1.DocEntry, T1.LineNum + 1 as LineNum FROM GRNDetails T0 " +
+                "INNER JOIN [" + ConfigurationManager.AppSettings.Get("SAPDB").ToString() + "]..POR1 T1 on T0.BaseDoc = T1.DocEntry and T0.BaseId = T1.LineNum " +
+                "WHERE T0.GRN = " + selectedObject.Oid + " AND T0.BaseType = 'PO' AND T1.LineStatus <> 'O' " +
+                ") D0 " +
+                "GROUP BY D0.PONum ";
+            if (conn.State == ConnectionState.Open)
+            {
+                conn.Close();
+            }
+            conn.Open();
+            SqlCommand cmdclosedpo = new SqlCommand(getclosedpo, conn);
+            SqlDataReader readerclosedpo = cmdclosedpo.ExecuteReader();
+            while (readerclosedpo.Read())
+            {
+                closedpo = closedpo + "(" + readerclosedpo.GetString(0) + "-" + readerclosedpo.GetString(1) + ") ";
+            }
+            cmdclosedpo.Dispose();
+            conn.Close();
+
+            if (closedpo != "")
+            {
+                showMsg("Error", "Base PO Line Closed : " + closedpo, InformationType.Error);
+                return;
+            }
+            // End ver 1.0.24
 
             if (selectedObject.InvoiceNo != null)
             {

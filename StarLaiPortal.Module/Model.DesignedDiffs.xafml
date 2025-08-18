@@ -372,7 +372,7 @@
           <Item Id="vwInquiryStockMovement_ListView" Index="3" Visible="False" />
           <Item Id="StockMovement_ListView" Index="4" Visible="True" />
           <Item Id="StockReorderingReport_ListView" Visible="False" Index="5" />
-          <Item Id="ItemInquiry_ListView_Report" Caption="Item Inquiry" Index="6" ViewId="ItemInquiry_ListView_Report" IsNewNode="True" />
+          <Item Id="ItemInquiry_ListView_Report" Caption="Item Inquiry" Index="6" ViewId="ItemInquiry_ListView_Report" Visible="True" IsNewNode="True" />
           <Item Id="vwInquiryCurrentARAging_ListView" Index="7" Visible="True" />
           <Item Id="vwInquiryCustomer_ListView" Index="8" Visible="True" />
           <Item Id="vwInquiryOrderTemplateMapping_ListView" Index="9" Visible="True" />

@@ -16,6 +16,7 @@ using System.Text;
 
 // 2023-04-09 fix speed issue ver 1.0.8.1
 // 2023-09-25 add copyto qty ver 1.0.10
+// 2025-08-18 Add ASN Container Printing ver 1.0.24
 
 namespace StarLaiPortal.Module.BusinessObjects.Advanced_Shipment_Notice
 {
@@ -36,6 +37,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Advanced_Shipment_Notice
     // Ene ver 1.0.10
 
     [Appearance("HidePrint", AppearanceItemType.Action, "True", TargetItems = "PreviewASN", Criteria = "(Status in (0))", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
+    // Start ver 1.0.24
+    [Appearance("HideChoicePrint", AppearanceItemType.Action, "True", TargetItems = "ChoicePrintASN", Criteria = "(Status in (0))", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
+    // End ver 1.0.24
+
     [Appearance("HideExportSQ", AppearanceItemType.Action, "True", TargetItems = "ExportASN", Criteria = "DocNum = null", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
     [Appearance("HideImportSQ", AppearanceItemType.Action, "True", TargetItems = "ImportASN", Criteria = "DocNum = null", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
 

@@ -58,7 +58,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 // 2025-01-23 Update Posted in picking - ver 1.0.22
 // 2025-03-24 Picking post with systedate instead if screen date - ver 1.0.22
 // 2025-04-03 Consolidate same SO but different packing - ver 1.0.22
-// 2025-07-11 - Fix generate Doc num for SO - ver 1.0.23
+// 2025-07-11 Fix generate Doc num for SO - ver 1.0.23
+// 2025-08-18 do not create Invoice for interco invoice- ver 1.0.24
 
 namespace PortalIntegration
 {
@@ -1131,30 +1132,44 @@ namespace PortalIntegration
 
                             if (doobj.SapINV == false && doobj.SapDO == true)
                             {
-                                #region Post INV
-                                if (!sap.oCom.InTransaction) sap.oCom.StartTransaction();
-
-                                int tempdo = 0;
-
-                                tempdo = PostDOtoSAP(doobj, ObjectSpaceProvider, sap);
-                                if (tempdo == 1)
+                                // Start ver 1.0.24
+                                if (doobj.Customer.GroupName != "Trade AR InterCo" 
+                                    && doobj.Customer.GroupName != "Non Trade AR InterCo" 
+                                    && doobj.Customer.GroupName != "AR InterCo Loan")
                                 {
-                                    if (sap.oCom.InTransaction)
-                                        sap.oCom.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+                                // End ver 1.0.24
+                                    #region Post INV
+                                    if (!sap.oCom.InTransaction) sap.oCom.StartTransaction();
 
+                                    int tempdo = 0;
+
+                                    tempdo = PostDOtoSAP(doobj, ObjectSpaceProvider, sap);
+                                    if (tempdo == 1)
+                                    {
+                                        if (sap.oCom.InTransaction)
+                                            sap.oCom.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+
+                                        doobj.SapINV = true;
+                                        doos.CommitChanges();
+
+                                        GC.Collect();
+                                    }
+                                    else if (tempdo <= 0)
+                                    {
+                                        if (sap.oCom.InTransaction)
+                                            sap.oCom.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+
+                                        GC.Collect();
+                                    }
+                                    #endregion
+                                // Start ver 1.0.24
+                                }
+                                else
+                                {
                                     doobj.SapINV = true;
                                     doos.CommitChanges();
-
-                                    GC.Collect();
                                 }
-                                else if (tempdo <= 0)
-                                {
-                                    if (sap.oCom.InTransaction)
-                                        sap.oCom.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-
-                                    GC.Collect();
-                                }
-                                #endregion
+                                // End ver 1.0.24
                             }
 
                             if (doobj.SapDO == true && doobj.SapINV == true)
