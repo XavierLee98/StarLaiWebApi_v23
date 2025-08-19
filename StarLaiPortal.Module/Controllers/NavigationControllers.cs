@@ -32,6 +32,7 @@ using System.Web.UI.WebControls;
 // 2024-04-05 - add inquiry view sp - ver 1.0.15
 // 2024-06-01 - enlarge popout screen - ver 1.0.17
 // 2024-02-04 - add global item inquiry - ver 1.0.22
+// 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -497,6 +498,21 @@ namespace StarLaiPortal.Module.Controllers
                 e.Handled = true;
             }
             // End ver 1.0.15
+
+            // Start ver 1.0.24
+            if (e.ActionArguments.SelectedChoiceActionItem.Id == "ItemBinInquiry_ListView")
+            {
+                XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                var nonPersistentOS = Application.CreateObjectSpace(typeof(ItemBinInquiry));
+                ItemBinInquiry list = nonPersistentOS.CreateObject<ItemBinInquiry>();
+
+                DetailView detailView = Application.CreateDetailView(nonPersistentOS, list);
+                detailView.ViewEditMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
+
+                e.ActionArguments.ShowViewParameters.CreatedView = detailView;
+                e.Handled = true;
+            }
+            // End ver 1.0.24
 
             // Start ver 1.0.22
             if (e.ActionArguments.SelectedChoiceActionItem.Id == "GlobalItemInquiry_ListView")

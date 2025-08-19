@@ -1005,21 +1005,19 @@ namespace StarLaiPortal.Module.Controllers
                 {
                     ReportDocument doc = new ReportDocument();
                     strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
-                    doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\ASN.rpt"));
+                    doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\ASN Container.rpt"));
                     strDatabase = conn.Database;
                     strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
                     strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
                     doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
                     doc.Refresh();
 
-                    doc.SetParameterValue("dockey@", asn.Oid);
-                    doc.SetParameterValue("dbName@", conn.Database);
-                    // Start ver 1.0.12
-                    doc.SetParameterValue("userName@", user.Staff.StaffName);
-                    // End ver 1.0.12
+                    doc.SetParameterValue("DocKey@", asn.Oid);
+                    doc.SetParameterValue("DBName@", conn.Database);
+                    doc.SetParameterValue("UserName@", user.Staff.StaffName);
 
                     filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
-                        + "_" + asn.Oid + "_" + user.UserName + "_ASN_"
+                        + "_" + asn.Oid + "_" + user.UserName + "_ASNContainer_"
                         + DateTime.Parse(asn.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
 
                     doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
@@ -1028,7 +1026,7 @@ namespace StarLaiPortal.Module.Controllers
 
                     string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
                         ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
-                        + "_" + asn.Oid + "_" + user.UserName + "_ASN_"
+                        + "_" + asn.Oid + "_" + user.UserName + "_ASNContainer_"
                         + DateTime.Parse(asn.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
                     var script = "window.open('" + url + "');";
 

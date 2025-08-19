@@ -16,7 +16,8 @@ using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
 
-// 2024-08-20 - add EIV-Validated Status - ver 1.0.19
+// 2024-08-20 - add EIV-Validated Status    - ver 1.0.19
+// 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
 
 namespace StarLaiPortal.Module.BusinessObjects
 {
@@ -4133,4 +4134,138 @@ namespace StarLaiPortal.Module.BusinessObjects
         }
     }
     #endregion
+
+    // Start ver 1.0.24
+    #region Item Bin Inquiry
+    [DomainComponent]
+    [NavigationItem("Reports")]
+    [DefaultProperty("PortalNo")]
+    [Appearance("HideNew", AppearanceItemType.Action, "True", TargetItems = "New", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideEdit", AppearanceItemType.Action, "True", TargetItems = "SwitchToEditMode; Edit", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideLink", AppearanceItemType.Action, "True", TargetItems = "Link", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideUnlink", AppearanceItemType.Action, "True", TargetItems = "Unlink", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave", AppearanceItemType.Action, "True", TargetItems = "Save", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&New", AppearanceItemType.Action, "True", TargetItems = "SaveAndNew", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&Close", AppearanceItemType = "Action", TargetItems = "SaveAndClose", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideCancel", AppearanceItemType.Action, "True", TargetItems = "Cancel", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideValidate", AppearanceItemType.Action, "True", TargetItems = "ShowAllContexts", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideResetViewSetting", AppearanceItemType.Action, "True", TargetItems = "ResetViewSettings", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideExport", AppearanceItemType.Action, "True", TargetItems = "Export", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideRefresh", AppearanceItemType.Action, "True", TargetItems = "Refresh", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+
+    [XafDisplayName("Item Bin Inquiry")]
+    public class ItemBinInquiry
+    {
+        [Key(AutoGenerate = true), Browsable(false)]
+        public int Oid;
+
+        [XafDisplayName("Warehouse")]
+        [Index(1), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public vwWarehouse Warehouse { get; set; }
+
+        [XafDisplayName("Item Code")]
+        [Index(2), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public string ItemCode { get; set; }
+
+        [XafDisplayName("Legacy Item Code")]
+        [Index(3), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public string LegacyItemCode { get; set; }
+
+        public ItemBinInquiry()
+        {
+            _Results = new BindingList<ItemBinInquiryResult>();
+        }
+
+        private BindingList<ItemBinInquiryResult> _Results;
+
+        public BindingList<ItemBinInquiryResult> Results { get { return _Results; } }
+    }
+
+    [DomainComponent]
+    [NonPersistent]
+    [Appearance("HideNew", AppearanceItemType.Action, "True", TargetItems = "New", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideEdit", AppearanceItemType.Action, "True", TargetItems = "SwitchToEditMode; Edit", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideLink", AppearanceItemType.Action, "True", TargetItems = "Link", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideUnlink", AppearanceItemType.Action, "True", TargetItems = "Unlink", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave", AppearanceItemType.Action, "True", TargetItems = "Save", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&New", AppearanceItemType.Action, "True", TargetItems = "SaveAndNew", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideValidate", AppearanceItemType.Action, "True", TargetItems = "ShowAllContexts", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [XafDisplayName("Item Bin Inquiry Result")]
+    public class ItemBinInquiryResult
+    {
+        [DevExpress.ExpressApp.Data.Key, Browsable(false)]
+        public string PriKey;
+
+        [XafDisplayName("Item Code")]
+        [Appearance("ItemCode", Enabled = false)]
+        [Index(1)]
+        public string ItemCode
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Item Name")]
+        [Appearance("ItemName", Enabled = false)]
+        [Index(3)]
+        public string ItemName
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Legacy Item Code")]
+        [Appearance("LegacyItemCode", Enabled = false)]
+        [Index(5)]
+        public string LegacyItemCode
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Warehouse")]
+        [Appearance("Warehouse", Enabled = false)]
+        [Index(8)]
+        public string Warehouse
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Bin Location")]
+        [Appearance("BinLocation", Enabled = false)]
+        [Index(10)]
+        public string BinLocation
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Quantity")]
+        [DbType("numeric(18,6)")]
+        [ModelDefault("DisplayFormat", "{0:n2}")]
+        [Appearance("Quantity", Enabled = false)]
+        [Index(13)]
+        public decimal Quantity
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Available")]
+        [DbType("numeric(18,6)")]
+        [ModelDefault("DisplayFormat", "{0:n2}")]
+        [Appearance("Available", Enabled = false)]
+        [Index(15)]
+        public decimal Available
+        {
+            get; set;
+        }
+
+        [XafDisplayName("UOM")]
+        [Appearance("UOM", Enabled = false)]
+        [Index(18)]
+        public string UOM
+        {
+            get; set;
+        }
+    }
+    #endregion
+    // End ver 1.0.24
 }

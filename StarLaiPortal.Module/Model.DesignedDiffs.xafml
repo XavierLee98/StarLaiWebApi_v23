@@ -1731,6 +1731,32 @@
       </Columns>
     </ListView>
     <DetailView Id="InvoiceInquiryResult_DetailView" AllowEdit="False" />
+    <DetailView Id="ItemBinInquiry_DetailView">
+      <Items>
+        <PropertyEditor Id="ItemCode" LookupEditorMode="AllItems" />
+        <PropertyEditor Id="Warehouse" LookupEditorMode="AllItems" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="8.908685968819599">
+            <LayoutGroup Id="ItemBinInquiry" Caption="ItemBinInquiry" RelativeSize="100" Direction="Horizontal">
+              <LayoutItem Id="Warehouse" ViewItem="Warehouse" Index="0" RelativeSize="33.380480905233384" IsNewNode="True" Removed="True" />
+              <LayoutItem Id="ItemCode" ViewItem="ItemCode" Index="1" RelativeSize="34.512022630834515" IsNewNode="True" Removed="True" />
+              <LayoutItem Id="LegacyItemCode" Index="2" RelativeSize="32.107496463932108" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Results_Group" Direction="Vertical" RelativeSize="91.0913140311804">
+            <LayoutItem Id="Results" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ItemBinInquiry_Results_ListView">
+      <Columns>
+        <ColumnInfo Id="ItemName" SortIndex="-1" SortOrder="None" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ItemBinInquiryResult_DetailView" AllowEdit="False" />
     <DetailView Id="ItemInquiry_DetailView" AllowEdit="True">
       <Items>
         <ActionContainerViewItem Id="Button" Caption="Button" ActionContainer="ListView" Orientation="Vertical" IsNewNode="True" />
