@@ -75,6 +75,7 @@ namespace StarLaiPortal.Module.Controllers
             this.ImportASN.Active.SetItemValue("Enabled", false);
             // Start ver 1.0.24
             this.ChoicePrintASN.Active.SetItemValue("Enabled", false);
+            this.ASNContainer.Active.SetItemValue("Enabled", false);
             // End ver 1.0.24
 
             // Start ver 1.0.24
@@ -84,7 +85,7 @@ namespace StarLaiPortal.Module.Controllers
                 {
                     if (View.Id == "ASN_DetailView")
                     {
-                        this.ChoicePrintASN.Active.SetItemValue("Enabled", true);
+                        //this.ChoicePrintASN.Active.SetItemValue("Enabled", true);
                         ChoicePrintASN.PaintStyle = DevExpress.ExpressApp.Templates.ActionItemPaintStyle.Caption;
                         ChoicePrintASN.CustomizeControl += action_CustomizeControl;
 
@@ -107,12 +108,13 @@ namespace StarLaiPortal.Module.Controllers
                 {
                     this.SubmitASN.Active.SetItemValue("Enabled", true);
                     this.CancelASN.Active.SetItemValue("Enabled", true);
-                    // Start ver 1.0.24
-                    //this.PreviewASN.Active.SetItemValue("Enabled", true);
-                    // End ver 1.0.24
+                    this.PreviewASN.Active.SetItemValue("Enabled", true);
                     //this.PrintLabelASN.Active.SetItemValue("Enabled", true);
                     this.ASNCopyToGRN.Active.SetItemValue("Enabled", true);
                     this.CloseASN.Active.SetItemValue("Enabled", true);
+                    // Start ver 1.0.24
+                    this.ASNContainer.Active.SetItemValue("Enabled", true);
+                    // End ver 1.0.24
                 }
                 else
                 {
@@ -151,6 +153,9 @@ namespace StarLaiPortal.Module.Controllers
                 this.CloseASN.Active.SetItemValue("Enabled", false);
                 this.ExportASN.Active.SetItemValue("Enabled", false);
                 this.ImportASN.Active.SetItemValue("Enabled", false);
+                // Start ver 1.0.24
+                this.ASNContainer.Active.SetItemValue("Enabled", false);
+                // End ver 1.0.24
             }
         }
         protected override void OnDeactivated()
@@ -1042,6 +1047,61 @@ namespace StarLaiPortal.Module.Controllers
                 {
                     showMsg("Fail", ex.Message, InformationType.Error);
                 }
+            }
+        }
+
+        private void ASNContainer_Execute(object sender, SimpleActionExecuteEventArgs e)
+        {
+            string strServer;
+            string strDatabase;
+            string strUserID;
+            string strPwd;
+            string filename;
+
+            SqlConnection conn = new SqlConnection(genCon.getConnectionString());
+            ASN asn = (ASN)View.CurrentObject;
+            ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
+
+            try
+            {
+                ReportDocument doc = new ReportDocument();
+                strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
+                doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\ASN Container.rpt"));
+                strDatabase = conn.Database;
+                strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
+                strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
+                doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
+                doc.Refresh();
+
+                doc.SetParameterValue("DocKey@", asn.Oid);
+                doc.SetParameterValue("DBName@", conn.Database);
+                doc.SetParameterValue("UserName@", user.Staff.StaffName);
+
+                filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
+                    + "_" + asn.Oid + "_" + user.UserName + "_ASNContainer_"
+                    + DateTime.Parse(asn.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+
+                doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
+                doc.Close();
+                doc.Dispose();
+
+                string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                    ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
+                    + "_" + asn.Oid + "_" + user.UserName + "_ASNContainer_"
+                    + DateTime.Parse(asn.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+                var script = "window.open('" + url + "');";
+
+                WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+
+                asn.PrintStatus = PrintStatus.Printed;
+
+                ObjectSpace.CommitChanges();
+                ObjectSpace.Refresh();
+
+            }
+            catch (Exception ex)
+            {
+                showMsg("Fail", ex.Message, InformationType.Error);
             }
         }
         // End ver 1.0.24
