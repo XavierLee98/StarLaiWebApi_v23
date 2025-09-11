@@ -28,6 +28,7 @@ using StarLaiPortal.Module.BusinessObjects.Sales_Quotation;
 using StarLaiPortal.Module.BusinessObjects.Setup;
 using StarLaiPortal.Module.BusinessObjects.View;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -49,6 +50,7 @@ using System.Web;
 // 2024-02-21 no edit after status submitted ver 1.0.14
 // 2024-05-29 get SO remarks ver 1.0.16
 // 2024-06-12 e-invoice - ver 1.0.18
+// 2025-09-11 print multiple document in one pdf - ver 1.0.25
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -1754,62 +1756,116 @@ namespace StarLaiPortal.Module.Controllers
         {
             if (e.SelectedObjects.Count >= 1)
             {
+                // Start ver 1.0.25
+                //int cnt = 1;
+                ArrayList docentry = new ArrayList();
+                // End ver 1.0.25
                 SqlConnection conn = new SqlConnection(genCon.getConnectionString());
                 ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
-                int cnt = 1;
+
+                // Start ver 1.0.25
                 foreach (PickList dtl in e.SelectedObjects)
                 {
-                    string strServer;
-                    string strDatabase;
-                    string strUserID;
-                    string strPwd;
-                    string filename;
-
-                    IObjectSpace os = Application.CreateObjectSpace();
-                    PickList pl = os.FindObject<PickList>(new BinaryOperator("Oid", dtl.Oid));
-
-                    try
-                    {
-                        ReportDocument doc = new ReportDocument();
-                        strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
-                        doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\PickList.rpt"));
-                        strDatabase = conn.Database;
-                        strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
-                        strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
-                        doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
-                        doc.Refresh();
-
-                        doc.SetParameterValue("dockey@", pl.Oid);
-                        doc.SetParameterValue("dbName@", conn.Database);
-
-                        filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
-                            + "_" + pl.Oid + "_" + user.UserName + "_PL_"
-                            + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
-
-                        doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
-                        doc.Close();
-                        doc.Dispose();
-
-                        string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                            ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
-                            + "_" + pl.Oid + "_" + user.UserName + "_PL_"
-                            + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
-                        var script = "window.open('" + url + "');";
-
-                        WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile" + cnt, script);
-
-                        pl.PrintStatus = PrintStatus.Printed;
-                        pl.PrintCount++;
-
-                        os.CommitChanges();
-                        os.Refresh();
-                        cnt++;
-                    }
-                    catch (Exception ex)
-                    {
-                        showMsg("Fail", ex.Message, InformationType.Error);
-                    }
+                    docentry.Add(dtl.Oid);
                 }
+
+                if (docentry.Count == 0)
+                {
+                    docentry.Add("0");
+                }
+                // End ver 1.0.25
+
+                // Start ver 1.0.25
+                //foreach (PickList dtl in e.SelectedObjects)
+                //{
+                // End ver 1.0.25
+                string strServer;
+                string strDatabase;
+                string strUserID;
+                string strPwd;
+                string filename;
+
+                // Start ver 1.0.25
+                //IObjectSpace os = Application.CreateObjectSpace();
+                //PickList pl = os.FindObject<PickList>(new BinaryOperator("Oid", dtl.Oid));
+                // End ver 1.0.25
+
+                try
+                {
+                    ReportDocument doc = new ReportDocument();
+                    strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
+                    doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\PickList.rpt"));
+                    strDatabase = conn.Database;
+                    strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
+                    strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
+                    doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
+                    doc.Refresh();
+
+                    // Start ver 1.0.25
+                    //doc.SetParameterValue("dockey@", pl.Oid);
+                    doc.SetParameterValue("dockey@", docentry.ToArray());
+                    // End ver 1.0.25
+                    doc.SetParameterValue("dbName@", conn.Database);
+
+                    // Start ver 1.0.25
+                    //filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
+                    //    + "_" + pl.Oid + "_" + user.UserName + "_PL_"
+                    //    + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+                    filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database 
+                        + "_" + user.UserName + "_PL_" 
+                        + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+                    // End ver 1.0.25
+
+                    doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
+                    doc.Close();
+                    doc.Dispose();
+
+                    // Start ver 1.0.25
+                    //string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                    //    ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
+                    //    + "_" + pl.Oid + "_" + user.UserName + "_PL_"
+                    //    + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+                    string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority + 
+                        ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database 
+                        + "_" + user.UserName + "_PL_" 
+                        + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+                    // End ver 1.0.25
+                    var script = "window.open('" + url + "');";
+
+                    // Start ver 1.0.25
+                    //WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile" + cnt, script);
+                    WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+
+                    //pl.PrintStatus = PrintStatus.Printed;
+                    //pl.PrintCount++;
+
+                    //os.CommitChanges();
+                    //os.Refresh();
+                    //cnt++;
+
+                    foreach (object DocOid in docentry)
+                    {
+                        IObjectSpace os = Application.CreateObjectSpace();
+                        PickList pl = os.FindObject<PickList>(CriteriaOperator.Parse("Oid = ?", DocOid));
+
+                        if (pl != null)
+                        {
+                            pl.PrintStatus = PrintStatus.Printed;
+                            pl.PrintCount++;
+
+                            os.CommitChanges();
+                            os.Refresh();
+                        }
+                    }
+                    // End ver 1.0.25
+                }
+                catch (Exception ex)
+                {
+                    showMsg("Fail", ex.Message, InformationType.Error);
+                }
+                // Start ver 1.0.25
+                //}
+                // End ver 1.0.25
             }
             else
             {
@@ -1823,62 +1879,116 @@ namespace StarLaiPortal.Module.Controllers
         {
             if (e.SelectedObjects.Count >= 1)
             {
+                // Start ver 1.0.25
+                //int cnt = 1;
+                ArrayList docentry = new ArrayList();
+                // End ver 1.0.25
                 SqlConnection conn = new SqlConnection(genCon.getConnectionString());
                 ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
-                int cnt = 1;
+
+                // Start ver 1.0.25
                 foreach (PickList dtl in e.SelectedObjects)
                 {
-                    string strServer;
-                    string strDatabase;
-                    string strUserID;
-                    string strPwd;
-                    string filename;
-
-                    IObjectSpace os = Application.CreateObjectSpace();
-                    PickList pl = os.FindObject<PickList>(new BinaryOperator("Oid", dtl.Oid));
-
-                    try
-                    {
-                        ReportDocument doc = new ReportDocument();
-                        strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
-                        doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\PickListByZone.rpt"));
-                        strDatabase = conn.Database;
-                        strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
-                        strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
-                        doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
-                        doc.Refresh();
-
-                        doc.SetParameterValue("dockey@", pl.Oid);
-                        doc.SetParameterValue("dbName@", conn.Database);
-
-                        filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
-                            + "_" + pl.Oid + "_" + user.UserName + "_PLByZone_"
-                            + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
-
-                        doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
-                        doc.Close();
-                        doc.Dispose();
-
-                        string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                            ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
-                            + "_" + pl.Oid + "_" + user.UserName + "_PLByZone_"
-                            + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
-                        var script = "window.open('" + url + "');";
-
-                        WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile" + cnt, script);
-
-                        pl.PrintStatus = PrintStatus.Printed;
-                        pl.PrintCount++;
-
-                        os.CommitChanges();
-                        os.Refresh();
-                        cnt++;
-                    }
-                    catch (Exception ex)
-                    {
-                        showMsg("Fail", ex.Message, InformationType.Error);
-                    }
+                    docentry.Add(dtl.Oid);
                 }
+
+                if (docentry.Count == 0)
+                {
+                    docentry.Add("0");
+                }
+                // End ver 1.0.25
+
+                // Start ver 1.0.25
+                //foreach (PickList dtl in e.SelectedObjects)
+                //{
+                // End ver 1.0.25
+                string strServer;
+                string strDatabase;
+                string strUserID;
+                string strPwd;
+                string filename;
+
+                // Start ver 1.0.25
+                //IObjectSpace os = Application.CreateObjectSpace();
+                //PickList pl = os.FindObject<PickList>(new BinaryOperator("Oid", dtl.Oid));
+                // End ver 1.0.25
+
+                try
+                {
+                    ReportDocument doc = new ReportDocument();
+                    strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
+                    doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\PickListByZone.rpt"));
+                    strDatabase = conn.Database;
+                    strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
+                    strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
+                    doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
+                    doc.Refresh();
+
+                    // Start ver 1.0.25
+                    //doc.SetParameterValue("dockey@", pl.Oid);
+                    doc.SetParameterValue("dockey@", docentry.ToArray());
+                    // End ver 1.0.25
+                    doc.SetParameterValue("dbName@", conn.Database);
+
+                    // Start ver 1.0.25
+                    //filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
+                    //    + "_" + pl.Oid + "_" + user.UserName + "_PLByZone_"
+                    //    + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+                    filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
+                        + "_" + user.UserName + "_PLByZone_"
+                        + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+                    // End ver 1.0.25
+
+                    doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
+                    doc.Close();
+                    doc.Dispose();
+
+                    // Start ver 1.0.25
+                    //string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                    //    ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
+                    //    + "_" + pl.Oid + "_" + user.UserName + "_PLByZone_"
+                    //    + DateTime.Parse(pl.DocDate.ToString()).ToString("yyyyMMdd") + ".pdf";
+                    string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                      ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
+                      + "_" + user.UserName + "_PLByZone_"
+                      + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+                    // End ver 1.0.25
+                    var script = "window.open('" + url + "');";
+
+                    // Start ver 1.0.25
+                    //WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile" + cnt, script);
+                    WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+
+                    //pl.PrintStatus = PrintStatus.Printed;
+                    //pl.PrintCount++;
+
+                    //os.CommitChanges();
+                    //os.Refresh();
+                    //cnt++;
+
+                    foreach (object DocOid in docentry)
+                    {
+                        IObjectSpace os = Application.CreateObjectSpace();
+                        PickList pl = os.FindObject<PickList>(CriteriaOperator.Parse("Oid = ?", DocOid));
+
+                        if (pl != null)
+                        {
+                            pl.PrintStatus = PrintStatus.Printed;
+                            pl.PrintCount++;
+
+                            os.CommitChanges();
+                            os.Refresh();
+                        }
+                    }
+                    // End ver 1.0.25
+                }
+                catch (Exception ex)
+                {
+                    showMsg("Fail", ex.Message, InformationType.Error);
+                }
+                // Start ver 1.0.25
+                //}
+                // End ver 1.0.25
             }
             else
             {

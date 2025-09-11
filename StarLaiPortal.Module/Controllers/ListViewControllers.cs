@@ -47,11 +47,13 @@ using System.Linq;
 using System.Text;
 using System.Web.UI.WebControls;
 using DevExpress.Xpo.DB.Helpers;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 
 // 2023-07-28 add AR Downpayment cancalletion ver 1.0.7
 // 2023-09-11 add dashboard sales/purchase/warehouse ver 1.0.9
 // 2023-09-19 add disable detail view ver 1.0.9
 // 2023-10-20 add stock count ver 1.0.11
+// 2025-09-11 Hide Export by role ver 1.0.25
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -228,6 +230,20 @@ namespace StarLaiPortal.Module.Controllers
             }
             //}
             // End ver 1.0.15
+
+            // Start ver 1.0.25
+            ExportController exportController = Frame.GetController<ExportController>();
+            if (exportController != null)
+            {
+                PermissionPolicyRole exportdaterole = ObjectSpace.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ExportDataRole')"));
+
+                if (exportdaterole == null)
+                {
+                    // Deactivate the ExportAction
+                    exportController.ExportAction.Active.SetItemValue("HideExportButtonInListView", false);
+                }    
+            }
+            // End ver 1.0.25
         }
         protected override void OnViewControlsCreated()
         {
@@ -345,6 +361,14 @@ namespace StarLaiPortal.Module.Controllers
                     listViewController = null;
                 }
             }
+
+            // Start ver 1.0.25
+            ExportController exportController = Frame.GetController<ExportController>();
+            if (exportController != null)
+            {
+                exportController.ExportAction.Active.RemoveItem("HideExportButtonInListView");
+            }
+            // End ver 1.0.25
 
             // Unsubscribe from previously subscribed events and release other references and resources.
             base.OnDeactivated();
