@@ -59,7 +59,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 // 2025-03-24 Picking post with systedate instead if screen date - ver 1.0.22
 // 2025-04-03 Consolidate same SO but different packing - ver 1.0.22
 // 2025-07-11 Fix generate Doc num for SO - ver 1.0.23
-// 2025-08-18 do not create Invoice for interco invoice- ver 1.0.24
+// 2025-08-18 Do not create Invoice for interco invoice- ver 1.0.24
+// 2025-09-12 Auto create picking for SO with transporter with OC type - ver 1.0.25
 
 namespace PortalIntegration
 {
@@ -191,6 +192,102 @@ namespace PortalIntegration
 
                     WriteLog("[INFO]", "--SO Posting End--");
                 }
+
+                // Start ver 1.0.25
+                temp = ConfigurationManager.AppSettings["AutoPicking"].ToString().ToUpper();
+                if (temp == "Y" || temp == "YES" || temp == "TRUE" || temp == "1")
+                {
+                    WriteLog("[INFO]", "--Automation Picking Start--");
+
+                    #region Automation Picking 
+                    string getAutoSo = "SELECT T0.OID, T0.DocNum, T0.Transporter, T1.U_Type " +
+                        "FROM SalesOrder T0 " +
+                        "INNER JOIN vwTransporter T1 on T0.Transporter = T1.TransporterID COLLATE DATABASE_DEFAULT " +
+                        "LEFT JOIN " +
+                        "( " +
+                        "SELECT SONumber " +
+                        "FROM PickList P0 " +
+                        "WHERE P0.GCRecord is null and P0.SONumber is not null " +
+                        "GROUP BY P0.SONumber " +
+                        ") T2 on T0.DocNum = T2.SONumber " +
+                        "WHERE T1.U_Type = 'OC' and T0.Sap = 1 and T0.SAPDocNum is not null and T0.[Status] = 6 and T2.SONumber is null";
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        conn.Close();
+                    }
+                    conn.Open();
+                    SqlCommand cmdauto = new SqlCommand(getAutoSo, conn);
+                    SqlDataReader readerauto = cmdso.ExecuteReader();
+                    while (readerauto.Read())
+                    {
+                        IObjectSpace getSOos = ObjectSpaceProvider.CreateObjectSpace();
+                        SalesOrder getobj = getSOos.FindObject<SalesOrder>(new BinaryOperator("Oid", readerauto.GetInt32(0)));
+
+                        if (getobj != null)
+                        {
+                            #region Add Picking
+                            IObjectSpace autoplos = ObjectSpaceProvider.CreateObjectSpace();
+                            PickList newpl = autoplos.CreateObject<PickList>();
+
+                            GeneralControllers genCon = new GeneralControllers();
+                            string docprefix = GetDocPrefix();
+                            newpl.DocNum = genCon.GenerateDocNum(DocTypeList.SO, autoplos, TransferType.NA, 0, docprefix);
+
+                            newpl.Warehouse = xxx;
+                            if (getobj.Transporter != null)
+                            {
+                                newpl.Transporter = newpl.Session.GetObjectByKey<vwTransporter>(getobj.Transporter.TransporterID);
+                            }
+
+                            newpl.CustomerGroup = getobj.Customer.GroupName;
+                            newpl.Customer = getobj.Customer.BPCode;
+                            newpl.CustomerName = getobj.CustomerName;
+                            newpl.SONumber = getobj.DocNum;
+                            newpl.SODeliveryDate = getobj.DeliveryDate.Date.ToString("dd/MM/yyyy");
+                            if (getobj.Priority != null)
+                            {
+                                newpl.Priority = newpl.Session.GetObjectByKey<PriorityType>(getobj.Priority.Oid);
+                            }
+
+                            foreach (SalesOrderDetails dtl in getobj.SalesOrderDetails)
+                            {
+                                PickListDetails newpldetails = autoplos.CreateObject<PickListDetails>();
+
+                                newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(dtl.ItemCode.ItemCode);
+                                newsodetails.ItemDesc = dtl.ItemDesc;
+                                newsodetails.Model = dtl.Model;
+                                newsodetails.CatalogNo = dtl.CatalogNo;
+                                // Start ver 1.0.18
+                                if (dtl.EIVClassification != null)
+                                {
+                                    newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", dtl.EIVClassification.Code));
+                                }
+                                // End ver 1.0.18
+                                if (dtl.Location != null)
+                                {
+                                    newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(dtl.Location.WarehouseCode);
+                                }
+                                newsodetails.Quantity = dtl.Quantity;
+                                newsodetails.Price = dtl.Price;
+                                newsodetails.AdjustedPrice = dtl.AdjustedPrice;
+                                newsodetails.BaseDoc = trx.DocNum;
+                                newsodetails.BaseId = dtl.Oid.ToString();
+                                newSO.SalesOrderDetails.Add(newsodetails);
+                            }
+
+                            autoplos.CommitChanges();
+
+                            #endregion
+                        }
+                    }
+                    cmdauto.Dispose();
+                    conn.Close();
+
+                    #endregion
+
+                    WriteLog("[INFO]", "--Automation Picking End--");
+                }
+                // End ver 1.0.25
 
                 temp = ConfigurationManager.AppSettings["POPost"].ToString().ToUpper();
                 if (temp == "Y" || temp == "YES" || temp == "TRUE" || temp == "1")
