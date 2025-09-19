@@ -17,6 +17,7 @@ using System.Text;
 // 2023-10-18 add Stock Count ver 1.0.11
 // 2023-10-30 add creditnote payment method ver 1.0.12
 // 2024-01-04 add inquiry filter status ver 1.0.15
+// 2025-09-19 add new docstatus and container status ver 1.0.25
 
 namespace StarLaiPortal.Module.BusinessObjects
 {
@@ -56,8 +57,11 @@ namespace StarLaiPortal.Module.BusinessObjects
         // End ver 1.0.7
         // Start ver 1.0.11
         [XafDisplayName("Stock Count Sheet")] STS = 22,
-        [XafDisplayName("Stock Count Confirm")] STC = 23
+        [XafDisplayName("Stock Count Confirm")] STC = 23,
         // End ver 1.0.11
+        // Start ver 1.0.25
+        [XafDisplayName("Container Tracking")] CT = 24
+        // End ver 1.0.25
     }
 
     public enum DocStatus
@@ -70,8 +74,13 @@ namespace StarLaiPortal.Module.BusinessObjects
         [XafDisplayName("Posted")] Post = 5,
         [XafDisplayName("Open")] Open = 6,
         // Start ver 1.0.11
-        [XafDisplayName("Counting")] Counting = 7
+        [XafDisplayName("Counting")] Counting = 7,
         // End ver 1.0.11
+        // Start ver 1.0.25
+        [XafDisplayName("New")] New = 8,
+        [XafDisplayName("Inprogress")] Inprogress = 9,
+        [XafDisplayName("Completed")] Completed = 10
+        // End ver 1.0.25
     }
 
     public enum ApprovalStatusType
@@ -177,4 +186,12 @@ namespace StarLaiPortal.Module.BusinessObjects
         [XafDisplayName("Counting")] Counting = 8
     }
     // End ver 1.0.15
+
+    // Start ver 1.0.25
+    public enum ContainerStatus
+    {
+        [XafDisplayName("Pending")] Pending = 0,
+        [XafDisplayName("Completed")] Completed = 1
+    }
+    // End ver 1.0.25
 }

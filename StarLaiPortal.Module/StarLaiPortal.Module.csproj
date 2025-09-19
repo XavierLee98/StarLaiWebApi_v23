@@ -139,6 +139,7 @@
     <Compile Include="BusinessObjects\Advanced Shipment Notice\ASN.cs" />
     <Compile Include="BusinessObjects\Advanced Shipment Notice\ASNDetails.cs" />
     <Compile Include="BusinessObjects\Advanced Shipment Notice\ASNDocTrail.cs" />
+    <Compile Include="BusinessObjects\Container Tracking\ContainerTracking.cs" />
     <Compile Include="BusinessObjects\Credit Notes Cancellation\ARDownpaymentCancel.cs" />
     <Compile Include="BusinessObjects\Credit Notes Cancellation\ARDownpaymentCancelDetails.cs" />
     <Compile Include="BusinessObjects\Credit Notes Cancellation\ARDownpaymentCancellationAppStage.cs" />
