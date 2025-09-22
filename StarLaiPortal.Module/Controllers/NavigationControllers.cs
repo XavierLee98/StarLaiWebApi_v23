@@ -33,6 +33,7 @@ using System.Web.UI.WebControls;
 // 2024-06-01 - enlarge popout screen - ver 1.0.17
 // 2024-02-04 - add global item inquiry - ver 1.0.22
 // 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
+// 2025-09-22 - add Container Tracking Inquiry - ver 1.0.25
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -530,6 +531,21 @@ namespace StarLaiPortal.Module.Controllers
                 e.Handled = true;
             }
             // End ver 1.0.22
+
+            // Start ver 1.0.25
+            if (e.ActionArguments.SelectedChoiceActionItem.Id == "ContainerTrackingInquiry_ListView")
+            {
+                XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                var nonPersistentOS = Application.CreateObjectSpace(typeof(ContainerTrackingInquiry));
+                ContainerTrackingInquiry list = nonPersistentOS.CreateObject<ContainerTrackingInquiry>();
+
+                DetailView detailView = Application.CreateDetailView(nonPersistentOS, list);
+                detailView.ViewEditMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
+
+                e.ActionArguments.ShowViewParameters.CreatedView = detailView;
+                e.Handled = true;
+            }
+            // End ver 1.0.25
 
             // Start ver 1.0.15
             if (DateTime.Now.Minute.ToString("00").Substring(1, 1) == "0" ||

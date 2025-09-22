@@ -39,6 +39,8 @@ using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using System.Web;
 using DevExpress.XtraPrinting.Native;
 using StarLaiPortal.Module.BusinessObjects.Pack_List;
+using StarLaiPortal.Module.BusinessObjects.Container_Tracking;
+using System.Collections;
 
 // 2023-09-14 - add filter into inquiry - ver 1.0.9
 // 2023-10-16 - sales order inquiry add "All" option for filter and view button - ver 1.0.11
@@ -49,6 +51,7 @@ using StarLaiPortal.Module.BusinessObjects.Pack_List;
 // 2024-07-18 - add view in pack list inquiry sp - ver 1.0.19
 // 2024-08-20 - add EIVValidatedStatus - ver 1.0.19
 // 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
+// 2025-09-22 - add Container Tracking Inquiry - ver 1.0.25
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -97,6 +100,9 @@ namespace StarLaiPortal.Module.Controllers
             // Start ver 1.0.19
             this.PrintBundleInquiry.Active.SetItemValue("Enabled", false);
             // End ver 1.0.19
+            // Start ver 1.0.25
+            this.PrintCTInquiry.Active.SetItemValue("Enabled", false);
+            // End ver 1.0.25
 
             if (typeof(vwInquiryOpenPickList).IsAssignableFrom(View.ObjectTypeInfo.Type))
             {
@@ -486,6 +492,24 @@ namespace StarLaiPortal.Module.Controllers
                 }
             }
             // End ver 1.0.24
+
+            // Start ver 1.0.25
+            if (typeof(ContainerTrackingInquiry).IsAssignableFrom(View.ObjectTypeInfo.Type))
+            {
+                if (View.ObjectTypeInfo.Type == typeof(ContainerTrackingInquiry))
+                {
+                    this.InquirySearch.Active.SetItemValue("Enabled", true);
+                }
+            }
+
+            if (typeof(ContainerTrackingInquiryResult).IsAssignableFrom(View.ObjectTypeInfo.Type))
+            {
+                if (View.ObjectTypeInfo.Type == typeof(ContainerTrackingInquiryResult))
+                {
+                    this.PrintCTInquiry.Active.SetItemValue("Enabled", true);
+                }
+            }
+            // End ver 1.0.25
         }
         protected override void OnViewControlsCreated()
         {
@@ -1931,6 +1955,71 @@ namespace StarLaiPortal.Module.Controllers
                 persistentObjectSpace.Dispose();
             }
             // End ver 1.0.24
+
+            // Start ver 1.0.25
+            if (View.ObjectTypeInfo.Type == typeof(ContainerTrackingInquiry))
+            {
+                ContainerTrackingInquiry currObject = (ContainerTrackingInquiry)e.CurrentObject;
+                currObject.Results.Clear();
+
+                XPObjectSpace persistentObjectSpace = (XPObjectSpace)Application.CreateObjectSpace();
+                SelectedData sprocData = persistentObjectSpace.Session.ExecuteSproc("sp_GetInquiryView",
+                    new OperandValue(currObject.DateFrom.Date),
+                    new OperandValue(currObject.DateTo.AddDays(1).Date), new OperandValue(currObject.Status), new OperandValue("ContainerTracking"),
+                     new OperandValue(""), new OperandValue(""), new OperandValue(""));
+
+                if (sprocData.ResultSet.Count() > 0)
+                {
+                    if (sprocData.ResultSet[0].Rows.Count() > 0)
+                    {
+                        foreach (SelectStatementResultRow row in sprocData.ResultSet[0].Rows)
+                        {
+                            ContainerTrackingInquiryResult result = new ContainerTrackingInquiryResult();
+
+                            result.PriKey = row.Values[0].ToString();
+                            result.PortalNo = row.Values[0].ToString();
+                            result.DocDate = DateTime.Parse(row.Values[1].ToString());
+                            result.Status = row.Values[2].ToString();
+                            result.ContainerNo = row.Values[3].ToString();
+                            result.ShipmentInvNo = row.Values[4].ToString();
+                            result.Whse = row.Values[5].ToString();
+                            result.ArrivePortDate = DateTime.Parse(row.Values[6].ToString());
+                            result.StakeOnDate = DateTime.Parse(row.Values[7].ToString());
+                            result.RecvGatePassDate = DateTime.Parse(row.Values[8].ToString());
+                            result.PendingDocDays = int.Parse(row.Values[9].ToString());
+                            result.ReqPullOut = DateTime.Parse(row.Values[10].ToString());
+                            result.ActualPullOut = DateTime.Parse(row.Values[11].ToString());
+                            result.StorageParkDays = int.Parse(row.Values[12].ToString());
+                            result.PenaltyDays = int.Parse(row.Values[13].ToString());
+                            result.ReqReturnBack = DateTime.Parse(row.Values[14].ToString());
+                            result.ActualReturnBack = DateTime.Parse(row.Values[15].ToString());
+                            result.ContainerUnloadDays = int.Parse(row.Values[16].ToString());
+                            result.GRPOCompleteDate = DateTime.Parse(row.Values[17].ToString());
+                            result.SystemStockinDays = int.Parse(row.Values[18].ToString());
+                            result.DemmurrageFreeDays = int.Parse(row.Values[19].ToString());
+                            result.DetentionFreeDays = int.Parse(row.Values[20].ToString());
+                            result.FreeTimeExpiry = int.Parse(row.Values[21].ToString());
+                            result.Remarks = row.Values[22].ToString();
+                            result.ParkingAtPort = int.Parse(row.Values[23].ToString());
+                            result.DMFreeDueDate = DateTime.Parse(row.Values[24].ToString());
+                            result.DTFreeDueDate = DateTime.Parse(row.Values[25].ToString());
+                            result.StorageChargeDay = int.Parse(row.Values[26].ToString());
+                            result.DMFreeDelayDay = int.Parse(row.Values[27].ToString());
+                            result.DTFreeDelayDay = int.Parse(row.Values[28].ToString());
+                            result.Oid = int.Parse(row.Values[29].ToString());
+
+                            currObject.Results.Add(result);
+                        }
+                    }
+                }
+
+                ObjectSpace.Refresh();
+                View.Refresh();
+
+                persistentObjectSpace.Session.DropIdentityMap();
+                persistentObjectSpace.Dispose();
+            }
+            // End ver 1.0.25
         }
 
         private void PrintDOInquiry_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -2210,5 +2299,73 @@ namespace StarLaiPortal.Module.Controllers
             }
         }
         // End ver 1.0.19
+
+        // Start ver 1.0.25
+        private void PrintCTInquiry_Execute(object sender, SimpleActionExecuteEventArgs e)
+        {
+            if (e.SelectedObjects.Count >= 1)
+            {
+                ArrayList docentry = new ArrayList();
+
+                SqlConnection conn = new SqlConnection(genCon.getConnectionString());
+                ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
+
+                foreach (ContainerTrackingInquiryResult dtl in e.SelectedObjects)
+                {
+                    docentry.Add(dtl.Oid);
+                }
+
+                if (docentry.Count == 0)
+                {
+                    docentry.Add("0");
+                }
+
+                string strServer;
+                string strDatabase;
+                string strUserID;
+                string strPwd;
+                string filename;
+
+                try
+                {
+                    ReportDocument doc = new ReportDocument();
+                    strServer = ConfigurationManager.AppSettings.Get("SQLserver").ToString();
+                    doc.Load(HttpContext.Current.Server.MapPath("~\\Reports\\ContainerTracking.rpt"));
+                    strDatabase = conn.Database;
+                    strUserID = ConfigurationManager.AppSettings.Get("SQLID").ToString();
+                    strPwd = ConfigurationManager.AppSettings.Get("SQLPass").ToString();
+                    doc.DataSourceConnections[0].SetConnection(strServer, strDatabase, strUserID, strPwd);
+                    doc.Refresh();
+
+                    doc.SetParameterValue("dockey@", docentry.ToArray());
+                    doc.SetParameterValue("dbName@", conn.Database);
+
+                    filename = ConfigurationManager.AppSettings.Get("ReportPath").ToString() + conn.Database
+                        + "_" + user.UserName + "_CT_"
+                        + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+
+                    doc.ExportToDisk(ExportFormatType.PortableDocFormat, filename);
+                    doc.Close();
+                    doc.Dispose();
+
+                    string url = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+                        ConfigurationManager.AppSettings.Get("PrintPath").ToString() + conn.Database
+                        + "_" + user.UserName + "_CT_"
+                        + DateTime.Today.Date.ToString("yyyyMMdd") + ".pdf";
+                    var script = "window.open('" + url + "');";
+
+                    WebWindow.CurrentRequestWindow.RegisterStartupScript("DownloadFile", script);
+                }
+                catch (Exception ex)
+                {
+                    showMsg("Fail", ex.Message, InformationType.Error);
+                }
+            }
+            else
+            {
+                showMsg("Fail", "Please select container tracking to print.", InformationType.Error);
+            }
+        }
+        // End ver 1.0.25
     }
 }

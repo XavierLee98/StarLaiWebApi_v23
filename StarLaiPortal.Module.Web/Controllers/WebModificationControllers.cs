@@ -13,6 +13,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.XtraGrid.EditForm.Helpers;
 using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Advanced_Shipment_Notice;
+using StarLaiPortal.Module.BusinessObjects.Container_Tracking;
 using StarLaiPortal.Module.BusinessObjects.Credit_Notes_Cancellation;
 using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using StarLaiPortal.Module.BusinessObjects.GRN;
@@ -53,6 +54,7 @@ using static DevExpress.XtraPrinting.Native.ExportOptionsPropertiesNames;
 // 2024-04-16 Pick list not allow to change after submitted ver 1.0.15
 // 2025-01-23 add item count ver 1.0.22
 // 2025-02-25 block add item if not in draft - ver 1.0.22
+// 2025-09-22 add container tracking - ver 1.0.25
 
 namespace StarLaiPortal.Module.Web.Controllers
 {
@@ -1058,6 +1060,38 @@ namespace StarLaiPortal.Module.Web.Controllers
                 View.CreateControls();
             }
             // End ver 1.0.12
+            // Start ver 1.0.25
+            else if (View.ObjectTypeInfo.Type == typeof(ContainerTracking))
+            {
+                ContainerTracking CurrObject = (ContainerTracking)args.CurrentObject;
+
+                base.Save(args);
+                if (CurrObject.DocNum == null)
+                {
+                    string docprefix = genCon.GetDocPrefix();
+                    CurrObject.DocNum = genCon.GenerateDocNum(DocTypeList.CT, ObjectSpace, TransferType.NA, 0, docprefix);
+                }
+
+                if (CurrObject.PurchaseDeptStatus == ContainerStatus.Completed || 
+                    CurrObject.AccDeptStatus == ContainerStatus.Completed || 
+                    CurrObject.WhsDeptStatus == ContainerStatus.Completed)
+                {
+                    CurrObject.Status = DocStatus.Inprogress;
+                }
+
+                if (CurrObject.PurchaseDeptStatus == ContainerStatus.Completed &&
+                    CurrObject.AccDeptStatus == ContainerStatus.Completed &&
+                    CurrObject.WhsDeptStatus == ContainerStatus.Completed)
+                {
+                    CurrObject.Status = DocStatus.Completed;
+                }
+
+                base.Save(args);
+                ((DetailView)View).ViewEditMode = ViewEditMode.View;
+                View.BreakLinksToControls();
+                View.CreateControls();
+            }
+            // End ver 1.0.25
             else
             {
                 base.Save(args);

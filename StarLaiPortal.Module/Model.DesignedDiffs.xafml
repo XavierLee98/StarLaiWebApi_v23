@@ -1056,13 +1056,14 @@
                 <LayoutItem Id="PurTradeTerms" RelativeSize="2.8077753779697625" Index="9" Removed="True" />
                 <LayoutItem Id="ShippingLine" RelativeSize="2.8077753779697625" Index="9" Removed="True" />
                 <LayoutItem Id="PurchaseDeptStatus" RelativeSize="2.8077753779697625" Index="11" Removed="True" />
+                <LayoutItem Id="DocDate" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="ContainerTracking_col2" RelativeSize="50.451807228915662">
                 <LayoutItem Id="DocNum" ViewItem="DocNum" Index="0" RelativeSize="19.767441860465116" IsNewNode="True" />
-                <LayoutItem Id="Status" ViewItem="Status" Index="1" RelativeSize="15.116279069767442" IsNewNode="True" />
-                <LayoutItem Id="ContainerType" ViewItem="ContainerType" Index="2" RelativeSize="15.116279069767442" IsNewNode="True" />
-                <LayoutItem Id="ESTDeparture" ViewItem="ESTDeparture" Index="3" RelativeSize="15.116279069767442" IsNewNode="True" />
-                <LayoutItem Id="ESTArrival" ViewItem="ESTArrival" Index="4" RelativeSize="34.883720930232556" IsNewNode="True" />
+                <LayoutItem Id="DocDate" ViewItem="DocDate" Index="1" RelativeSize="15.116279069767442" IsNewNode="True" />
+                <LayoutItem Id="Status" ViewItem="Status" Index="2" RelativeSize="15.116279069767442" IsNewNode="True" />
+                <LayoutItem Id="ContainerType" ViewItem="ContainerType" Index="3" RelativeSize="15.116279069767442" IsNewNode="True" />
+                <LayoutItem Id="ESTDeparture" ViewItem="ESTDeparture" Index="4" RelativeSize="15.116279069767442" IsNewNode="True" />
                 <LayoutItem Id="AccDemmurrageFreeDays" RelativeSize="2.8077753779697625" Index="5" Removed="True" />
                 <LayoutItem Id="AccDetentionFreeDays" RelativeSize="2.8888888888888888" Index="5" Removed="True" />
                 <LayoutItem Id="AccRemarks" RelativeSize="2.9748283752860414" Index="5" Removed="True" />
@@ -1074,6 +1075,7 @@
                 <LayoutItem Id="DetentionFreeDelay" RelativeSize="9.420289855072463" Index="5" Removed="True" />
                 <LayoutItem Id="DutyDraftFrmForwarded" RelativeSize="3.4946236559139785" Index="5" Removed="True" />
                 <LayoutItem Id="DutySettDate" RelativeSize="3.6211699164345403" Index="5" Removed="True" />
+                <LayoutItem Id="ESTArrival" ViewItem="ESTArrival" Index="5" RelativeSize="19.767441860465116" IsNewNode="True" />
                 <LayoutItem Id="ForwardedFrmPort" RelativeSize="10.4" Index="5" Removed="True" />
                 <LayoutItem Id="ForwardedSubmission" RelativeSize="3.3766233766233764" Index="5" Removed="True" />
                 <LayoutItem Id="ForwardedToPort" RelativeSize="13.131313131313131" Index="5" Removed="True" />
@@ -1097,21 +1099,21 @@
             </LayoutGroup>
             <TabbedGroup Id="Item5" CaptionLocation="Top" Index="1" RelativeSize="72.549019607843135" IsNewNode="True">
               <LayoutGroup Id="Item1" ShowCaption="True" Caption="Purchase Dept." CaptionLocation="Top" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Auto1ff1fdc2-08df-4d39-b881-50393dd6d2f3" ShowCaption="False" Caption="" Index="0" RelativeSize="49.548192771084338" IsNewNode="True">
+                <LayoutGroup Id="Auto1ff1fdc2-08df-4d39-b881-50393dd6d2f3" ShowCaption="False" Caption="Auto1ff1fdc2-08df-4d39-b881-50393dd6d2f3(20)" Index="0" RelativeSize="49.548192771084338" IsNewNode="True">
                   <LayoutItem Id="PurBillOfLandingType" ViewItem="PurBillOfLandingType" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="PurCertificateOfOrigin" ViewItem="PurCertificateOfOrigin" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="SoftcopyBLRec" ViewItem="SoftcopyBLRec" CaptionLocation="Top" Index="2" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="SoftcopyPLRec" ViewItem="SoftcopyPLRec" CaptionLocation="Top" Index="3" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="SoftcopyInvoice" ViewItem="SoftcopyInvoice" CaptionLocation="Top" Index="4" RelativeSize="63.209393346379649" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Auto2ac90500-4a1b-4442-ab38-2b6718424395" ShowCaption="False" Caption="" Index="1" RelativeSize="50.451807228915662" IsNewNode="True">
+                <LayoutGroup Id="Auto2ac90500-4a1b-4442-ab38-2b6718424395" ShowCaption="False" Caption="Auto2ac90500-4a1b-4442-ab38-2b6718424395(26)" Index="1" RelativeSize="50.451807228915662" IsNewNode="True">
                   <LayoutItem Id="PurchaseDeptStatus" ViewItem="PurchaseDeptStatus" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="PurCreditorPaymentTerm" ViewItem="PurCreditorPaymentTerm" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="PurTradeTerms" ViewItem="PurTradeTerms" CaptionLocation="Top" Index="2" RelativeSize="80.821917808219183" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Index="1" RelativeSize="100" Caption="Account Dept." Direction="Horizontal" IsNewNode="True">
-                <LayoutGroup Id="Auto106929c5-9d6d-486e-aa6b-3067969be79a" ShowCaption="False" Caption="" Index="0" RelativeSize="50.451807228915662" IsNewNode="True">
+                <LayoutGroup Id="Auto106929c5-9d6d-486e-aa6b-3067969be79a" ShowCaption="False" Caption="Auto106929c5-9d6d-486e-aa6b-3067969be79a(31)" Index="0" RelativeSize="50.30120481927711" IsNewNode="True">
                   <LayoutItem Id="AccBillOfLandingType" ViewItem="AccBillOfLandingType" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="AccCertificateOfOrigin" ViewItem="AccCertificateOfOrigin" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="SoftcopyBLRecFrmPur" ViewItem="SoftcopyBLRecFrmPur" CaptionLocation="Top" Index="2" RelativeSize="8.8062622309197653" IsNewNode="True" />
@@ -1124,7 +1126,7 @@
                   <LayoutItem Id="AccDetentionFreeDays" ViewItem="AccDetentionFreeDays" CaptionLocation="Top" Index="9" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="AccRemarks" ViewItem="AccRemarks" CaptionLocation="Top" Index="10" RelativeSize="10.371819960861057" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Autoa1dafb39-a879-4312-b895-0bf5dafcbe68" ShowCaption="False" Caption="" Index="1" RelativeSize="49.548192771084338" IsNewNode="True">
+                <LayoutGroup Id="Autoa1dafb39-a879-4312-b895-0bf5dafcbe68" ShowCaption="False" Caption="Autoa1dafb39-a879-4312-b895-0bf5dafcbe68(43)" Index="1" RelativeSize="49.69879518072289" IsNewNode="True">
                   <LayoutItem Id="AccDeptStatus" ViewItem="AccDeptStatus" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="AccCreditorPaymentTerm" ViewItem="AccCreditorPaymentTerm" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="AccTradeTerms" ViewItem="AccTradeTerms" CaptionLocation="Top" Index="2" RelativeSize="8.8062622309197653" IsNewNode="True" />
@@ -1139,7 +1141,7 @@
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item6" ShowCaption="True" CaptionLocation="Top" Index="2" RelativeSize="100" Caption="Warehouse Dept." Direction="Horizontal" IsNewNode="True">
-                <LayoutGroup Id="Auto4d9b297e-c3a6-49fc-a9ca-0ffffb0afa50" ShowCaption="False" Caption="" Index="0" RelativeSize="50.451807228915662" IsNewNode="True">
+                <LayoutGroup Id="Auto4d9b297e-c3a6-49fc-a9ca-0ffffb0afa50" ShowCaption="False" Caption="Auto4d9b297e-c3a6-49fc-a9ca-0ffffb0afa50(56)" Index="0" RelativeSize="50.30120481927711" IsNewNode="True">
                   <LayoutItem Id="WhsStakeOnDateTime" ViewItem="WhsStakeOnDateTime" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="WhsStorageFreeDays" ViewItem="WhsStorageFreeDays" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="WhsDemmurrageFreeDays" ViewItem="WhsDemmurrageFreeDays" CaptionLocation="Top" Index="2" RelativeSize="8.8062622309197653" IsNewNode="True" />
@@ -1151,7 +1153,7 @@
                   <LayoutItem Id="GRPOReturnBack" ViewItem="GRPOReturnBack" CaptionLocation="Top" Index="8" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="WhsRemarks" ViewItem="WhsRemarks" CaptionLocation="Top" Index="9" RelativeSize="19.17808219178082" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Auto9fb74abe-2d7d-4701-b08f-1a7af8e86781" ShowCaption="False" Caption="" Index="1" RelativeSize="49.548192771084338" IsNewNode="True">
+                <LayoutGroup Id="Auto9fb74abe-2d7d-4701-b08f-1a7af8e86781" ShowCaption="False" Caption="Auto9fb74abe-2d7d-4701-b08f-1a7af8e86781(67)" Index="1" RelativeSize="49.69879518072289" IsNewNode="True">
                   <LayoutItem Id="WhsDeptStatus" ViewItem="WhsDeptStatus" CaptionLocation="Top" Index="0" RelativeSize="10.371819960861057" IsNewNode="True" />
                   <LayoutItem Id="StorageFreeDue" ViewItem="StorageFreeDue" CaptionLocation="Top" Index="1" RelativeSize="8.8062622309197653" IsNewNode="True" />
                   <LayoutItem Id="DemmurrageFreeDue" ViewItem="DemmurrageFreeDue" CaptionLocation="Top" Index="2" RelativeSize="8.8062622309197653" IsNewNode="True" />
@@ -1178,6 +1180,35 @@
         <ColumnInfo Id="ESTArrival" Index="7" />
       </Columns>
     </ListView>
+    <DetailView Id="ContainerTrackingInquiry_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="14.699331848552339">
+            <LayoutGroup Id="ContainerTrackingInquiry" Caption="ContainerTrackingInquiry" RelativeSize="100">
+              <LayoutGroup Id="Autocc4bd946-dc85-442a-bc82-e492a63f0ef8" ShowCaption="False" Caption="Autocc4bd946-dc85-442a-bc82-e492a63f0ef8(4)" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Autoc4eb8a7e-e762-403a-a9d6-b995dad15d19" ShowCaption="False" Caption="" Index="0" RelativeSize="49.929278642149931" IsNewNode="True">
+                  <LayoutItem Id="DateFrom" ViewItem="DateFrom" Index="0" RelativeSize="51.515151515151516" IsNewNode="True" />
+                  <LayoutItem Id="DateTo" ViewItem="DateTo" Index="1" RelativeSize="48.484848484848484" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutItem Id="Status" ViewItem="Status" Index="1" RelativeSize="50.070721357850069" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="DateFrom" Removed="True" />
+              <LayoutItem Id="DateTo" RelativeSize="48.484848484848484" Removed="True" />
+              <LayoutItem Id="Status" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Results_Group" Direction="Vertical" RelativeSize="85.300668151447667">
+            <LayoutItem Id="Results" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ContainerTrackingInquiry_Results_ListView">
+      <Columns>
+        <ColumnInfo Id="PortalNo" SortIndex="0" SortOrder="Ascending" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ContainerTrackingInquiryResult_DetailView" AllowEdit="False" />
     <DetailView Id="CreditMemoInquiry_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

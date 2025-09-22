@@ -331,7 +331,9 @@
     <Compile Include="BusinessObjects\View\vwBillingAddress.cs" />
     <Compile Include="BusinessObjects\View\vwBin.cs" />
     <Compile Include="BusinessObjects\View\vwBinStockBalance.cs" />
+    <Compile Include="BusinessObjects\View\vwBOLTYPE.cs" />
     <Compile Include="BusinessObjects\View\vwBusniessPartner.cs" />
+    <Compile Include="BusinessObjects\View\vwCONTAINERTYPE.cs" />
     <Compile Include="BusinessObjects\View\vwCountry.cs" />
     <Compile Include="BusinessObjects\View\vwDepartment.cs" />
     <Compile Include="BusinessObjects\View\vwDownpaymentINV.cs" />
@@ -355,6 +357,7 @@
     <Compile Include="BusinessObjects\View\vwPaymentSOSimplified.cs" />
     <Compile Include="BusinessObjects\View\vwPaymentTerm.cs" />
     <Compile Include="BusinessObjects\View\vwPaymentType.cs" />
+    <Compile Include="BusinessObjects\View\vwPAYTERM.cs" />
     <Compile Include="BusinessObjects\View\vwPendingPostQty.cs" />
     <Compile Include="BusinessObjects\View\vwPickList.cs" />
     <Compile Include="BusinessObjects\View\vwPO.cs" />
@@ -372,6 +375,7 @@
     <Compile Include="BusinessObjects\View\vwState.cs" />
     <Compile Include="BusinessObjects\View\vwStockBalance.cs" />
     <Compile Include="BusinessObjects\View\vwStockCountGL.cs" />
+    <Compile Include="BusinessObjects\View\vwTRADETERM.cs" />
     <Compile Include="BusinessObjects\View\vwTransporter.cs" />
     <Compile Include="BusinessObjects\View\vwVehicle.cs" />
     <Compile Include="BusinessObjects\View\vwWarehouse.cs" />
@@ -404,6 +408,12 @@
     </Compile>
     <Compile Include="Controllers\ASNControllers.Designer.cs">
       <DependentUpon>ASNControllers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\ContainerControllers.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controllers\ContainerControllers.Designer.cs">
+      <DependentUpon>ContainerControllers.cs</DependentUpon>
     </Compile>
     <Compile Include="Controllers\DashboardsControllers.cs" />
     <Compile Include="Controllers\DashboardsControllers.Designer.cs">
@@ -633,6 +643,9 @@
     <EmbeddedResource Include="Controllers\ASNControllers.resx">
       <DependentUpon>ASNControllers.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controllers\ContainerControllers.resx">
+      <DependentUpon>ContainerControllers.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controllers\DashboardsControllers.resx">
       <DependentUpon>DashboardsControllers.cs</DependentUpon>

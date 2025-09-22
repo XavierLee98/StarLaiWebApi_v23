@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using DevExpress.XtraPrinting.Native;
@@ -26,7 +27,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
     [XafDisplayName("Container Tracking")]
     [NavigationItem("Container Tracking")]
     [DefaultProperty("DocNum")]
+    [Appearance("HideEdit", AppearanceItemType.Action, "True", TargetItems = "SwitchToEditMode; Edit", Criteria = "(Status in (2, 10))", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
     [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideCancel", AppearanceItemType.Action, "True", TargetItems = "CancelContainer", Criteria = "(Status in (2, 10))", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Context = "Any")]
     public class ContainerTracking : XPObject
     { 
         public ContainerTracking(Session session)
@@ -48,6 +51,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
             CreateDate = DateTime.Now;
 
+            DocDate = DateTime.Now;
             DocType = DocTypeList.CT;
             Status = DocStatus.New;
         }
@@ -130,6 +134,18 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
+        private DateTime _DocDate;
+        [XafDisplayName("Doc Date")]
+        [Index(4), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
+        public DateTime DocDate
+        {
+            get { return _DocDate; }
+            set
+            {
+                SetPropertyValue("_DocDate", ref _DocDate, value);
+            }
+        }
+
         private vwBusniessPartner _Supplier;
         [XafDisplayName("Supplier Code")]
         [NoForeignKey]
@@ -137,6 +153,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [LookupEditorMode(LookupEditorMode.AllItems)]
         [DataSourceCriteria("ValidFor = 'Y' and CardType = 'S'")]
         [RuleRequiredField(DefaultContexts.Save)]
+        [Appearance("Supplier", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(5), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public vwBusniessPartner Supplier
         {
@@ -159,6 +176,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("Supplier Name")]
         [RuleRequiredField(DefaultContexts.Save)]
+        [Appearance("SupplierName", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(8), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public string SupplierName
         {
@@ -171,6 +189,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private DateTime _ESTDeparture;
         [XafDisplayName("EST. Departure From Country of Origin")]
+        [Appearance("ESTDeparture", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(10), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public DateTime ESTDeparture
         {
@@ -183,6 +202,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private DateTime _ESTArrival;
         [XafDisplayName("EST. Time Arrival at Local Port")]
+        [Appearance("ESTArrival", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(13), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public DateTime ESTArrival
         {
@@ -195,6 +215,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private string _ContainerNo;
         [XafDisplayName("Container No")]
+        [Appearance("ContainerNo", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(15), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public string ContainerNo
         {
@@ -207,6 +228,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private string _ShipmentInvoiceNo;
         [XafDisplayName("Shipment Invoice No")]
+        [Appearance("ShipmentInvoiceNo", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(18), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(false)]
         public string ShipmentInvoiceNo
         {
@@ -219,6 +241,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private string _Forwarded;
         [XafDisplayName("Forwarded")]
+        [Appearance("Forwarded", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(20), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         public string Forwarded
         {
@@ -229,11 +252,12 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
-        private string _ContainerType;
+        private vwCONTAINERTYPE _ContainerType;
         [NoForeignKey]
         [XafDisplayName("Container Type")]
+        [Appearance("ContainerType", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(23), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        public string ContainerType
+        public vwCONTAINERTYPE ContainerType
         {
             get { return _ContainerType; }
             set
@@ -257,6 +281,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private string _Remarks;
         [XafDisplayName("Remarks")]
+        [Appearance("Remarks", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(28), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         public string Remarks
         {
@@ -268,13 +293,13 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         // Purchase Dept
-        private string _PurBillOfLandingType;
+        private vwBOLTYPE _PurBillOfLandingType;
         [NoForeignKey]
         [ImmediatePostData]
-        [XafDisplayName("Pur Bill Of Landing Type")]
+        [XafDisplayName("Bill Of Landing Type")]
         [Index(30), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("PurBillOfLandingType", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
-        public string PurBillOfLandingType
+        [Appearance("PurBillOfLandingType", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
+        public vwBOLTYPE PurBillOfLandingType
         {
             get { return _PurBillOfLandingType; }
             set
@@ -282,7 +307,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 SetPropertyValue("PurBillOfLandingType", ref _PurBillOfLandingType, value);
                 if (!IsLoading && value != null)
                 {
-                    AccBillOfLandingType = PurBillOfLandingType;
+                    AccBillOfLandingType = Session.FindObject<vwBOLTYPE>(CriteriaOperator.Parse("Code = ?", PurBillOfLandingType.Code)); ;
                 }
                 else if (!IsLoading && value == null)
                 {
@@ -293,9 +318,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private bool _PurCertificateOfOrigin;
         [ImmediatePostData]
-        [XafDisplayName("Pur Certificate Of Origin")]
+        [XafDisplayName("Certificate Of Origin")]
         [Index(33), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("PurCertificateOfOrigin", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
+        [Appearance("PurCertificateOfOrigin", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
         public bool PurCertificateOfOrigin
         {
             get { return _PurCertificateOfOrigin; }
@@ -315,7 +340,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(35), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyBLRec", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
+        [Appearance("SoftcopyBLRec", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
         public DateTime SoftcopyBLRec
         {
             get { return _SoftcopyBLRec; }
@@ -335,7 +360,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(38), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyPLRec", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
+        [Appearance("SoftcopyPLRec", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
         public DateTime SoftcopyPLRec
         {
             get { return _SoftcopyPLRec; }
@@ -355,7 +380,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(40), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyInvoice", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
+        [Appearance("SoftcopyInvoice", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
         public DateTime SoftcopyInvoice
         {
             get { return _SoftcopyInvoice; }
@@ -369,13 +394,13 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
-        private vwPaymentTerm _PurCreditorPaymentTerm;
+        private vwPAYTERM _PurCreditorPaymentTerm;
         [NoForeignKey]
         [ImmediatePostData]
-        [XafDisplayName("Pur Creditor Payment Term")]
+        [XafDisplayName("Creditor Payment Term")]
         [Index(43), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("PurCreditorPaymentTerm", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
-        public vwPaymentTerm PurCreditorPaymentTerm
+        [Appearance("PurCreditorPaymentTerm", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
+        public vwPAYTERM PurCreditorPaymentTerm
         {
             get { return _PurCreditorPaymentTerm; }
             set
@@ -383,7 +408,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 SetPropertyValue("PurCreditorPaymentTerm", ref _PurCreditorPaymentTerm, value);
                 if (!IsLoading && value != null)
                 {
-                    AccCreditorPaymentTerm = Session.FindObject<vwPaymentTerm>(CriteriaOperator.Parse("GroupNum = ?", PurCreditorPaymentTerm.GroupNum));
+                    AccCreditorPaymentTerm = Session.FindObject<vwPAYTERM>(CriteriaOperator.Parse("Code = ?", PurCreditorPaymentTerm.Code));
                 }
                 else if (!IsLoading && value == null)
                 {
@@ -392,13 +417,13 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
-        private string _PurTradeTerms;
+        private vwTRADETERM _PurTradeTerms;
         [NoForeignKey]
         [ImmediatePostData]
-        [XafDisplayName("Pur Trade Terms")]
+        [XafDisplayName("Trade Terms")]
         [Index(45), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("PurTradeTerms", Enabled = false, Criteria = "PurchaseDeptStatus = 1")]
-        public string PurTradeTerms
+        [Appearance("PurTradeTerms", Enabled = false, Criteria = "PurchaseDeptStatus = 1 or IsValidPurc = 0")]
+        public vwTRADETERM PurTradeTerms
         {
             get { return _PurTradeTerms; }
             set
@@ -406,7 +431,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 SetPropertyValue("PurTradeTerms", ref _PurTradeTerms, value);
                 if (!IsLoading && value != null)
                 {
-                    AccTradeTerms = PurTradeTerms;
+                    AccTradeTerms = Session.FindObject<vwTRADETERM>(CriteriaOperator.Parse("Code = ?", PurTradeTerms.Code));
                 }
                 else if (!IsLoading && value == null)
                 {
@@ -419,6 +444,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("Purchase Dept. Status")]
         [Index(48), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
+        [Appearance("PurchaseDeptStatus", Enabled = false, Criteria = "IsValidPurc = 0")]
         public ContainerStatus PurchaseDeptStatus
         {
             get { return _PurchaseDeptStatus; }
@@ -429,12 +455,12 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         // Account Dept
-        private string _AccBillOfLandingType;
+        private vwBOLTYPE _AccBillOfLandingType;
         [NoForeignKey]
-        [XafDisplayName("Acc Bill Of Landing Type")]
+        [XafDisplayName("Bill Of Landing Type")]
         [Index(50), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccBillOfLandingType", Enabled = false, Criteria = "AccDeptStatus = 1")]
-        public string AccBillOfLandingType
+        [Appearance("AccBillOfLandingType", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
+        public vwBOLTYPE AccBillOfLandingType
         {
             get { return _AccBillOfLandingType; }
             set
@@ -444,9 +470,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         private bool _AccCertificateOfOrigin;
-        [XafDisplayName("Acc Certificate Of Origin")]
+        [XafDisplayName("Certificate Of Origin")]
         [Index(53), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccCertificateOfOrigin", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccCertificateOfOrigin", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public bool AccCertificateOfOrigin
         {
             get { return _AccCertificateOfOrigin; }
@@ -462,7 +488,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(55), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyBLRecFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("SoftcopyBLRecFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime SoftcopyBLRecFrmPur
         {
             get { return _SoftcopyBLRecFrmPur; }
@@ -488,7 +514,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(58), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyPLRecFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("SoftcopyPLRecFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime SoftcopyPLRecFrmPur
         {
             get { return _SoftcopyPLRecFrmPur; }
@@ -503,7 +529,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(60), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("SoftcopyInvoiceFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("SoftcopyInvoiceFrmPur", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime SoftcopyInvoiceFrmPur
         {
             get { return _SoftcopyInvoiceFrmPur; }
@@ -513,12 +539,12 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
-        private vwPaymentTerm _AccCreditorPaymentTerm;
+        private vwPAYTERM _AccCreditorPaymentTerm;
         [NoForeignKey]
-        [XafDisplayName("Acc Creditor Payment Term")]
+        [XafDisplayName("Creditor Payment Term")]
         [Index(63), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccCreditorPaymentTerm", Enabled = false, Criteria = "AccDeptStatus = 1")]
-        public vwPaymentTerm AccCreditorPaymentTerm
+        [Appearance("AccCreditorPaymentTerm", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
+        public vwPAYTERM AccCreditorPaymentTerm
         {
             get { return _AccCreditorPaymentTerm; }
             set
@@ -527,12 +553,12 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             }
         }
 
-        private string _AccTradeTerms;
+        private vwTRADETERM _AccTradeTerms;
         [NoForeignKey]
-        [XafDisplayName("Acc Trade Terms")]
+        [XafDisplayName("Trade Terms")]
         [Index(65), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccTradeTerms", Enabled = false, Criteria = "AccDeptStatus = 1")]
-        public string AccTradeTerms
+        [Appearance("AccTradeTerms", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
+        public vwTRADETERM AccTradeTerms
         {
             get { return _AccTradeTerms; }
             set
@@ -545,6 +571,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("Account Dept. Status")]
         [Index(68), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
+        [Appearance("AccDeptStatus", Enabled = false, Criteria = "IsValidAcc = 0")]
         public ContainerStatus AccDeptStatus
         {
             get { return _AccDeptStatus; }
@@ -557,7 +584,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         private string _ShippingLine;
         [XafDisplayName("Shipping Line")]
         [Index(70), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("ShippingLine", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("ShippingLine", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public string ShippingLine
         {
             get { return _ShippingLine; }
@@ -569,11 +596,11 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private DateTime _AccStakeOnDateTime;
         [ImmediatePostData]
-        [XafDisplayName("Acc Stake On Date Time")]
+        [XafDisplayName("Stake On Date Time")]
         [Index(73), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("AccStakeOnDateTime", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccStakeOnDateTime", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime AccStakeOnDateTime
         {
             get { return _AccStakeOnDateTime; }
@@ -589,9 +616,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private int _AccStorageFreeDays;
         [ImmediatePostData]
-        [XafDisplayName("Acc Storage Free Days")]
+        [XafDisplayName("Storage Free Days")]
         [Index(75), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccStorageFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccStorageFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public int AccStorageFreeDays
         {
             get { return _AccStorageFreeDays; }
@@ -607,9 +634,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private int _AccDemmurrageFreeDays;
         [ImmediatePostData]
-        [XafDisplayName("Acc Demmurrage Free Days")]
+        [XafDisplayName("Demmurrage Free Days")]
         [Index(78), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccDemmurrageFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccDemmurrageFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public int AccDemmurrageFreeDays
         {
             get { return _AccDemmurrageFreeDays; }
@@ -625,9 +652,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private int _AccDetentionFreeDays;
         [ImmediatePostData]
-        [XafDisplayName("Acc Detention Free Days")]
+        [XafDisplayName("Detention Free Days")]
         [Index(80), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccDetentionFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccDetentionFreeDays", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public int AccDetentionFreeDays
         {
             get { return _AccDetentionFreeDays; }
@@ -642,9 +669,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         private string _AccRemarks;
-        [XafDisplayName("Acc Remarks")]
+        [XafDisplayName("Remarks")]
         [Index(83), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("AccRemarks", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("AccRemarks", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public string AccRemarks
         {
             get { return _AccRemarks; }
@@ -658,7 +685,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("BL Recv. Date")]
         [Index(85), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("BLRecvDate", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("BLRecvDate", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime BLRecvDate
         {
             get { return _BLRecvDate; }
@@ -695,7 +722,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         private DateTime _InvSettDate;
         [XafDisplayName("Invoice Sett. Date")]
         [Index(90), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("InvSettDate", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("InvSettDate", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime InvSettDate
         {
             get { return _InvSettDate; }
@@ -710,7 +737,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(93), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("ForwardedSubmission", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("ForwardedSubmission", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime ForwardedSubmission
         {
             get { return _ForwardedSubmission; }
@@ -725,7 +752,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(95), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("DutyDraftFrmForwarded", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("DutyDraftFrmForwarded", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime DutyDraftFrmForwarded
         {
             get { return _DutyDraftFrmForwarded; }
@@ -740,7 +767,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(98), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("DutySettDate", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("DutySettDate", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime DutySettDate
         {
             get { return _DutySettDate; }
@@ -753,7 +780,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         private DateTime _ArrivePortDate;
         [XafDisplayName("Arrive Port Date")]
         [Index(100), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("ArrivePortDate", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("ArrivePortDate", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime ArrivePortDate
         {
             get { return _ArrivePortDate; }
@@ -766,7 +793,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         private DateTime _RecvGatePassDate;
         [XafDisplayName("Receive Gate Pass Date")]
         [Index(103), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("RecvGatePassDate", Enabled = false, Criteria = "AccDeptStatus = 1")]
+        [Appearance("RecvGatePassDate", Enabled = false, Criteria = "AccDeptStatus = 1 or IsValidAcc = 0")]
         public DateTime RecvGatePassDate
         {
             get { return _RecvGatePassDate; }
@@ -779,11 +806,11 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         // Warehouse Dept
         private DateTime _WhsStakeOnDateTime;
         [ImmediatePostData]
-        [XafDisplayName("Whs Stake On Date Time")]
+        [XafDisplayName("Stake On Date Time")]
         [Index(105), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("WhsStakeOnDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("WhsStakeOnDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime WhsStakeOnDateTime
         {
             get { return _WhsStakeOnDateTime; }
@@ -800,9 +827,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private int _WhsStorageFreeDays;
         [ImmediatePostData]
-        [XafDisplayName("Whs Storage Free Days")]
+        [XafDisplayName("Storage Free Days")]
         [Index(108), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("WhsStorageFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("WhsStorageFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public int WhsStorageFreeDays
         {
             get { return _WhsStorageFreeDays; }
@@ -818,9 +845,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
         private int _WhsDemmurrageFreeDays;
         [ImmediatePostData]
-        [XafDisplayName("Whs Demmurrage Free Days")]
+        [XafDisplayName("Demmurrage Free Days")]
         [Index(110), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("WhsDemmurrageFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("WhsDemmurrageFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public int WhsDemmurrageFreeDays
         {
             get { return _WhsDemmurrageFreeDays; }
@@ -843,9 +870,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         private int _WhsDetentionFreeDays;
-        [XafDisplayName("Whs Detention Free Days")]
+        [XafDisplayName("Detention Free Days")]
         [Index(113), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("WhsDetentionFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("WhsDetentionFreeDays", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public int WhsDetentionFreeDays
         {
             get { return _WhsDetentionFreeDays; }
@@ -861,7 +888,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(115), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("ReqPullOutDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("ReqPullOutDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime ReqPullOutDateTime
         {
             get { return _ReqPullOutDateTime; }
@@ -888,7 +915,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(118), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("ActualPullOutDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("ActualPullOutDateTime", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime ActualPullOutDateTime
         {
             get { return _ActualPullOutDateTime; }
@@ -933,7 +960,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(120), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("ReqReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("ReqReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime ReqReturnBack
         {
             get { return _ReqReturnBack; }
@@ -978,7 +1005,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [Index(123), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         [ModelDefault("DisplayFormat", "{0: dd/MM/yyyy hh:mm tt}")]
         [ModelDefault("EditMask", "MM/dd/yyyy hh:mm")]
-        [Appearance("ActualReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("ActualReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime ActualReturnBack
         {
             get { return _ActualReturnBack; }
@@ -1012,7 +1039,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("GRPO Completion Date")]
         [Index(125), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("GRPOReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("GRPOReturnBack", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public DateTime GRPOReturnBack
         {
             get { return _GRPOReturnBack; }
@@ -1034,9 +1061,9 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         private string _WhsRemarks;
-        [XafDisplayName("Whs Remarks")]
+        [XafDisplayName("Remarks")]
         [Index(130), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("WhsRemarks", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("WhsRemarks", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public string WhsRemarks
         {
             get { return _WhsRemarks; }
@@ -1050,6 +1077,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [ImmediatePostData]
         [XafDisplayName("Whs Dept. Status")]
         [Index(135), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
+        [Appearance("WhsDeptStatus", Enabled = false, Criteria = "IsValidWhs = 0")]
         public ContainerStatus WhsDeptStatus
         {
             get { return _WhsDeptStatus; }
@@ -1093,7 +1121,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         [NoForeignKey]
         [XafDisplayName("Warehouse")]
         [Index(145), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
-        [Appearance("Warehouse", Enabled = false, Criteria = "WhsDeptStatus = 1")]
+        [Appearance("Warehouse", Enabled = false, Criteria = "WhsDeptStatus = 1 or IsValidWhs = 0")]
         public vwWarehouse Warehouse
         {
             get { return _Warehouse; }
@@ -1165,6 +1193,70 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
             set
             {
                 SetPropertyValue("WhsProcessing", ref _WhsProcessing, value);
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsValidHdr
+        {
+            get
+            {
+                PermissionPolicyRole header = Session.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ContainerHdrRole')"));
+
+                if (header != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsValidPurc
+        {
+            get
+            {
+                PermissionPolicyRole purc = Session.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ContainerPurcRole')"));
+
+                if (purc != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsValidAcc
+        {
+            get
+            {
+                PermissionPolicyRole acc = Session.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ContainerAccRole')"));
+
+                if (acc != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsValidWhs
+        {
+            get
+            {
+                PermissionPolicyRole whs = Session.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ContainerWhsRole')"));
+
+                if (whs != null)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 

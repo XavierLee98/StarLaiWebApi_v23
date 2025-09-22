@@ -48,6 +48,7 @@ using System.Text;
 using System.Web.UI.WebControls;
 using DevExpress.Xpo.DB.Helpers;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using StarLaiPortal.Module.BusinessObjects.Container_Tracking;
 
 // 2023-07-28 add AR Downpayment cancalletion ver 1.0.7
 // 2023-09-11 add dashboard sales/purchase/warehouse ver 1.0.9
@@ -167,8 +168,11 @@ namespace StarLaiPortal.Module.Controllers
                  // End ver 1.0.7
                  // Start ver 1.0.12
                  View.ObjectTypeInfo.Type == typeof(StockCountSheet) ||
-                 View.ObjectTypeInfo.Type == typeof(StockCountConfirm)
+                 View.ObjectTypeInfo.Type == typeof(StockCountConfirm) ||
                  // Start ver 1.0.12
+                 // Start ver 1.0.25
+                 View.ObjectTypeInfo.Type == typeof(ContainerTracking)
+                 // End ver 1.0.25
                  )
             {
                 listViewController = Frame.GetController<ListViewController>();

@@ -193,5 +193,14 @@ namespace StarLaiPortal.Module.BusinessObjects
         [XafDisplayName("Pending")] Pending = 0,
         [XafDisplayName("Completed")] Completed = 1
     }
+
+    public enum InquiryCTStatus
+    {
+        [XafDisplayName("All")] All = 0,
+        [XafDisplayName("New")] New = 1,
+        [XafDisplayName("Inprogress")] Inprogress = 2,
+        [XafDisplayName("Completed")] Completed = 3,
+        [XafDisplayName("Cancelled")] Cancelled = 4
+    }
     // End ver 1.0.25
 }

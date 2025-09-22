@@ -18,6 +18,7 @@ using System.Text;
 
 // 2024-08-20 - add EIV-Validated Status    - ver 1.0.19
 // 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
+// 2025-09-22 - add Container Tracking Inquiry - ver 1.0.25
 
 namespace StarLaiPortal.Module.BusinessObjects
 {
@@ -4268,4 +4269,314 @@ namespace StarLaiPortal.Module.BusinessObjects
     }
     #endregion
     // End ver 1.0.24
+
+    // Start ver 1.0.25
+    #region Container Tracking Inquiry
+    [DomainComponent]
+    [NavigationItem("Container Tracking")]
+    [DefaultProperty("PortalNo")]
+    [Appearance("HideNew", AppearanceItemType.Action, "True", TargetItems = "New", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideEdit", AppearanceItemType.Action, "True", TargetItems = "SwitchToEditMode; Edit", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideLink", AppearanceItemType.Action, "True", TargetItems = "Link", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideUnlink", AppearanceItemType.Action, "True", TargetItems = "Unlink", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave", AppearanceItemType.Action, "True", TargetItems = "Save", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&New", AppearanceItemType.Action, "True", TargetItems = "SaveAndNew", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&Close", AppearanceItemType = "Action", TargetItems = "SaveAndClose", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideCancel", AppearanceItemType.Action, "True", TargetItems = "Cancel", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideValidate", AppearanceItemType.Action, "True", TargetItems = "ShowAllContexts", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideResetViewSetting", AppearanceItemType.Action, "True", TargetItems = "ResetViewSettings", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideExport", AppearanceItemType.Action, "True", TargetItems = "Export", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideRefresh", AppearanceItemType.Action, "True", TargetItems = "Refresh", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+
+    [XafDisplayName("Container Tracking Inquiry (SP)")]
+    public class ContainerTrackingInquiry
+    {
+        [Key(AutoGenerate = true), Browsable(false)]
+        public int Oid;
+
+        [XafDisplayName("Date From")]
+        [Index(0), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public DateTime DateFrom { get; set; }
+
+        [XafDisplayName("Date To")]
+        [Index(1), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public DateTime DateTo { get; set; }
+
+        [XafDisplayName("Status")]
+        //[LookupEditorMode(LookupEditorMode.AllItems)]
+        [Index(2), VisibleInDetailView(true), VisibleInListView(true), VisibleInLookupListView(true)]
+        public InquiryCTStatus Status { get; set; }
+
+        public ContainerTrackingInquiry()
+        {
+            _Results = new BindingList<ContainerTrackingInquiryResult>();
+
+            DateTo = DateTime.Today;
+            DateFrom = DateTo.AddDays(-7);
+        }
+
+        private BindingList<ContainerTrackingInquiryResult> _Results;
+
+        public BindingList<ContainerTrackingInquiryResult> Results { get { return _Results; } }
+    }
+
+    [DomainComponent]
+    [NonPersistent]
+    [Appearance("HideNew", AppearanceItemType.Action, "True", TargetItems = "New", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideDelete", AppearanceItemType.Action, "True", TargetItems = "Delete", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideEdit", AppearanceItemType.Action, "True", TargetItems = "SwitchToEditMode; Edit", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideLink", AppearanceItemType.Action, "True", TargetItems = "Link", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideUnlink", AppearanceItemType.Action, "True", TargetItems = "Unlink", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave", AppearanceItemType.Action, "True", TargetItems = "Save", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideSave&New", AppearanceItemType.Action, "True", TargetItems = "SaveAndNew", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [Appearance("HideValidate", AppearanceItemType.Action, "True", TargetItems = "ShowAllContexts", Visibility = ViewItemVisibility.Hide, Context = "Any")]
+    [XafDisplayName("Container Tracking Inquiry Result")]
+    public class ContainerTrackingInquiryResult
+    {
+        [DevExpress.ExpressApp.Data.Key, Browsable(false)]
+        public string PriKey;
+
+        [XafDisplayName("Document No.")]
+        [Appearance("PortalNo", Enabled = false)]
+        [Index(3)]
+        public string PortalNo
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Doc. Date")]
+        [Appearance("DocDate", Enabled = false)]
+        [Index(4)]
+        public DateTime DocDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Status")]
+        [Appearance("Status", Enabled = false)]
+        [Index(5)]
+        public string Status
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Container No")]
+        [Appearance("ContainerNo", Enabled = false)]
+        [Index(8)]
+        public string ContainerNo
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Shipment Invoice No")]
+        [Appearance("ShipmentInvNo", Enabled = false)]
+        [Index(10)]
+        public string ShipmentInvNo
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Whse")]
+        [Appearance("Whse", Enabled = false)]
+        [Index(13)]
+        public string Whse
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Arrive Port Date")]
+        [Appearance("ArrivePortDate", Enabled = false)]
+        [Index(15)]
+        public DateTime ArrivePortDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Stake On Date")]
+        [Appearance("StakeOnDate", Enabled = false)]
+        [Index(18)]
+        public DateTime StakeOnDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Receive Gate Pass Date")]
+        [Appearance("RecvGatePassDate", Enabled = false)]
+        [Index(20)]
+        public DateTime RecvGatePassDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Pending Doc Days")]
+        [Appearance("PendingDocDays", Enabled = false)]
+        [Index(23)]
+        public int PendingDocDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Request Pull Out")]
+        [Appearance("ReqPullOut", Enabled = false)]
+        [Index(25)]
+        public DateTime ReqPullOut
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Actual Pull Out")]
+        [Appearance("ActualPullOut", Enabled = false)]
+        [Index(28)]
+        public DateTime ActualPullOut
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Storage Parking Days")]
+        [Appearance("StorageParkDays", Enabled = false)]
+        [Index(30)]
+        public int StorageParkDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Penalty Days")]
+        [Appearance("PenaltyDays", Enabled = false)]
+        [Index(33)]
+        public int PenaltyDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Request Return Back")]
+        [Appearance("ReqReturnBack", Enabled = false)]
+        [Index(35)]
+        public DateTime ReqReturnBack
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Actual Return Back")]
+        [Appearance("ActualReturnBack", Enabled = false)]
+        [Index(38)]
+        public DateTime ActualReturnBack
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Container Unload Days")]
+        [Appearance("ContainerUnloadDays", Enabled = false)]
+        [Index(40)]
+        public int ContainerUnloadDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("GRPO Complete Date")]
+        [Appearance("GRPOCompleteDate", Enabled = false)]
+        [Index(43)]
+        public DateTime GRPOCompleteDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("System Stock in Days")]
+        [Appearance("SystemStockinDays", Enabled = false)]
+        [Index(45)]
+        public int SystemStockinDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Demmurrage Free Days(DM)")]
+        [Appearance("DemmurrageFreeDays", Enabled = false)]
+        [Index(48)]
+        public int DemmurrageFreeDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Detention Free Days(DT)")]
+        [Appearance("DetentionFreeDays", Enabled = false)]
+        [Index(50)]
+        public int DetentionFreeDays
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Free Time Expiry")]
+        [Appearance("FreeTimeExpiry", Enabled = false)]
+        [Index(53)]
+        public int FreeTimeExpiry
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Remarks")]
+        [Appearance("Remarks", Enabled = false)]
+        [Index(55)]
+        public string Remarks
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Parking at Port(Days)")]
+        [Appearance("ParkingAtPort", Enabled = false)]
+        [Index(58)]
+        public int ParkingAtPort
+        {
+            get; set;
+        }
+
+        [XafDisplayName("DM Free Due Date")]
+        [Appearance("DMFreeDueDate", Enabled = false)]
+        [Index(60)]
+        public DateTime DMFreeDueDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("DT Free Due Date")]
+        [Appearance("DTFreeDueDate", Enabled = false)]
+        [Index(63)]
+        public DateTime DTFreeDueDate
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Storage Charge Day")]
+        [Appearance("StorageChargeDay", Enabled = false)]
+        [Index(65)]
+        public int StorageChargeDay
+        {
+            get; set;
+        }
+
+        [XafDisplayName("DM Free Delay Day")]
+        [Appearance("DMFreeDelayDay", Enabled = false)]
+        [Index(68)]
+        public int DMFreeDelayDay
+        {
+            get; set;
+        }
+
+        [XafDisplayName("DT Free Delay Day")]
+        [Appearance("DTFreeDelayDay", Enabled = false)]
+        [Index(70)]
+        public int DTFreeDelayDay
+        {
+            get; set;
+        }
+
+        [XafDisplayName("Oid")]
+        [Appearance("Oid", Enabled = false)]
+        [Index(73), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        public int Oid
+        {
+            get; set;
+        }
+    }
+    #endregion
+    // End ver 1.0.25
 }
