@@ -7,18 +7,20 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Web;
 using StarLaiPortal.Module.BusinessObjects;
 using StarLaiPortal.Module.BusinessObjects.Container_Tracking;
-using StarLaiPortal.Module.BusinessObjects.Pick_List;
 using System.Collections;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Web;
 using System;
+using DevExpress.ExpressApp.SystemModule;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 
 namespace StarLaiPortal.Module.Controllers
 {
     public partial class ContainerControllers : ViewController
     {
         GeneralControllers genCon;
+        private NewObjectViewController controller;
         public ContainerControllers()
         {
             InitializeComponent();
@@ -29,6 +31,24 @@ namespace StarLaiPortal.Module.Controllers
 
             this.CancelContainer.Active.SetItemValue("Enabled", false);
             this.PrintContainer.Active.SetItemValue("Enabled", false);
+
+            if (View.ObjectTypeInfo.Type == typeof(ContainerTracking))
+            {
+                PermissionPolicyRole header = ObjectSpace.FindObject<PermissionPolicyRole>(CriteriaOperator.Parse("IsCurrentUserInRole('ContainerHdrRole')"));
+
+                controller = Frame.GetController<NewObjectViewController>();
+                if (controller != null)
+                {
+                    if (header == null)
+                    {
+                        controller.Active["NewButton"] = false;
+                    }
+                    else
+                    {
+                        controller.Active["NewButton"] = true;
+                    }
+                }
+            }
         }
         protected override void OnViewControlsCreated()
         {
