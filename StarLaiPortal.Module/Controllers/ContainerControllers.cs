@@ -49,6 +49,14 @@ namespace StarLaiPortal.Module.Controllers
                     }
                 }
             }
+            else
+            {
+                controller = Frame.GetController<NewObjectViewController>();
+                if (controller != null)
+                {
+                    controller.Active["NewButton"] = true;
+                }
+            }
         }
         protected override void OnViewControlsCreated()
         {
