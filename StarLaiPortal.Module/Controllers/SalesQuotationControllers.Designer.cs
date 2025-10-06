@@ -191,7 +191,7 @@
             // 
             // CopyAddress
             // 
-            this.CopyAddress.Caption = "Copy To Recepient";
+            this.CopyAddress.Caption = "Copy To Recipient";
             this.CopyAddress.Category = "PopupActions";
             this.CopyAddress.ConfirmationMessage = null;
             this.CopyAddress.Id = "CopyAddress";

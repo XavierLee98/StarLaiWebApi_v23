@@ -46,6 +46,7 @@ using static System.Net.Mime.MediaTypeNames;
 // 2024-07-22 - check current on hand - ver 1.0.19
 // 2025-04-25 - not allow add detail after submit - ver 1.0.22
 // 2025-07-11 - Fix generate Doc num for SO - ver 1.0.23
+// 2025-10-06 - Fix copy to recepient button - ver 1.0.25
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -2227,6 +2228,14 @@ namespace StarLaiPortal.Module.Controllers
             {
                 sq.EIVCountryS = sq.Session.GetObjectByKey<vwCountry>(sq.EIVCountryB.Code);
             }
+            // Start ver 1.0.25
+            sq.EIVShippingTin = sq.EIVBuyerTIN;
+            sq.EIVShippingRegNum = sq.EIVBuyerRegNum;
+            if (sq.EIVBuyerRegTyp != null)
+            {
+                sq.EIVShippingRegTyp = sq.Session.GetObjectByKey<vwEIVRegType>(sq.EIVBuyerRegTyp.Code);
+            }
+            // End ver 1.0.25
         }
         // End ver 1.0.18
     }
