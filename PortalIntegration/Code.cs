@@ -263,7 +263,7 @@ namespace PortalIntegration
                                 newpldetails.PlanQty = dtl.Quantity;
                                 newpldetails.Customer = newpldetails.Session.GetObjectByKey<vwBusniessPartner>(getobj.Customer.BPCode);
                                 newpldetails.SOBaseDoc = getobj.DocNum;
-                                newpldetails.SOBaseId = getobj.Oid.ToString();
+                                newpldetails.SOBaseId = dtl.Oid.ToString();
                                 newpldetails.SOCreateDate = DateTime.Parse(getobj.CreateDate.ToString());
                                 newpldetails.SOExpectedDate = getobj.PostingDate;
                                 newpldetails.SORemarks = getobj.Remarks;
