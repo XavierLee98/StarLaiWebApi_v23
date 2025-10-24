@@ -13,6 +13,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
+// 2025-10-24 - Add Lead Time - ver 1.0.26
+
 namespace StarLaiPortal.Module.BusinessObjects.Setup
 {
     [DefaultClassOptions]
@@ -55,6 +57,32 @@ namespace StarLaiPortal.Module.BusinessObjects.Setup
                 SetPropertyValue("PriorityName", ref _PriorityName, value);
             }
         }
+
+        // Start ver 1.0.26
+        private int _LeadTime;
+        [XafDisplayName("Lead Time")]
+        [Index(5)]
+        public int LeadTime
+        {
+            get { return _LeadTime; }
+            set
+            {
+                SetPropertyValue("LeadTime", ref _LeadTime, value);
+            }
+        }
+
+        private int _MaxUrgentQty;
+        [XafDisplayName("Max Urgent Qty")]
+        [Index(6)]
+        public int MaxUrgentQty
+        {
+            get { return _MaxUrgentQty; }
+            set
+            {
+                SetPropertyValue("MaxUrgentQty", ref _MaxUrgentQty, value);
+            }
+        }
+        // End ver 1.0.26
 
         private bool _IsActive;
         [XafDisplayName("Active")]
