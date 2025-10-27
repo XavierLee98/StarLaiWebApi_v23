@@ -324,8 +324,8 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
         }
 
         private string _BaseId;
-        [XafDisplayName("BaseId")]
-        [Index(28), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [XafDisplayName("PO Line")]
+        [Index(28), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
         public string BaseId
         {
             get { return _BaseId; }
@@ -372,8 +372,8 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
         }
 
         private string _ASNPOBaseId;
-        [XafDisplayName("ASNBaseId")]
-        [Index(38), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [XafDisplayName("ASN PO Line")]
+        [Index(38), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
         public string ASNPOBaseId
         {
             get { return _ASNPOBaseId; }

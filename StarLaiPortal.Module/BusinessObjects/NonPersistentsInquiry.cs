@@ -4249,7 +4249,7 @@ namespace StarLaiPortal.Module.BusinessObjects
             get; set;
         }
 
-        [XafDisplayName("Available")]
+        [XafDisplayName("BIN QTY")]
         [DbType("numeric(18,6)")]
         [ModelDefault("DisplayFormat", "{0:n2}")]
         [Appearance("Available", Enabled = false)]

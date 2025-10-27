@@ -1943,7 +1943,10 @@
     </DetailView>
     <ListView Id="ItemBinInquiry_Results_ListView">
       <Columns>
+        <ColumnInfo Id="Quantity" Index="-1" />
         <ColumnInfo Id="ItemName" SortIndex="-1" SortOrder="None" />
+        <ColumnInfo Id="Available" Index="5" />
+        <ColumnInfo Id="UOM" Index="6" />
       </Columns>
     </ListView>
     <DetailView Id="ItemBinInquiryResult_DetailView" AllowEdit="False" />
