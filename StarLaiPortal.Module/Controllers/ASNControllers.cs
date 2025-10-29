@@ -38,6 +38,7 @@ using System.Web;
 // 2023-11-02 pass print user ver 1.0.12
 // 2023-12-04 avoid copy same asn ver 1.0.13
 // 2025-08-18 Add ASN Container Printing ver 1.0.24
+// 2025-10-29 add PO line Num ver 1.0.24
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -785,6 +786,9 @@ namespace StarLaiPortal.Module.Controllers
                         newgrnitem.ASNPOBaseDoc = dtl.BaseDoc.ToString();
                         newgrnitem.ASNPOBaseId = dtl.BaseId.ToString();
                         newgrnitem.BaseType = "ASN";
+                        // Start ver 1.0.24
+                        newgrnitem.ASNLineNo = (dtl.BaseId + 1).ToString();
+                        // End ver 1.0.24
 
                         newgrn.GRNDetails.Add(newgrnitem);
                     // Start ver 1.0.10
