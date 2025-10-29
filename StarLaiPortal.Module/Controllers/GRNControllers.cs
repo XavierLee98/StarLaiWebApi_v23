@@ -500,9 +500,10 @@ namespace StarLaiPortal.Module.Controllers
                                 newgrnitem.BaseType = "ASN";
                                 // Start ver 1.0.24
                                 newgrnitem.ASNLineNo = (dtl.BaseLine + 1).ToString();
+                                newgrnitem.POLineNo = (dtl.BaseLine + 1).ToString();
                                 // End ver 1.0.24
 
-                                grn.GRNDetails.Add(newgrnitem);
+                            grn.GRNDetails.Add(newgrnitem);
                             }
 
                             // Start ver 1.0.11

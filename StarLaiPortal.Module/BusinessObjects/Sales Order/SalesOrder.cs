@@ -21,6 +21,7 @@ using System.Text;
 // 2023-09-25 change date format ver 1.0.10
 // 2023-10-16 hide seach function ver 1.0.11
 // 2024-06-12 e-invoice - ver 1.0.18
+// 2025-10-29 add INTQuotation - ver 1.0.26
 
 namespace StarLaiPortal.Module.BusinessObjects.Sales_Order
 {
@@ -955,6 +956,22 @@ namespace StarLaiPortal.Module.BusinessObjects.Sales_Order
             }
             // End ver 1.0.8.1
         }
+
+        // Start ver 1.0.26
+        private string _INTQuotation;
+        [XafDisplayName("INT Quotation")]
+        [Index(110), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [Appearance("INTQuotation", Enabled = false)]
+        public string INTQuotation
+        {
+           
+            get { return _INTQuotation; }
+            set
+            {
+                SetPropertyValue("INTQuotation", ref _INTQuotation, value);
+            }
+        }
+        // End ver 1.0.26
 
         private bool _Sap;
         [XafDisplayName("Sap")]

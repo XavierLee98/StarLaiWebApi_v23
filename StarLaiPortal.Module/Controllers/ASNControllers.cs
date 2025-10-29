@@ -787,7 +787,8 @@ namespace StarLaiPortal.Module.Controllers
                         newgrnitem.ASNPOBaseId = dtl.BaseId.ToString();
                         newgrnitem.BaseType = "ASN";
                         // Start ver 1.0.24
-                        newgrnitem.ASNLineNo = (dtl.BaseId + 1).ToString();
+                        newgrnitem.ASNLineNo = (int.Parse(dtl.BaseId) + 1).ToString();
+                        newgrnitem.POLineNo = (int.Parse(dtl.BaseId) + 1).ToString();
                         // End ver 1.0.24
 
                         newgrn.GRNDetails.Add(newgrnitem);

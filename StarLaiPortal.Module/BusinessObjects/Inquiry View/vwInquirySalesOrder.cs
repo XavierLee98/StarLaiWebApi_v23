@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 
 // 2024-06-11 - hide search - ver 1.0.17
+// 2025-10-29 - add INTQuotation - ver 1.0.26
 
 namespace StarLaiPortal.Module.BusinessObjects.Inquiry_View
 {
@@ -203,6 +204,16 @@ namespace StarLaiPortal.Module.BusinessObjects.Inquiry_View
         {
             get; set;
         }
+
+        // Start ver 1.0.26
+        [XafDisplayName("INT Quotation")]
+        [Appearance("INTQuotation", Enabled = false)]
+        [Index(46)]
+        public string INTQuotation
+        {
+            get; set;
+        }
+        // End ver 1.0.26
 
         [XafDisplayName("SAP SO Status")]
         [Appearance("SAPStatus", Enabled = false)]

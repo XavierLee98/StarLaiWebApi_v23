@@ -400,7 +400,7 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
         private string _ASNLineNo;
         [XafDisplayName("ASN PO Line")]
         [Appearance("ASNLineNo", Enabled = false)]
-        [Index(43), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [Index(43), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
         public string ASNLineNo
         {
             get { return _ASNLineNo; }
