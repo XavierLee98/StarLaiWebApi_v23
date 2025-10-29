@@ -37,6 +37,7 @@ using System.Web;
 // 2023-12-04 add outstanding qty ver 1.0.13
 // 2025-07-21 enhance speed ver 1.0.23
 // 2025-08-18 not allow submit if PO line closed ver 1.0.24
+// 2025-10-29 add PO line Num ver 1.0.24
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -224,8 +225,11 @@ namespace StarLaiPortal.Module.Controllers
                             newgrnitem.BaseDoc = dtl.BaseEntry.ToString();
                             newgrnitem.BaseId = dtl.BaseLine.ToString();
                             newgrnitem.BaseType = "PO";
+                            // Start ver 1.0.24
+                            newgrnitem.POLineNo = (dtl.BaseLine + 1).ToString();
+                            // End ver 1.0.24
 
-                            grn.GRNDetails.Add(newgrnitem);
+                        grn.GRNDetails.Add(newgrnitem);
                         }
 
                         if (grn.DocNum == null)
@@ -494,6 +498,9 @@ namespace StarLaiPortal.Module.Controllers
                                 newgrnitem.ASNPOBaseDoc = dtl.BaseEntry.ToString();
                                 newgrnitem.ASNPOBaseId = dtl.BaseLine.ToString();
                                 newgrnitem.BaseType = "ASN";
+                                // Start ver 1.0.24
+                                newgrnitem.ASNLineNo = (dtl.BaseLine + 1).ToString();
+                                // End ver 1.0.24
 
                                 grn.GRNDetails.Add(newgrnitem);
                             }

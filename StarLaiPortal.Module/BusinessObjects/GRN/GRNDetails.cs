@@ -17,6 +17,7 @@ using System.Text;
 
 // 2023-08-25 remove validation for qty ver 1.0.9
 // 2024-06-01 allow to change warehouse ver 1.0.17
+// 2025-10-29 add PO line Num ver 1.0.24
 
 namespace StarLaiPortal.Module.BusinessObjects.GRN
 {
@@ -324,8 +325,8 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
         }
 
         private string _BaseId;
-        [XafDisplayName("PO Line")]
-        [Index(28), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [XafDisplayName("BaseId")]
+        [Index(28), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
         public string BaseId
         {
             get { return _BaseId; }
@@ -372,8 +373,8 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
         }
 
         private string _ASNPOBaseId;
-        [XafDisplayName("ASN PO Line")]
-        [Index(38), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        [XafDisplayName("ASNPOBaseId")]
+        [Index(38), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
         public string ASNPOBaseId
         {
             get { return _ASNPOBaseId; }
@@ -394,6 +395,34 @@ namespace StarLaiPortal.Module.BusinessObjects.GRN
                 SetPropertyValue("BaseType", ref _BaseType, value);
             }
         }
+
+        // Start ver 1.0.24
+        private string _ASNLineNo;
+        [XafDisplayName("ASN PO Line")]
+        [Appearance("ASNLineNo", Enabled = false)]
+        [Index(43), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        public string ASNLineNo
+        {
+            get { return _ASNLineNo; }
+            set
+            {
+                SetPropertyValue("ASNLineNo", ref _ASNLineNo, value);
+            }
+        }
+
+        private string _POLineNo;
+        [XafDisplayName("PO Line")]
+        [Appearance("POLineNo", Enabled = false)]
+        [Index(45), VisibleInListView(true), VisibleInDetailView(false), VisibleInLookupListView(false)]
+        public string POLineNo
+        {
+            get { return _POLineNo; }
+            set
+            {
+                SetPropertyValue("POLineNo", ref _POLineNo, value);
+            }
+        }
+        // End ver 1.0.24
 
         private int _OIDKey;
         [Index(80), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
