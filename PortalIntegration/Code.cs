@@ -2,6 +2,8 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Xpo;
+using DevExpress.Persistent.BaseImpl;
+using DevExpress.Utils.StructuredStorage.Internal.Reader;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DevExpress.XtraSpellChecker.Parser;
@@ -32,6 +34,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -61,6 +64,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 // 2025-07-11 Fix generate Doc num for SO - ver 1.0.23
 // 2025-08-18 Do not create Invoice for interco invoice- ver 1.0.24
 // 2025-09-12 Auto create picking for SO with transporter with OC type - ver 1.0.25
+// 2025-10-30 Auto create INT Quotation from B2B portal - ver 1.0.26
 
 namespace PortalIntegration
 {
@@ -2301,6 +2305,363 @@ namespace PortalIntegration
                 #endregion
                 }
                 // End ver 1.0.13
+
+                // Start ver 1.0.26
+                temp = ConfigurationManager.AppSettings["CreateINTQuo"].ToString().ToUpper();
+                if (temp == "Y" || temp == "YES" || temp == "TRUE" || temp == "1")
+                {
+                    #region Create INT Quotation
+
+                    // Location 1
+                    using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
+                    {
+                        daheader.SelectCommand.CommandTimeout = 0;
+                        daheader.SelectCommand.CommandText = "SELECT ISNULL(T0.DocNum,'') as DocNum, ISNULL(T0.Customer, '') as Customer, " +
+                            "ISNULL(T0.CustomerName, '') as CustomerName, " +
+                            "ISNULL(T0.Transporter, '') as Transporter, ISNULL(T0.ContactNo, '') as ContactNo, ISNULL(T0.ContactPerson, '') as ContactPerson, " +
+                            "ISNULL(T0.Balance, 0) as Balance, ISNULL(T0.PaymentTerm, '') as PaymentTerm, ISNULL(T0.Series, '') as Series, " +
+                            "ISNULL(T0.Priority, '') as Priority, ISNULL(T0.BillingAddress, '') as BillingAddress, " +
+                            "ISNULL(T0.BillingAddressfield, '') as BillingAddressfield, ISNULL(T0.ShippingAddress, '') as ShippingAddress, " +
+                            "ISNULL(T0.ShippingAddressfield, '') as ShippingAddressfield, ISNULL(T0.Remarks, '') as Remarks, " +
+                            "ISNULL(T0.Currency, 0) as Currency, ISNULL(T0.CurrencyRate, 1) as CurrencyRate, " +
+                            "ISNULL(T0.PriceChange, 0) as PriceChange, ISNULL(T0.ExceedPrice, 0) as ExceedPrice, " +
+                            "ISNULL(T0.ExceedCreditControl, 0) as ExceedCreditControl, ISNULL(T0.Attn, '') as Attn, ISNULL(T0.RefNo, '') as RefNo, " +
+                            "ISNULL(T0.EIVConsolidate, '') as EIVConsolidate, ISNULL(T0.EIVType, '') as EIVType, ISNULL(T0.EIVFreqSync, '') as EIVFreqSync, " +
+                            "ISNULL(T0.EIVBuyerName, '') as EIVBuyerName, " +
+                            "ISNULL(T0.EIVBuyerTIN, '') as EIVBuyerTIN, ISNULL(T0.EIVBuyerRegNum, '') as EIVBuyerRegNum, " +
+                            "ISNULL(T0.EIVBuyerRegTyp, '') as EIVBuyerRegTyp, ISNULL(T0.EIVBuyerSSTRegNum, '') as EIVBuyerSSTRegNum, " +
+                            "ISNULL(T0.EIVBuyerEmail, '') as EIVBuyerEmail, ISNULL(T0.EIVBuyerContact, '') as EIVBuyerContact, " +
+                            "ISNULL(T0.EIVAddressLine1B, '') as EIVAddressLine1B, ISNULL(T0.EIVAddressLine2B, '') as EIVAddressLine2B, " +
+                            "ISNULL(T0.EIVAddressLine3B, '') as EIVAddressLine3B, ISNULL(T0.EIVPostalZoneB, '') as EIVPostalZoneB, " +
+                            "ISNULL(T0.EIVCityNameB, '') as EIVCityNameB, ISNULL(T0.EIVStateB, '') as EIVStateB, ISNULL(T0.EIVCountryB, '') as EIVCountryB, " +
+                            "ISNULL(T0.EIVShippingName, '') as EIVShippingName, ISNULL(T0.EIVShippingTin, '') as EIVShippingTin, " +
+                            "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
+                            "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
+                            "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS " +
+                            "FROM SalesQuotation T0 " +
+                            "INNER JOIN SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T1.Loc1Quantity > 0 " +
+                            "AND T0.GCRecord is null";
+                        DataTable dtheader = new DataTable();
+                        daheader.Fill(dtheader);
+
+                        if (dtheader.Rows.Count > 0)
+                        {
+                            foreach (DataRow header in dtheader.Rows)
+                            {
+                                IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                                SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                                GeneralControllers genCon = new GeneralControllers();
+                                string docprefix = GetDocPrefix();
+                                newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                                if (header["Customer"].ToString() != "")
+                                {
+                                    newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(header["Customer"].ToString());
+                                }
+                                newSO.CustomerName = header["CustomerName"].ToString();
+                                if (header["Transporter"].ToString() != "")
+                                {
+                                    newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(header["Transporter"].ToString());
+                                }
+                                newSO.ContactNo = header["ContactNo"].ToString();
+                                if (header["ContactPerson"].ToString() != "")
+                                {
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(header["ContactPerson"].ToString());
+                                }
+                                if (header["PaymentTerm"].ToString() != null)
+                                {
+                                    newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
+                                }
+                                if (header["Series"].ToString() != null)
+                                {
+                                    newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
+                                }
+                                if (header["Priority"].ToString() != null)
+                                {
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(header["Priority"].ToString());
+                                }
+                                if (header["BillingAddress"].ToString() != null)
+                                {
+                                    newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
+                                }
+                                newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
+                                if (header["ShippingAddress"].ToString() != null)
+                                {
+                                    newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
+                                }
+                                newSO.ShippingAddressfield = header["ShippingAddressfield"].ToString();
+                                newSO.Remarks = header["Remarks"].ToString();
+                                newSO.Attn = header["Attn"].ToString();
+                                newSO.RefNo = header["RefNo"].ToString();
+                                newSO.SQNumber = header["DocNum"].ToString();
+
+                                // Buyer
+                                if (trx.EIVConsolidate != null)
+                                {
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", trx.EIVConsolidate.Code));
+                                }
+                                if (trx.EIVType != null)
+                                {
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", trx.EIVType.Code));
+                                }
+                                if (trx.EIVFreqSync != null)
+                                {
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", trx.EIVFreqSync.Code));
+                                }
+                                newSO.EIVBuyerName = trx.EIVBuyerName;
+                                newSO.EIVBuyerTIN = trx.EIVBuyerTIN;
+                                newSO.EIVBuyerRegNum = trx.EIVBuyerRegNum;
+                                if (trx.EIVBuyerRegTyp != null)
+                                {
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVBuyerRegTyp.Code));
+                                }
+                                newSO.EIVBuyerSSTRegNum = trx.EIVBuyerSSTRegNum;
+                                newSO.EIVBuyerEmail = trx.EIVBuyerEmail;
+                                newSO.EIVBuyerContact = trx.EIVBuyerContact;
+                                newSO.EIVAddressLine1B = trx.EIVAddressLine1B;
+                                newSO.EIVAddressLine2B = trx.EIVAddressLine2B;
+                                newSO.EIVAddressLine3B = trx.EIVAddressLine3B;
+                                newSO.EIVPostalZoneB = trx.EIVPostalZoneB;
+                                newSO.EIVCityNameB = trx.EIVCityNameB;
+                                if (trx.EIVStateB != null)
+                                {
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateB.Code));
+                                }
+                                if (trx.EIVCountryB != null)
+                                {
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryB.Code));
+                                }
+                                //Recipient
+                                newSO.EIVShippingName = trx.EIVShippingName;
+                                newSO.EIVShippingTin = trx.EIVShippingTin;
+                                newSO.EIVShippingRegNum = trx.EIVShippingRegNum;
+                                if (trx.EIVShippingRegTyp != null)
+                                {
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVShippingRegTyp.Code));
+                                }
+                                newSO.EIVAddressLine1S = trx.EIVAddressLine1S;
+                                newSO.EIVAddressLine2S = trx.EIVAddressLine2S;
+                                newSO.EIVAddressLine3S = trx.EIVAddressLine3S;
+                                newSO.EIVPostalZoneS = trx.EIVPostalZoneS;
+                                newSO.EIVCityNameS = trx.EIVCityNameS;
+                                if (trx.EIVStateS != null)
+                                {
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateS.Code));
+                                }
+                                if (trx.EIVCountryS != null)
+                                {
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryS.Code));
+                                }
+
+
+                                using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
+                                {
+                                    daline.SelectCommand.CommandTimeout = 0;
+                                    daline.SelectCommand.CommandText = "SELECT * FROM FTS_fn_ActualSalesInvoiceItem " +
+                                        "('" + ASVT.SlpCode.SlpCode + "', '" + ASVT.FromDate.Date.ToString("yyyy-MM-dd") + "', '" + ASVT.ToDate.Date.ToString("yyyy-MM-dd") + "', '" + dtrow["DocEntry"].ToString() + "')";
+                                    DataTable dtline = new DataTable();
+                                    daline.Fill(dtline);
+
+                                    if (dtline.Rows.Count > 0)
+                                    {
+                                        int itemrow = 1;
+                                        foreach (DataRow dtlinerow in dtline.Rows)
+                                        {
+                                            HT11ASVTPieCByItem listitem = new HT11ASVTPieCByItem();
+
+                                            listitem.Id = itemrow;
+                                            listitem.No = itemrow;
+                                            listitem.ItemCode = dtlinerow["ItemCode"].ToString();
+                                            listitem.ItemName = dtlinerow["ItemName"].ToString();
+                                            listitem.ItemCategory = dtlinerow["U_Category"].ToString();
+                                            listitem.BaseQty = decimal.Parse(dtlinerow["BaseQty"].ToString());
+                                            listitem.MTQty = decimal.Parse(dtlinerow["MTQty"].ToString());
+                                            listitem.UnitPrice = decimal.Parse(dtlinerow["UnitPrice"].ToString());
+                                            listitem.Discount = decimal.Parse(dtlinerow["Discount"].ToString());
+                                            listitem.Currency = dtlinerow["Currency"].ToString();
+                                            listitem.GrossAmt = decimal.Parse(dtlinerow["GrossAmt"].ToString());
+                                            listitem.NetAmount = decimal.Parse(dtlinerow["NetTotal"].ToString());
+
+                                            header.DetailsPieC.Add(listitem);
+
+                                            itemrow++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                    string getSQDoc = "SELECT T0.DocNum " +
+                    "FROM SalesQuotation T0 " +
+                    "LEFT JOIN SalesOrder T1 on T0.DocNum = T1.SQNumber " +
+                    "WHERE T1.OID is null AND T0.Status = 1 " +
+                    "AND (T0.AppStatus <> 3 and T0.AppStatus <> 2) AND CAST(T0.UpdateDate as date) = CAST(GETDATE() as date) " +
+                    "AND GETDATE() >= DATEADD(MINUTE, 10, T0.UpdateDate)";
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        conn.Close();
+                    }
+                    conn.Open();
+                    SqlCommand cmdsq = new SqlCommand(getSQDoc, conn);
+                    SqlDataReader readersq = cmdsq.ExecuteReader();
+                    while (readersq.Read())
+                    {
+                        IObjectSpace sqos = ObjectSpaceProvider.CreateObjectSpace();
+                        SalesQuotation trx = sqos.FindObject<SalesQuotation>(new BinaryOperator("DocNum", readersq.GetString(0)));
+
+                        if (trx != null)
+                        {
+                            #region Add SO
+                            IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                            SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                            GeneralControllers genCon = new GeneralControllers();
+                            string docprefix = GetDocPrefix();
+                            newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                            if (trx.Customer != null)
+                            {
+                                newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(trx.Customer.BPCode);
+                            }
+                            newSO.CustomerName = trx.CustomerName;
+                            if (trx.Transporter != null)
+                            {
+                                newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(trx.Transporter.TransporterID);
+                            }
+                            newSO.ContactNo = trx.ContactNo;
+                            if (trx.ContactPerson != null)
+                            {
+                                newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(trx.ContactPerson.SlpCode);
+                            }
+                            if (trx.PaymentTerm != null)
+                            {
+                                newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(trx.PaymentTerm.GroupNum);
+                            }
+                            if (trx.Series != null)
+                            {
+                                newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(trx.Series.Series);
+                            }
+                            if (trx.Priority != null)
+                            {
+                                newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(trx.Priority.Oid);
+                            }
+                            if (trx.BillingAddress != null)
+                            {
+                                newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(trx.BillingAddress.PriKey);
+                            }
+                            newSO.BillingAddressfield = trx.BillingAddressfield;
+                            if (trx.ShippingAddress != null)
+                            {
+                                newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(trx.ShippingAddress.PriKey);
+                            }
+                            newSO.ShippingAddressfield = trx.ShippingAddressfield;
+                            newSO.Remarks = trx.Remarks;
+                            newSO.Attn = trx.Attn;
+                            newSO.RefNo = trx.RefNo;
+                            // Start ver 1.0.8.1
+                            newSO.SQNumber = trx.DocNum;
+                            // End ver 1.0.8.1
+                            // Start ver 1.0.18
+                            // Buyer
+                            if (trx.EIVConsolidate != null)
+                            {
+                                newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", trx.EIVConsolidate.Code));
+                            }
+                            if (trx.EIVType != null)
+                            {
+                                newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", trx.EIVType.Code));
+                            }
+                            if (trx.EIVFreqSync != null)
+                            {
+                                newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", trx.EIVFreqSync.Code));
+                            }
+                            newSO.EIVBuyerName = trx.EIVBuyerName;
+                            newSO.EIVBuyerTIN = trx.EIVBuyerTIN;
+                            newSO.EIVBuyerRegNum = trx.EIVBuyerRegNum;
+                            if (trx.EIVBuyerRegTyp != null)
+                            {
+                                newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVBuyerRegTyp.Code));
+                            }
+                            newSO.EIVBuyerSSTRegNum = trx.EIVBuyerSSTRegNum;
+                            newSO.EIVBuyerEmail = trx.EIVBuyerEmail;
+                            newSO.EIVBuyerContact = trx.EIVBuyerContact;
+                            newSO.EIVAddressLine1B = trx.EIVAddressLine1B;
+                            newSO.EIVAddressLine2B = trx.EIVAddressLine2B;
+                            newSO.EIVAddressLine3B = trx.EIVAddressLine3B;
+                            newSO.EIVPostalZoneB = trx.EIVPostalZoneB;
+                            newSO.EIVCityNameB = trx.EIVCityNameB;
+                            if (trx.EIVStateB != null)
+                            {
+                                newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateB.Code));
+                            }
+                            if (trx.EIVCountryB != null)
+                            {
+                                newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryB.Code));
+                            }
+                            //Recipient
+                            newSO.EIVShippingName = trx.EIVShippingName;
+                            newSO.EIVShippingTin = trx.EIVShippingTin;
+                            newSO.EIVShippingRegNum = trx.EIVShippingRegNum;
+                            if (trx.EIVShippingRegTyp != null)
+                            {
+                                newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVShippingRegTyp.Code));
+                            }
+                            newSO.EIVAddressLine1S = trx.EIVAddressLine1S;
+                            newSO.EIVAddressLine2S = trx.EIVAddressLine2S;
+                            newSO.EIVAddressLine3S = trx.EIVAddressLine3S;
+                            newSO.EIVPostalZoneS = trx.EIVPostalZoneS;
+                            newSO.EIVCityNameS = trx.EIVCityNameS;
+                            if (trx.EIVStateS != null)
+                            {
+                                newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateS.Code));
+                            }
+                            if (trx.EIVCountryS != null)
+                            {
+                                newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryS.Code));
+                            }
+                            // End ver 1.0.18
+
+                            foreach (SalesQuotationDetails dtl in trx.SalesQuotationDetails)
+                            {
+                                SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
+
+                                newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(dtl.ItemCode.ItemCode);
+                                newsodetails.ItemDesc = dtl.ItemDesc;
+                                newsodetails.Model = dtl.Model;
+                                newsodetails.CatalogNo = dtl.CatalogNo;
+                                // Start ver 1.0.18
+                                if (dtl.EIVClassification != null)
+                                {
+                                    newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", dtl.EIVClassification.Code));
+                                }
+                                // End ver 1.0.18
+                                if (dtl.Location != null)
+                                {
+                                    newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(dtl.Location.WarehouseCode);
+                                }
+                                newsodetails.Quantity = dtl.Quantity;
+                                newsodetails.Price = dtl.Price;
+                                newsodetails.AdjustedPrice = dtl.AdjustedPrice;
+                                newsodetails.BaseDoc = trx.DocNum;
+                                newsodetails.BaseId = dtl.Oid.ToString();
+                                newSO.SalesOrderDetails.Add(newsodetails);
+                            }
+
+                            salesos.CommitChanges();
+                            #endregion
+                        }
+                    }
+                    cmdsq.Dispose();
+                    conn.Close();
+
+                    #endregion
+                }
+                // End ver 1.0.26
             }
             catch (Exception ex)
             {
