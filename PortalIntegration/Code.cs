@@ -1791,7 +1791,7 @@ namespace PortalIntegration
                 // End ver 1.0.12
 
                 #region Update SAP DocNum
-                    SqlCommand TransactionNotification = new SqlCommand("", conn);
+                SqlCommand TransactionNotification = new SqlCommand("", conn);
                 TransactionNotification.CommandTimeout = 600;
 
                 if (conn.State == ConnectionState.Open)
@@ -2312,7 +2312,12 @@ namespace PortalIntegration
                 {
                     #region Create INT Quotation
 
-                    // Location 1
+                    WriteLog("[INFO]", "--Create INT Quotation Start--");
+
+                    string UpdHeader = "";
+                    string UpdDetails = "";
+
+                    #region Location 1
                     using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
                     {
                         daheader.SelectCommand.CommandTimeout = 0;
@@ -2338,11 +2343,15 @@ namespace PortalIntegration
                             "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
                             "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
                             "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
-                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS " +
-                            "FROM SalesQuotation T0 " +
-                            "INNER JOIN SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
-                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T1.Loc1Quantity > 0 " +
-                            "AND T0.GCRecord is null";
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS, T0.OID " +
+                            "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                            "INNER JOIN (" +
+                            "SELECT D1.SalesQuotation FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation D0 " +
+                            "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails D1 on D0.OID = D1.SalesQuotation " +
+                            "WHERE D1.Loc1Quantity > 0 AND D1.GCRecord is null AND ISNULL(D0.GeneratedINT, 0) = 0 " +
+                            "GROUP BY D1.SalesQuotation " +
+                            ") T1 on T0.OID = T1.SalesQuotation " +
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T0.GCRecord is null";
                         DataTable dtheader = new DataTable();
                         daheader.Fill(dtheader);
 
@@ -2369,26 +2378,26 @@ namespace PortalIntegration
                                 newSO.ContactNo = header["ContactNo"].ToString();
                                 if (header["ContactPerson"].ToString() != "")
                                 {
-                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(header["ContactPerson"].ToString());
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(int.Parse(header["ContactPerson"].ToString()));
                                 }
-                                if (header["PaymentTerm"].ToString() != null)
+                                if (header["PaymentTerm"].ToString() != "")
                                 {
                                     newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
                                 }
-                                if (header["Series"].ToString() != null)
+                                if (header["Series"].ToString() != "")
                                 {
                                     newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
                                 }
-                                if (header["Priority"].ToString() != null)
+                                if (header["Priority"].ToString() != "")
                                 {
-                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(header["Priority"].ToString());
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(int.Parse(header["Priority"].ToString()));
                                 }
-                                if (header["BillingAddress"].ToString() != null)
+                                if (header["BillingAddress"].ToString() != "")
                                 {
                                     newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
                                 }
                                 newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
-                                if (header["ShippingAddress"].ToString() != null)
+                                if (header["ShippingAddress"].ToString() != "")
                                 {
                                     newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
                                 }
@@ -2399,265 +2408,1022 @@ namespace PortalIntegration
                                 newSO.SQNumber = header["DocNum"].ToString();
 
                                 // Buyer
-                                if (trx.EIVConsolidate != null)
+                                if (header["EIVConsolidate"].ToString() != "")
                                 {
-                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", trx.EIVConsolidate.Code));
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", header["EIVConsolidate"].ToString()));
                                 }
-                                if (trx.EIVType != null)
+                                if (header["EIVType"].ToString() != "")
                                 {
-                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", trx.EIVType.Code));
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", header["EIVType"].ToString()));
                                 }
-                                if (trx.EIVFreqSync != null)
+                                if (header["EIVFreqSync"].ToString() != "")
                                 {
-                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", trx.EIVFreqSync.Code));
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", header["EIVFreqSync"].ToString()));
                                 }
-                                newSO.EIVBuyerName = trx.EIVBuyerName;
-                                newSO.EIVBuyerTIN = trx.EIVBuyerTIN;
-                                newSO.EIVBuyerRegNum = trx.EIVBuyerRegNum;
-                                if (trx.EIVBuyerRegTyp != null)
+                                newSO.EIVBuyerName = header["EIVBuyerName"].ToString();
+                                newSO.EIVBuyerTIN = header["EIVBuyerTIN"].ToString();
+                                newSO.EIVBuyerRegNum = header["EIVBuyerRegNum"].ToString();
+                                if (header["EIVBuyerRegTyp"].ToString() != "")
                                 {
-                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVBuyerRegTyp.Code));
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVBuyerRegTyp"].ToString()));
                                 }
-                                newSO.EIVBuyerSSTRegNum = trx.EIVBuyerSSTRegNum;
-                                newSO.EIVBuyerEmail = trx.EIVBuyerEmail;
-                                newSO.EIVBuyerContact = trx.EIVBuyerContact;
-                                newSO.EIVAddressLine1B = trx.EIVAddressLine1B;
-                                newSO.EIVAddressLine2B = trx.EIVAddressLine2B;
-                                newSO.EIVAddressLine3B = trx.EIVAddressLine3B;
-                                newSO.EIVPostalZoneB = trx.EIVPostalZoneB;
-                                newSO.EIVCityNameB = trx.EIVCityNameB;
-                                if (trx.EIVStateB != null)
+                                newSO.EIVBuyerSSTRegNum = header["EIVBuyerSSTRegNum"].ToString();
+                                newSO.EIVBuyerEmail = header["EIVBuyerEmail"].ToString();
+                                newSO.EIVBuyerContact = header["EIVBuyerContact"].ToString();
+                                newSO.EIVAddressLine1B = header["EIVAddressLine1B"].ToString();
+                                newSO.EIVAddressLine2B = header["EIVAddressLine2B"].ToString();
+                                newSO.EIVAddressLine3B = header["EIVAddressLine3B"].ToString();
+                                newSO.EIVPostalZoneB = header["EIVPostalZoneB"].ToString();
+                                newSO.EIVCityNameB = header["EIVCityNameB"].ToString();
+                                if (header["EIVStateB"].ToString() != "")
                                 {
-                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateB.Code));
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateB"].ToString()));
                                 }
-                                if (trx.EIVCountryB != null)
+                                if (header["EIVCountryB"].ToString() != "")
                                 {
-                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryB.Code));
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryB"].ToString()));
                                 }
                                 //Recipient
-                                newSO.EIVShippingName = trx.EIVShippingName;
-                                newSO.EIVShippingTin = trx.EIVShippingTin;
-                                newSO.EIVShippingRegNum = trx.EIVShippingRegNum;
-                                if (trx.EIVShippingRegTyp != null)
+                                newSO.EIVShippingName = header["EIVShippingName"].ToString();
+                                newSO.EIVShippingTin = header["EIVShippingTin"].ToString();
+                                newSO.EIVShippingRegNum = header["EIVShippingRegNum"].ToString();
+                                if (header["EIVShippingRegTyp"].ToString() != "")
                                 {
-                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVShippingRegTyp.Code));
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVShippingRegTyp"].ToString()));
                                 }
-                                newSO.EIVAddressLine1S = trx.EIVAddressLine1S;
-                                newSO.EIVAddressLine2S = trx.EIVAddressLine2S;
-                                newSO.EIVAddressLine3S = trx.EIVAddressLine3S;
-                                newSO.EIVPostalZoneS = trx.EIVPostalZoneS;
-                                newSO.EIVCityNameS = trx.EIVCityNameS;
-                                if (trx.EIVStateS != null)
+                                newSO.EIVAddressLine1S = header["EIVAddressLine1S"].ToString();
+                                newSO.EIVAddressLine2S = header["EIVAddressLine2S"].ToString();
+                                newSO.EIVAddressLine3S = header["EIVAddressLine3S"].ToString();
+                                newSO.EIVPostalZoneS = header["EIVPostalZoneS"].ToString();
+                                newSO.EIVCityNameS = header["EIVCityNameS"].ToString();
+                                if (header["EIVStateS"].ToString() != "")
                                 {
-                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateS.Code));
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateS"].ToString()));
                                 }
-                                if (trx.EIVCountryS != null)
+                                if (header["EIVCountryS"].ToString() != "")
                                 {
-                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryS.Code));
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryS"].ToString()));
                                 }
-
 
                                 using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
                                 {
                                     daline.SelectCommand.CommandTimeout = 0;
-                                    daline.SelectCommand.CommandText = "SELECT * FROM FTS_fn_ActualSalesInvoiceItem " +
-                                        "('" + ASVT.SlpCode.SlpCode + "', '" + ASVT.FromDate.Date.ToString("yyyy-MM-dd") + "', '" + ASVT.ToDate.Date.ToString("yyyy-MM-dd") + "', '" + dtrow["DocEntry"].ToString() + "')";
+                                    daline.SelectCommand.CommandText = "SELECT ISNULL(T1.ItemCode, 0) as ItemCode, ISNULL(T1.LegacyItemCode, '') as LegacyItemCode, " +
+                                        "ISNULL(T1.ItemDesc, '') as ItemDesc, ISNULL(T1.Model, '') as Model, ISNULL(T1.CatalogNo, '') as CatalogNo, " +
+                                        "T1.Price, ISNULL(T1.EIVClassification, '') as EIVClassification, T1.Loc1Quantity, T1.OID, T0.DocNum, ISNULL(T2.Loc1, '') as Loc " +
+                                        "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SQDefaultWhs T2 on T0.DocType = T2.DocType " + 
+                                        "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc1Quantity > 0 " +
+                                        "AND ISNULL(T1.GeneratedLoc1, 0) = 0 AND T1.GCRecord is null ";
                                     DataTable dtline = new DataTable();
                                     daline.Fill(dtline);
 
                                     if (dtline.Rows.Count > 0)
                                     {
-                                        int itemrow = 1;
-                                        foreach (DataRow dtlinerow in dtline.Rows)
+                                        foreach (DataRow details in dtline.Rows)
                                         {
-                                            HT11ASVTPieCByItem listitem = new HT11ASVTPieCByItem();
+                                            SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
 
-                                            listitem.Id = itemrow;
-                                            listitem.No = itemrow;
-                                            listitem.ItemCode = dtlinerow["ItemCode"].ToString();
-                                            listitem.ItemName = dtlinerow["ItemName"].ToString();
-                                            listitem.ItemCategory = dtlinerow["U_Category"].ToString();
-                                            listitem.BaseQty = decimal.Parse(dtlinerow["BaseQty"].ToString());
-                                            listitem.MTQty = decimal.Parse(dtlinerow["MTQty"].ToString());
-                                            listitem.UnitPrice = decimal.Parse(dtlinerow["UnitPrice"].ToString());
-                                            listitem.Discount = decimal.Parse(dtlinerow["Discount"].ToString());
-                                            listitem.Currency = dtlinerow["Currency"].ToString();
-                                            listitem.GrossAmt = decimal.Parse(dtlinerow["GrossAmt"].ToString());
-                                            listitem.NetAmount = decimal.Parse(dtlinerow["NetTotal"].ToString());
-
-                                            header.DetailsPieC.Add(listitem);
-
-                                            itemrow++;
+                                            newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(details["ItemCode"].ToString());
+                                            newsodetails.ItemDesc = details["ItemDesc"].ToString();
+                                            newsodetails.Model = details["Model"].ToString();
+                                            newsodetails.CatalogNo = details["CatalogNo"].ToString();
+                                            if (details["EIVClassification"].ToString() != "")
+                                            {
+                                                newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", details["EIVClassification"].ToString()));
+                                            }
+                                            if (details["Loc"].ToString() != "")
+                                            {
+                                                newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(details["Loc"].ToString());
+                                            }
+                                            newsodetails.Quantity = decimal.Parse(details["Loc1Quantity"].ToString());
+                                            newsodetails.Price = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.AdjustedPrice = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.BaseDoc = details["DocNum"].ToString();
+                                            newsodetails.BaseId = details["OID"].ToString();
+                                            newSO.SalesOrderDetails.Add(newsodetails);
                                         }
                                     }
                                 }
+
+                                salesos.CommitChanges();
+
+                                #region Update INT Quotation Details Status
+                                UpdDetails = "UPDATE T1 SET T1.GeneratedLoc1 = 1  " +
+                                    "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                    "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                    "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc1Quantity > 0 " +
+                                    "AND ISNULL(T1.GeneratedLoc1, 0) = 0 AND T1.GCRecord is null ";
+                                if (conn.State == ConnectionState.Open)
+                                {
+                                    conn.Close();
+                                }
+                                conn.Open();
+                                SqlCommand cmdupdLoc1 = new SqlCommand(UpdDetails, conn);
+                                SqlDataReader readerupdLoc1 = cmdupdLoc1.ExecuteReader();
+                                cmdupdLoc1.Dispose();
+                                conn.Close();
+                                #endregion
                             }
                         }
                     }
+                    #endregion
 
+                    #region Location 2
+                    using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
+                    {
+                        daheader.SelectCommand.CommandTimeout = 0;
+                        daheader.SelectCommand.CommandText = "SELECT ISNULL(T0.DocNum,'') as DocNum, ISNULL(T0.Customer, '') as Customer, " +
+                            "ISNULL(T0.CustomerName, '') as CustomerName, " +
+                            "ISNULL(T0.Transporter, '') as Transporter, ISNULL(T0.ContactNo, '') as ContactNo, ISNULL(T0.ContactPerson, '') as ContactPerson, " +
+                            "ISNULL(T0.Balance, 0) as Balance, ISNULL(T0.PaymentTerm, '') as PaymentTerm, ISNULL(T0.Series, '') as Series, " +
+                            "ISNULL(T0.Priority, '') as Priority, ISNULL(T0.BillingAddress, '') as BillingAddress, " +
+                            "ISNULL(T0.BillingAddressfield, '') as BillingAddressfield, ISNULL(T0.ShippingAddress, '') as ShippingAddress, " +
+                            "ISNULL(T0.ShippingAddressfield, '') as ShippingAddressfield, ISNULL(T0.Remarks, '') as Remarks, " +
+                            "ISNULL(T0.Currency, 0) as Currency, ISNULL(T0.CurrencyRate, 1) as CurrencyRate, " +
+                            "ISNULL(T0.PriceChange, 0) as PriceChange, ISNULL(T0.ExceedPrice, 0) as ExceedPrice, " +
+                            "ISNULL(T0.ExceedCreditControl, 0) as ExceedCreditControl, ISNULL(T0.Attn, '') as Attn, ISNULL(T0.RefNo, '') as RefNo, " +
+                            "ISNULL(T0.EIVConsolidate, '') as EIVConsolidate, ISNULL(T0.EIVType, '') as EIVType, ISNULL(T0.EIVFreqSync, '') as EIVFreqSync, " +
+                            "ISNULL(T0.EIVBuyerName, '') as EIVBuyerName, " +
+                            "ISNULL(T0.EIVBuyerTIN, '') as EIVBuyerTIN, ISNULL(T0.EIVBuyerRegNum, '') as EIVBuyerRegNum, " +
+                            "ISNULL(T0.EIVBuyerRegTyp, '') as EIVBuyerRegTyp, ISNULL(T0.EIVBuyerSSTRegNum, '') as EIVBuyerSSTRegNum, " +
+                            "ISNULL(T0.EIVBuyerEmail, '') as EIVBuyerEmail, ISNULL(T0.EIVBuyerContact, '') as EIVBuyerContact, " +
+                            "ISNULL(T0.EIVAddressLine1B, '') as EIVAddressLine1B, ISNULL(T0.EIVAddressLine2B, '') as EIVAddressLine2B, " +
+                            "ISNULL(T0.EIVAddressLine3B, '') as EIVAddressLine3B, ISNULL(T0.EIVPostalZoneB, '') as EIVPostalZoneB, " +
+                            "ISNULL(T0.EIVCityNameB, '') as EIVCityNameB, ISNULL(T0.EIVStateB, '') as EIVStateB, ISNULL(T0.EIVCountryB, '') as EIVCountryB, " +
+                            "ISNULL(T0.EIVShippingName, '') as EIVShippingName, ISNULL(T0.EIVShippingTin, '') as EIVShippingTin, " +
+                            "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
+                            "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
+                            "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS, T0.OID " +
+                            "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                            "INNER JOIN (" +
+                            "SELECT D1.SalesQuotation FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation D0 " +
+                            "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails D1 on D0.OID = D1.SalesQuotation " +
+                            "WHERE D1.Loc2Quantity > 0 AND D1.GCRecord is null AND ISNULL(D0.GeneratedINT, 0) = 0 " +
+                            "GROUP BY D1.SalesQuotation " +
+                            ") T1 on T0.OID = T1.SalesQuotation " +
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T0.GCRecord is null";
+                        DataTable dtheader = new DataTable();
+                        daheader.Fill(dtheader);
 
-                    string getSQDoc = "SELECT T0.DocNum " +
-                    "FROM SalesQuotation T0 " +
-                    "LEFT JOIN SalesOrder T1 on T0.DocNum = T1.SQNumber " +
-                    "WHERE T1.OID is null AND T0.Status = 1 " +
-                    "AND (T0.AppStatus <> 3 and T0.AppStatus <> 2) AND CAST(T0.UpdateDate as date) = CAST(GETDATE() as date) " +
-                    "AND GETDATE() >= DATEADD(MINUTE, 10, T0.UpdateDate)";
+                        if (dtheader.Rows.Count > 0)
+                        {
+                            foreach (DataRow header in dtheader.Rows)
+                            {
+                                IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                                SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                                GeneralControllers genCon = new GeneralControllers();
+                                string docprefix = GetDocPrefix();
+                                newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                                if (header["Customer"].ToString() != "")
+                                {
+                                    newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(header["Customer"].ToString());
+                                }
+                                newSO.CustomerName = header["CustomerName"].ToString();
+                                if (header["Transporter"].ToString() != "")
+                                {
+                                    newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(header["Transporter"].ToString());
+                                }
+                                newSO.ContactNo = header["ContactNo"].ToString();
+                                if (header["ContactPerson"].ToString() != "")
+                                {
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(int.Parse(header["ContactPerson"].ToString()));
+                                }
+                                if (header["PaymentTerm"].ToString() != "")
+                                {
+                                    newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
+                                }
+                                if (header["Series"].ToString() != "")
+                                {
+                                    newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
+                                }
+                                if (header["Priority"].ToString() != "")
+                                {
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(int.Parse(header["Priority"].ToString()));
+                                }
+                                if (header["BillingAddress"].ToString() != "")
+                                {
+                                    newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
+                                }
+                                newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
+                                if (header["ShippingAddress"].ToString() != "")
+                                {
+                                    newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
+                                }
+                                newSO.ShippingAddressfield = header["ShippingAddressfield"].ToString();
+                                newSO.Remarks = header["Remarks"].ToString();
+                                newSO.Attn = header["Attn"].ToString();
+                                newSO.RefNo = header["RefNo"].ToString();
+                                newSO.SQNumber = header["DocNum"].ToString();
+
+                                // Buyer
+                                if (header["EIVConsolidate"].ToString() != "")
+                                {
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", header["EIVConsolidate"].ToString()));
+                                }
+                                if (header["EIVType"].ToString() != "")
+                                {
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", header["EIVType"].ToString()));
+                                }
+                                if (header["EIVFreqSync"].ToString() != "")
+                                {
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", header["EIVFreqSync"].ToString()));
+                                }
+                                newSO.EIVBuyerName = header["EIVBuyerName"].ToString();
+                                newSO.EIVBuyerTIN = header["EIVBuyerTIN"].ToString();
+                                newSO.EIVBuyerRegNum = header["EIVBuyerRegNum"].ToString();
+                                if (header["EIVBuyerRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVBuyerRegTyp"].ToString()));
+                                }
+                                newSO.EIVBuyerSSTRegNum = header["EIVBuyerSSTRegNum"].ToString();
+                                newSO.EIVBuyerEmail = header["EIVBuyerEmail"].ToString();
+                                newSO.EIVBuyerContact = header["EIVBuyerContact"].ToString();
+                                newSO.EIVAddressLine1B = header["EIVAddressLine1B"].ToString();
+                                newSO.EIVAddressLine2B = header["EIVAddressLine2B"].ToString();
+                                newSO.EIVAddressLine3B = header["EIVAddressLine3B"].ToString();
+                                newSO.EIVPostalZoneB = header["EIVPostalZoneB"].ToString();
+                                newSO.EIVCityNameB = header["EIVCityNameB"].ToString();
+                                if (header["EIVStateB"].ToString() != "")
+                                {
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateB"].ToString()));
+                                }
+                                if (header["EIVCountryB"].ToString() != "")
+                                {
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryB"].ToString()));
+                                }
+                                //Recipient
+                                newSO.EIVShippingName = header["EIVShippingName"].ToString();
+                                newSO.EIVShippingTin = header["EIVShippingTin"].ToString();
+                                newSO.EIVShippingRegNum = header["EIVShippingRegNum"].ToString();
+                                if (header["EIVShippingRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVShippingRegTyp"].ToString()));
+                                }
+                                newSO.EIVAddressLine1S = header["EIVAddressLine1S"].ToString();
+                                newSO.EIVAddressLine2S = header["EIVAddressLine2S"].ToString();
+                                newSO.EIVAddressLine3S = header["EIVAddressLine3S"].ToString();
+                                newSO.EIVPostalZoneS = header["EIVPostalZoneS"].ToString();
+                                newSO.EIVCityNameS = header["EIVCityNameS"].ToString();
+                                if (header["EIVStateS"].ToString() != "")
+                                {
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateS"].ToString()));
+                                }
+                                if (header["EIVCountryS"].ToString() != "")
+                                {
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryS"].ToString()));
+                                }
+
+                                using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
+                                {
+                                    daline.SelectCommand.CommandTimeout = 0;
+                                    daline.SelectCommand.CommandText = "SELECT ISNULL(T1.ItemCode, 0) as ItemCode, ISNULL(T1.LegacyItemCode, '') as LegacyItemCode, " +
+                                        "ISNULL(T1.ItemDesc, '') as ItemDesc, ISNULL(T1.Model, '') as Model, ISNULL(T1.CatalogNo, '') as CatalogNo, " +
+                                        "T1.Price, ISNULL(T1.EIVClassification, '') as EIVClassification, T1.Loc2Quantity, T1.OID, T0.DocNum, ISNULL(T2.Loc2, '') as Loc " +
+                                        "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SQDefaultWhs T2 on T0.DocType = T2.DocType " +
+                                        "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc2Quantity > 0 " +
+                                        "AND ISNULL(T1.GeneratedLoc2, 0) = 0 AND T1.GCRecord is null ";
+                                    DataTable dtline = new DataTable();
+                                    daline.Fill(dtline);
+
+                                    if (dtline.Rows.Count > 0)
+                                    {
+                                        foreach (DataRow details in dtline.Rows)
+                                        {
+                                            SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
+
+                                            newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(details["ItemCode"].ToString());
+                                            newsodetails.ItemDesc = details["ItemDesc"].ToString();
+                                            newsodetails.Model = details["Model"].ToString();
+                                            newsodetails.CatalogNo = details["CatalogNo"].ToString();
+                                            if (details["EIVClassification"].ToString() != "")
+                                            {
+                                                newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", details["EIVClassification"].ToString()));
+                                            }
+                                            if (details["Loc"].ToString() != "")
+                                            {
+                                                newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(details["Loc"].ToString());
+                                            }
+                                            newsodetails.Quantity = decimal.Parse(details["Loc2Quantity"].ToString());
+                                            newsodetails.Price = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.AdjustedPrice = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.BaseDoc = details["DocNum"].ToString();
+                                            newsodetails.BaseId = details["OID"].ToString();
+                                            newSO.SalesOrderDetails.Add(newsodetails);
+                                        }
+                                    }
+                                }
+
+                                salesos.CommitChanges();
+
+                                #region Update INT Quotation Details Status
+                                UpdDetails = "UPDATE T1 SET T1.GeneratedLoc2 = 1  " +
+                                    "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                    "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                    "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc2Quantity > 0 " +
+                                    "AND ISNULL(T1.GeneratedLoc2, 0) = 0 AND T1.GCRecord is null ";
+                                if (conn.State == ConnectionState.Open)
+                                {
+                                    conn.Close();
+                                }
+                                conn.Open();
+                                SqlCommand cmdupdLoc2 = new SqlCommand(UpdDetails, conn);
+                                SqlDataReader readerupdLoc2 = cmdupdLoc2.ExecuteReader();
+                                cmdupdLoc2.Dispose();
+                                conn.Close();
+                                #endregion
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Location 3
+                    using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
+                    {
+                        daheader.SelectCommand.CommandTimeout = 0;
+                        daheader.SelectCommand.CommandText = "SELECT ISNULL(T0.DocNum,'') as DocNum, ISNULL(T0.Customer, '') as Customer, " +
+                            "ISNULL(T0.CustomerName, '') as CustomerName, " +
+                            "ISNULL(T0.Transporter, '') as Transporter, ISNULL(T0.ContactNo, '') as ContactNo, ISNULL(T0.ContactPerson, '') as ContactPerson, " +
+                            "ISNULL(T0.Balance, 0) as Balance, ISNULL(T0.PaymentTerm, '') as PaymentTerm, ISNULL(T0.Series, '') as Series, " +
+                            "ISNULL(T0.Priority, '') as Priority, ISNULL(T0.BillingAddress, '') as BillingAddress, " +
+                            "ISNULL(T0.BillingAddressfield, '') as BillingAddressfield, ISNULL(T0.ShippingAddress, '') as ShippingAddress, " +
+                            "ISNULL(T0.ShippingAddressfield, '') as ShippingAddressfield, ISNULL(T0.Remarks, '') as Remarks, " +
+                            "ISNULL(T0.Currency, 0) as Currency, ISNULL(T0.CurrencyRate, 1) as CurrencyRate, " +
+                            "ISNULL(T0.PriceChange, 0) as PriceChange, ISNULL(T0.ExceedPrice, 0) as ExceedPrice, " +
+                            "ISNULL(T0.ExceedCreditControl, 0) as ExceedCreditControl, ISNULL(T0.Attn, '') as Attn, ISNULL(T0.RefNo, '') as RefNo, " +
+                            "ISNULL(T0.EIVConsolidate, '') as EIVConsolidate, ISNULL(T0.EIVType, '') as EIVType, ISNULL(T0.EIVFreqSync, '') as EIVFreqSync, " +
+                            "ISNULL(T0.EIVBuyerName, '') as EIVBuyerName, " +
+                            "ISNULL(T0.EIVBuyerTIN, '') as EIVBuyerTIN, ISNULL(T0.EIVBuyerRegNum, '') as EIVBuyerRegNum, " +
+                            "ISNULL(T0.EIVBuyerRegTyp, '') as EIVBuyerRegTyp, ISNULL(T0.EIVBuyerSSTRegNum, '') as EIVBuyerSSTRegNum, " +
+                            "ISNULL(T0.EIVBuyerEmail, '') as EIVBuyerEmail, ISNULL(T0.EIVBuyerContact, '') as EIVBuyerContact, " +
+                            "ISNULL(T0.EIVAddressLine1B, '') as EIVAddressLine1B, ISNULL(T0.EIVAddressLine2B, '') as EIVAddressLine2B, " +
+                            "ISNULL(T0.EIVAddressLine3B, '') as EIVAddressLine3B, ISNULL(T0.EIVPostalZoneB, '') as EIVPostalZoneB, " +
+                            "ISNULL(T0.EIVCityNameB, '') as EIVCityNameB, ISNULL(T0.EIVStateB, '') as EIVStateB, ISNULL(T0.EIVCountryB, '') as EIVCountryB, " +
+                            "ISNULL(T0.EIVShippingName, '') as EIVShippingName, ISNULL(T0.EIVShippingTin, '') as EIVShippingTin, " +
+                            "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
+                            "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
+                            "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS, T0.OID " +
+                            "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                            "INNER JOIN (" +
+                            "SELECT D1.SalesQuotation FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation D0 " +
+                            "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails D1 on D0.OID = D1.SalesQuotation " +
+                            "WHERE D1.Loc3Quantity > 0 AND D1.GCRecord is null AND ISNULL(D0.GeneratedINT, 0) = 0 " +
+                            "GROUP BY D1.SalesQuotation " +
+                            ") T1 on T0.OID = T1.SalesQuotation " + 
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T0.GCRecord is null";
+                        DataTable dtheader = new DataTable();
+                        daheader.Fill(dtheader);
+
+                        if (dtheader.Rows.Count > 0)
+                        {
+                            foreach (DataRow header in dtheader.Rows)
+                            {
+                                IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                                SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                                GeneralControllers genCon = new GeneralControllers();
+                                string docprefix = GetDocPrefix();
+                                newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                                if (header["Customer"].ToString() != "")
+                                {
+                                    newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(header["Customer"].ToString());
+                                }
+                                newSO.CustomerName = header["CustomerName"].ToString();
+                                if (header["Transporter"].ToString() != "")
+                                {
+                                    newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(header["Transporter"].ToString());
+                                }
+                                newSO.ContactNo = header["ContactNo"].ToString();
+                                if (header["ContactPerson"].ToString() != "")
+                                {
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(int.Parse(header["ContactPerson"].ToString()));
+                                }
+                                if (header["PaymentTerm"].ToString() != "")
+                                {
+                                    newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
+                                }
+                                if (header["Series"].ToString() != "")
+                                {
+                                    newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
+                                }
+                                if (header["Priority"].ToString() != "")
+                                {
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(int.Parse(header["Priority"].ToString()));
+                                }
+                                if (header["BillingAddress"].ToString() != "")
+                                {
+                                    newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
+                                }
+                                newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
+                                if (header["ShippingAddress"].ToString() != "")
+                                {
+                                    newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
+                                }
+                                newSO.ShippingAddressfield = header["ShippingAddressfield"].ToString();
+                                newSO.Remarks = header["Remarks"].ToString();
+                                newSO.Attn = header["Attn"].ToString();
+                                newSO.RefNo = header["RefNo"].ToString();
+                                newSO.SQNumber = header["DocNum"].ToString();
+
+                                // Buyer
+                                if (header["EIVConsolidate"].ToString() != "")
+                                {
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", header["EIVConsolidate"].ToString()));
+                                }
+                                if (header["EIVType"].ToString() != "")
+                                {
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", header["EIVType"].ToString()));
+                                }
+                                if (header["EIVFreqSync"].ToString() != "")
+                                {
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", header["EIVFreqSync"].ToString()));
+                                }
+                                newSO.EIVBuyerName = header["EIVBuyerName"].ToString();
+                                newSO.EIVBuyerTIN = header["EIVBuyerTIN"].ToString();
+                                newSO.EIVBuyerRegNum = header["EIVBuyerRegNum"].ToString();
+                                if (header["EIVBuyerRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVBuyerRegTyp"].ToString()));
+                                }
+                                newSO.EIVBuyerSSTRegNum = header["EIVBuyerSSTRegNum"].ToString();
+                                newSO.EIVBuyerEmail = header["EIVBuyerEmail"].ToString();
+                                newSO.EIVBuyerContact = header["EIVBuyerContact"].ToString();
+                                newSO.EIVAddressLine1B = header["EIVAddressLine1B"].ToString();
+                                newSO.EIVAddressLine2B = header["EIVAddressLine2B"].ToString();
+                                newSO.EIVAddressLine3B = header["EIVAddressLine3B"].ToString();
+                                newSO.EIVPostalZoneB = header["EIVPostalZoneB"].ToString();
+                                newSO.EIVCityNameB = header["EIVCityNameB"].ToString();
+                                if (header["EIVStateB"].ToString() != "")
+                                {
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateB"].ToString()));
+                                }
+                                if (header["EIVCountryB"].ToString() != "")
+                                {
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryB"].ToString()));
+                                }
+                                //Recipient
+                                newSO.EIVShippingName = header["EIVShippingName"].ToString();
+                                newSO.EIVShippingTin = header["EIVShippingTin"].ToString();
+                                newSO.EIVShippingRegNum = header["EIVShippingRegNum"].ToString();
+                                if (header["EIVShippingRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVShippingRegTyp"].ToString()));
+                                }
+                                newSO.EIVAddressLine1S = header["EIVAddressLine1S"].ToString();
+                                newSO.EIVAddressLine2S = header["EIVAddressLine2S"].ToString();
+                                newSO.EIVAddressLine3S = header["EIVAddressLine3S"].ToString();
+                                newSO.EIVPostalZoneS = header["EIVPostalZoneS"].ToString();
+                                newSO.EIVCityNameS = header["EIVCityNameS"].ToString();
+                                if (header["EIVStateS"].ToString() != "")
+                                {
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateS"].ToString()));
+                                }
+                                if (header["EIVCountryS"].ToString() != "")
+                                {
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryS"].ToString()));
+                                }
+
+                                using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
+                                {
+                                    daline.SelectCommand.CommandTimeout = 0;
+                                    daline.SelectCommand.CommandText = "SELECT ISNULL(T1.ItemCode, 0) as ItemCode, ISNULL(T1.LegacyItemCode, '') as LegacyItemCode, " +
+                                        "ISNULL(T1.ItemDesc, '') as ItemDesc, ISNULL(T1.Model, '') as Model, ISNULL(T1.CatalogNo, '') as CatalogNo, " +
+                                        "T1.Price, ISNULL(T1.EIVClassification, '') as EIVClassification, T1.Loc3Quantity, T1.OID, T0.DocNum, ISNULL(T2.Loc3, '') as Loc " +
+                                        "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SQDefaultWhs T2 on T0.DocType = T2.DocType " +
+                                        "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc3Quantity > 0 " +
+                                        "AND ISNULL(T1.GeneratedLoc3, 0) = 0 AND T1.GCRecord is null ";
+                                    DataTable dtline = new DataTable();
+                                    daline.Fill(dtline);
+
+                                    if (dtline.Rows.Count > 0)
+                                    {
+                                        foreach (DataRow details in dtline.Rows)
+                                        {
+                                            SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
+
+                                            newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(details["ItemCode"].ToString());
+                                            newsodetails.ItemDesc = details["ItemDesc"].ToString();
+                                            newsodetails.Model = details["Model"].ToString();
+                                            newsodetails.CatalogNo = details["CatalogNo"].ToString();
+                                            if (details["EIVClassification"].ToString() != "")
+                                            {
+                                                newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", details["EIVClassification"].ToString()));
+                                            }
+                                            if (details["Loc"].ToString() != "")
+                                            {
+                                                newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(details["Loc"].ToString());
+                                            }
+                                            newsodetails.Quantity = decimal.Parse(details["Loc3Quantity"].ToString());
+                                            newsodetails.Price = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.AdjustedPrice = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.BaseDoc = details["DocNum"].ToString();
+                                            newsodetails.BaseId = details["OID"].ToString();
+                                            newSO.SalesOrderDetails.Add(newsodetails);
+                                        }
+                                    }
+                                }
+
+                                salesos.CommitChanges();
+
+                                #region Update INT Quotation Details Status
+                                UpdDetails = "UPDATE T1 SET T1.GeneratedLoc3 = 1  " +
+                                    "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                    "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                    "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc3Quantity > 0 " +
+                                    "AND ISNULL(T1.GeneratedLoc3, 0) = 0 AND T1.GCRecord is null ";
+                                if (conn.State == ConnectionState.Open)
+                                {
+                                    conn.Close();
+                                }
+                                conn.Open();
+                                SqlCommand cmdupdLoc3 = new SqlCommand(UpdDetails, conn);
+                                SqlDataReader readerupdLoc3 = cmdupdLoc3.ExecuteReader();
+                                cmdupdLoc3.Dispose();
+                                conn.Close();
+                                #endregion
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Location 4
+                    using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
+                    {
+                        daheader.SelectCommand.CommandTimeout = 0;
+                        daheader.SelectCommand.CommandText = "SELECT ISNULL(T0.DocNum,'') as DocNum, ISNULL(T0.Customer, '') as Customer, " +
+                            "ISNULL(T0.CustomerName, '') as CustomerName, " +
+                            "ISNULL(T0.Transporter, '') as Transporter, ISNULL(T0.ContactNo, '') as ContactNo, ISNULL(T0.ContactPerson, '') as ContactPerson, " +
+                            "ISNULL(T0.Balance, 0) as Balance, ISNULL(T0.PaymentTerm, '') as PaymentTerm, ISNULL(T0.Series, '') as Series, " +
+                            "ISNULL(T0.Priority, '') as Priority, ISNULL(T0.BillingAddress, '') as BillingAddress, " +
+                            "ISNULL(T0.BillingAddressfield, '') as BillingAddressfield, ISNULL(T0.ShippingAddress, '') as ShippingAddress, " +
+                            "ISNULL(T0.ShippingAddressfield, '') as ShippingAddressfield, ISNULL(T0.Remarks, '') as Remarks, " +
+                            "ISNULL(T0.Currency, 0) as Currency, ISNULL(T0.CurrencyRate, 1) as CurrencyRate, " +
+                            "ISNULL(T0.PriceChange, 0) as PriceChange, ISNULL(T0.ExceedPrice, 0) as ExceedPrice, " +
+                            "ISNULL(T0.ExceedCreditControl, 0) as ExceedCreditControl, ISNULL(T0.Attn, '') as Attn, ISNULL(T0.RefNo, '') as RefNo, " +
+                            "ISNULL(T0.EIVConsolidate, '') as EIVConsolidate, ISNULL(T0.EIVType, '') as EIVType, ISNULL(T0.EIVFreqSync, '') as EIVFreqSync, " +
+                            "ISNULL(T0.EIVBuyerName, '') as EIVBuyerName, " +
+                            "ISNULL(T0.EIVBuyerTIN, '') as EIVBuyerTIN, ISNULL(T0.EIVBuyerRegNum, '') as EIVBuyerRegNum, " +
+                            "ISNULL(T0.EIVBuyerRegTyp, '') as EIVBuyerRegTyp, ISNULL(T0.EIVBuyerSSTRegNum, '') as EIVBuyerSSTRegNum, " +
+                            "ISNULL(T0.EIVBuyerEmail, '') as EIVBuyerEmail, ISNULL(T0.EIVBuyerContact, '') as EIVBuyerContact, " +
+                            "ISNULL(T0.EIVAddressLine1B, '') as EIVAddressLine1B, ISNULL(T0.EIVAddressLine2B, '') as EIVAddressLine2B, " +
+                            "ISNULL(T0.EIVAddressLine3B, '') as EIVAddressLine3B, ISNULL(T0.EIVPostalZoneB, '') as EIVPostalZoneB, " +
+                            "ISNULL(T0.EIVCityNameB, '') as EIVCityNameB, ISNULL(T0.EIVStateB, '') as EIVStateB, ISNULL(T0.EIVCountryB, '') as EIVCountryB, " +
+                            "ISNULL(T0.EIVShippingName, '') as EIVShippingName, ISNULL(T0.EIVShippingTin, '') as EIVShippingTin, " +
+                            "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
+                            "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
+                            "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS, T0.OID " +
+                            "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                            "INNER JOIN (" +
+                            "SELECT D1.SalesQuotation FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation D0 " +
+                            "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails D1 on D0.OID = D1.SalesQuotation " +
+                            "WHERE D1.Loc4Quantity > 0 AND D1.GCRecord is null AND ISNULL(D0.GeneratedINT, 0) = 0 " +
+                            "GROUP BY D1.SalesQuotation " +
+                            ") T1 on T0.OID = T1.SalesQuotation " +
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T0.GCRecord is null";
+                        DataTable dtheader = new DataTable();
+                        daheader.Fill(dtheader);
+
+                        if (dtheader.Rows.Count > 0)
+                        {
+                            foreach (DataRow header in dtheader.Rows)
+                            {
+                                IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                                SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                                GeneralControllers genCon = new GeneralControllers();
+                                string docprefix = GetDocPrefix();
+                                newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                                if (header["Customer"].ToString() != "")
+                                {
+                                    newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(header["Customer"].ToString());
+                                }
+                                newSO.CustomerName = header["CustomerName"].ToString();
+                                if (header["Transporter"].ToString() != "")
+                                {
+                                    newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(header["Transporter"].ToString());
+                                }
+                                newSO.ContactNo = header["ContactNo"].ToString();
+                                if (header["ContactPerson"].ToString() != "")
+                                {
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(int.Parse(header["ContactPerson"].ToString()));
+                                }
+                                if (header["PaymentTerm"].ToString() != "")
+                                {
+                                    newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
+                                }
+                                if (header["Series"].ToString() != "")
+                                {
+                                    newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
+                                }
+                                if (header["Priority"].ToString() != "")
+                                {
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(int.Parse(header["Priority"].ToString()));
+                                }
+                                if (header["BillingAddress"].ToString() != "")
+                                {
+                                    newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
+                                }
+                                newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
+                                if (header["ShippingAddress"].ToString() != "")
+                                {
+                                    newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
+                                }
+                                newSO.ShippingAddressfield = header["ShippingAddressfield"].ToString();
+                                newSO.Remarks = header["Remarks"].ToString();
+                                newSO.Attn = header["Attn"].ToString();
+                                newSO.RefNo = header["RefNo"].ToString();
+                                newSO.SQNumber = header["DocNum"].ToString();
+
+                                // Buyer
+                                if (header["EIVConsolidate"].ToString() != "")
+                                {
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", header["EIVConsolidate"].ToString()));
+                                }
+                                if (header["EIVType"].ToString() != "")
+                                {
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", header["EIVType"].ToString()));
+                                }
+                                if (header["EIVFreqSync"].ToString() != "")
+                                {
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", header["EIVFreqSync"].ToString()));
+                                }
+                                newSO.EIVBuyerName = header["EIVBuyerName"].ToString();
+                                newSO.EIVBuyerTIN = header["EIVBuyerTIN"].ToString();
+                                newSO.EIVBuyerRegNum = header["EIVBuyerRegNum"].ToString();
+                                if (header["EIVBuyerRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVBuyerRegTyp"].ToString()));
+                                }
+                                newSO.EIVBuyerSSTRegNum = header["EIVBuyerSSTRegNum"].ToString();
+                                newSO.EIVBuyerEmail = header["EIVBuyerEmail"].ToString();
+                                newSO.EIVBuyerContact = header["EIVBuyerContact"].ToString();
+                                newSO.EIVAddressLine1B = header["EIVAddressLine1B"].ToString();
+                                newSO.EIVAddressLine2B = header["EIVAddressLine2B"].ToString();
+                                newSO.EIVAddressLine3B = header["EIVAddressLine3B"].ToString();
+                                newSO.EIVPostalZoneB = header["EIVPostalZoneB"].ToString();
+                                newSO.EIVCityNameB = header["EIVCityNameB"].ToString();
+                                if (header["EIVStateB"].ToString() != "")
+                                {
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateB"].ToString()));
+                                }
+                                if (header["EIVCountryB"].ToString() != "")
+                                {
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryB"].ToString()));
+                                }
+                                //Recipient
+                                newSO.EIVShippingName = header["EIVShippingName"].ToString();
+                                newSO.EIVShippingTin = header["EIVShippingTin"].ToString();
+                                newSO.EIVShippingRegNum = header["EIVShippingRegNum"].ToString();
+                                if (header["EIVShippingRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVShippingRegTyp"].ToString()));
+                                }
+                                newSO.EIVAddressLine1S = header["EIVAddressLine1S"].ToString();
+                                newSO.EIVAddressLine2S = header["EIVAddressLine2S"].ToString();
+                                newSO.EIVAddressLine3S = header["EIVAddressLine3S"].ToString();
+                                newSO.EIVPostalZoneS = header["EIVPostalZoneS"].ToString();
+                                newSO.EIVCityNameS = header["EIVCityNameS"].ToString();
+                                if (header["EIVStateS"].ToString() != "")
+                                {
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateS"].ToString()));
+                                }
+                                if (header["EIVCountryS"].ToString() != "")
+                                {
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryS"].ToString()));
+                                }
+
+                                using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
+                                {
+                                    daline.SelectCommand.CommandTimeout = 0;
+                                    daline.SelectCommand.CommandText = "SELECT ISNULL(T1.ItemCode, 0) as ItemCode, ISNULL(T1.LegacyItemCode, '') as LegacyItemCode, " +
+                                        "ISNULL(T1.ItemDesc, '') as ItemDesc, ISNULL(T1.Model, '') as Model, ISNULL(T1.CatalogNo, '') as CatalogNo, " +
+                                        "T1.Price, ISNULL(T1.EIVClassification, '') as EIVClassification, T1.Loc4Quantity, T1.OID, T0.DocNum, ISNULL(T2.Loc4, '') as Loc " +
+                                        "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SQDefaultWhs T2 on T0.DocType = T2.DocType " +
+                                        "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc4Quantity > 0 " +
+                                        "AND ISNULL(T1.GeneratedLoc4, 0) = 0 AND T1.GCRecord is null ";
+                                    DataTable dtline = new DataTable();
+                                    daline.Fill(dtline);
+
+                                    if (dtline.Rows.Count > 0)
+                                    {
+                                        foreach (DataRow details in dtline.Rows)
+                                        {
+                                            SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
+
+                                            newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(details["ItemCode"].ToString());
+                                            newsodetails.ItemDesc = details["ItemDesc"].ToString();
+                                            newsodetails.Model = details["Model"].ToString();
+                                            newsodetails.CatalogNo = details["CatalogNo"].ToString();
+                                            if (details["EIVClassification"].ToString() != "")
+                                            {
+                                                newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", details["EIVClassification"].ToString()));
+                                            }
+                                            if (details["Loc"].ToString() != "")
+                                            {
+                                                newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(details["Loc"].ToString());
+                                            }
+                                            newsodetails.Quantity = decimal.Parse(details["Loc4Quantity"].ToString());
+                                            newsodetails.Price = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.AdjustedPrice = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.BaseDoc = details["DocNum"].ToString();
+                                            newsodetails.BaseId = details["OID"].ToString();
+                                            newSO.SalesOrderDetails.Add(newsodetails);
+                                        }
+                                    }
+                                }
+
+                                salesos.CommitChanges();
+
+                                #region Update INT Quotation Details Status
+                                UpdDetails = "UPDATE T1 SET T1.GeneratedLoc4 = 1  " +
+                                    "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                    "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                    "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc4Quantity > 0 " +
+                                    "AND ISNULL(T1.GeneratedLoc4, 0) = 0 AND T1.GCRecord is null ";
+                                if (conn.State == ConnectionState.Open)
+                                {
+                                    conn.Close();
+                                }
+                                conn.Open();
+                                SqlCommand cmdupdLoc4 = new SqlCommand(UpdDetails, conn);
+                                SqlDataReader readerupdLoc4 = cmdupdLoc4.ExecuteReader();
+                                cmdupdLoc4.Dispose();
+                                conn.Close();
+                                #endregion
+                            }
+                        }
+                    }
+                    #endregion
+
+                    #region Location 5
+                    using (SqlDataAdapter daheader = new SqlDataAdapter("", conn))
+                    {
+                        daheader.SelectCommand.CommandTimeout = 0;
+                        daheader.SelectCommand.CommandText = "SELECT ISNULL(T0.DocNum,'') as DocNum, ISNULL(T0.Customer, '') as Customer, " +
+                            "ISNULL(T0.CustomerName, '') as CustomerName, " +
+                            "ISNULL(T0.Transporter, '') as Transporter, ISNULL(T0.ContactNo, '') as ContactNo, ISNULL(T0.ContactPerson, '') as ContactPerson, " +
+                            "ISNULL(T0.Balance, 0) as Balance, ISNULL(T0.PaymentTerm, '') as PaymentTerm, ISNULL(T0.Series, '') as Series, " +
+                            "ISNULL(T0.Priority, '') as Priority, ISNULL(T0.BillingAddress, '') as BillingAddress, " +
+                            "ISNULL(T0.BillingAddressfield, '') as BillingAddressfield, ISNULL(T0.ShippingAddress, '') as ShippingAddress, " +
+                            "ISNULL(T0.ShippingAddressfield, '') as ShippingAddressfield, ISNULL(T0.Remarks, '') as Remarks, " +
+                            "ISNULL(T0.Currency, 0) as Currency, ISNULL(T0.CurrencyRate, 1) as CurrencyRate, " +
+                            "ISNULL(T0.PriceChange, 0) as PriceChange, ISNULL(T0.ExceedPrice, 0) as ExceedPrice, " +
+                            "ISNULL(T0.ExceedCreditControl, 0) as ExceedCreditControl, ISNULL(T0.Attn, '') as Attn, ISNULL(T0.RefNo, '') as RefNo, " +
+                            "ISNULL(T0.EIVConsolidate, '') as EIVConsolidate, ISNULL(T0.EIVType, '') as EIVType, ISNULL(T0.EIVFreqSync, '') as EIVFreqSync, " +
+                            "ISNULL(T0.EIVBuyerName, '') as EIVBuyerName, " +
+                            "ISNULL(T0.EIVBuyerTIN, '') as EIVBuyerTIN, ISNULL(T0.EIVBuyerRegNum, '') as EIVBuyerRegNum, " +
+                            "ISNULL(T0.EIVBuyerRegTyp, '') as EIVBuyerRegTyp, ISNULL(T0.EIVBuyerSSTRegNum, '') as EIVBuyerSSTRegNum, " +
+                            "ISNULL(T0.EIVBuyerEmail, '') as EIVBuyerEmail, ISNULL(T0.EIVBuyerContact, '') as EIVBuyerContact, " +
+                            "ISNULL(T0.EIVAddressLine1B, '') as EIVAddressLine1B, ISNULL(T0.EIVAddressLine2B, '') as EIVAddressLine2B, " +
+                            "ISNULL(T0.EIVAddressLine3B, '') as EIVAddressLine3B, ISNULL(T0.EIVPostalZoneB, '') as EIVPostalZoneB, " +
+                            "ISNULL(T0.EIVCityNameB, '') as EIVCityNameB, ISNULL(T0.EIVStateB, '') as EIVStateB, ISNULL(T0.EIVCountryB, '') as EIVCountryB, " +
+                            "ISNULL(T0.EIVShippingName, '') as EIVShippingName, ISNULL(T0.EIVShippingTin, '') as EIVShippingTin, " +
+                            "ISNULL(T0.EIVShippingRegNum, '') as EIVShippingRegNum, ISNULL(T0.EIVShippingRegTyp, '') as EIVShippingRegTyp, " +
+                            "ISNULL(T0.EIVAddressLine1S, '') as EIVAddressLine1S, ISNULL(T0.EIVAddressLine2S, '') as EIVAddressLine2S, " +
+                            "ISNULL(T0.EIVAddressLine3S, '') as EIVAddressLine3S, ISNULL(T0.EIVPostalZoneS, '') as EIVPostalZoneS, " +
+                            "ISNULL(T0.EIVCityNameS, '') as EIVCityNameS, ISNULL(T0.EIVStateS, '') as EIVStateS, ISNULL(T0.EIVCountryS, '') as EIVCountryS, T0.OID " +
+                            "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                            "INNER JOIN (" +
+                            "SELECT D1.SalesQuotation FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation D0 " +
+                            "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails D1 on D0.OID = D1.SalesQuotation " +
+                            "WHERE D1.Loc5Quantity > 0 AND D1.GCRecord is null AND ISNULL(D0.GeneratedINT, 0) = 0 " +
+                            "GROUP BY D1.SalesQuotation " +
+                            ") T1 on T0.OID = T1.SalesQuotation " +
+                            "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T0.GCRecord is null";
+                        DataTable dtheader = new DataTable();
+                        daheader.Fill(dtheader);
+
+                        if (dtheader.Rows.Count > 0)
+                        {
+                            foreach (DataRow header in dtheader.Rows)
+                            {
+                                IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
+                                SalesOrder newSO = salesos.CreateObject<SalesOrder>();
+
+                                GeneralControllers genCon = new GeneralControllers();
+                                string docprefix = GetDocPrefix();
+                                newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
+
+                                if (header["Customer"].ToString() != "")
+                                {
+                                    newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(header["Customer"].ToString());
+                                }
+                                newSO.CustomerName = header["CustomerName"].ToString();
+                                if (header["Transporter"].ToString() != "")
+                                {
+                                    newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(header["Transporter"].ToString());
+                                }
+                                newSO.ContactNo = header["ContactNo"].ToString();
+                                if (header["ContactPerson"].ToString() != "")
+                                {
+                                    newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(int.Parse(header["ContactPerson"].ToString()));
+                                }
+                                if (header["PaymentTerm"].ToString() != "")
+                                {
+                                    newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(header["PaymentTerm"].ToString());
+                                }
+                                if (header["Series"].ToString() != "")
+                                {
+                                    newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(header["Series"].ToString());
+                                }
+                                if (header["Priority"].ToString() != "")
+                                {
+                                    newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(int.Parse(header["Priority"].ToString()));
+                                }
+                                if (header["BillingAddress"].ToString() != "")
+                                {
+                                    newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(header["BillingAddress"].ToString());
+                                }
+                                newSO.BillingAddressfield = header["BillingAddressfield"].ToString();
+                                if (header["ShippingAddress"].ToString() != "")
+                                {
+                                    newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(header["ShippingAddress"].ToString());
+                                }
+                                newSO.ShippingAddressfield = header["ShippingAddressfield"].ToString();
+                                newSO.Remarks = header["Remarks"].ToString();
+                                newSO.Attn = header["Attn"].ToString();
+                                newSO.RefNo = header["RefNo"].ToString();
+                                newSO.SQNumber = header["DocNum"].ToString();
+
+                                // Buyer
+                                if (header["EIVConsolidate"].ToString() != "")
+                                {
+                                    newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", header["EIVConsolidate"].ToString()));
+                                }
+                                if (header["EIVType"].ToString() != "")
+                                {
+                                    newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", header["EIVType"].ToString()));
+                                }
+                                if (header["EIVFreqSync"].ToString() != "")
+                                {
+                                    newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", header["EIVFreqSync"].ToString()));
+                                }
+                                newSO.EIVBuyerName = header["EIVBuyerName"].ToString();
+                                newSO.EIVBuyerTIN = header["EIVBuyerTIN"].ToString();
+                                newSO.EIVBuyerRegNum = header["EIVBuyerRegNum"].ToString();
+                                if (header["EIVBuyerRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVBuyerRegTyp"].ToString()));
+                                }
+                                newSO.EIVBuyerSSTRegNum = header["EIVBuyerSSTRegNum"].ToString();
+                                newSO.EIVBuyerEmail = header["EIVBuyerEmail"].ToString();
+                                newSO.EIVBuyerContact = header["EIVBuyerContact"].ToString();
+                                newSO.EIVAddressLine1B = header["EIVAddressLine1B"].ToString();
+                                newSO.EIVAddressLine2B = header["EIVAddressLine2B"].ToString();
+                                newSO.EIVAddressLine3B = header["EIVAddressLine3B"].ToString();
+                                newSO.EIVPostalZoneB = header["EIVPostalZoneB"].ToString();
+                                newSO.EIVCityNameB = header["EIVCityNameB"].ToString();
+                                if (header["EIVStateB"].ToString() != "")
+                                {
+                                    newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateB"].ToString()));
+                                }
+                                if (header["EIVCountryB"].ToString() != "")
+                                {
+                                    newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryB"].ToString()));
+                                }
+                                //Recipient
+                                newSO.EIVShippingName = header["EIVShippingName"].ToString();
+                                newSO.EIVShippingTin = header["EIVShippingTin"].ToString();
+                                newSO.EIVShippingRegNum = header["EIVShippingRegNum"].ToString();
+                                if (header["EIVShippingRegTyp"].ToString() != "")
+                                {
+                                    newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", header["EIVShippingRegTyp"].ToString()));
+                                }
+                                newSO.EIVAddressLine1S = header["EIVAddressLine1S"].ToString();
+                                newSO.EIVAddressLine2S = header["EIVAddressLine2S"].ToString();
+                                newSO.EIVAddressLine3S = header["EIVAddressLine3S"].ToString();
+                                newSO.EIVPostalZoneS = header["EIVPostalZoneS"].ToString();
+                                newSO.EIVCityNameS = header["EIVCityNameS"].ToString();
+                                if (header["EIVStateS"].ToString() != "")
+                                {
+                                    newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", header["EIVStateS"].ToString()));
+                                }
+                                if (header["EIVCountryS"].ToString() != "")
+                                {
+                                    newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", header["EIVCountryS"].ToString()));
+                                }
+
+                                using (SqlDataAdapter daline = new SqlDataAdapter("", conn))
+                                {
+                                    daline.SelectCommand.CommandTimeout = 0;
+                                    daline.SelectCommand.CommandText = "SELECT ISNULL(T1.ItemCode, 0) as ItemCode, ISNULL(T1.LegacyItemCode, '') as LegacyItemCode, " +
+                                        "ISNULL(T1.ItemDesc, '') as ItemDesc, ISNULL(T1.Model, '') as Model, ISNULL(T1.CatalogNo, '') as CatalogNo, " +
+                                        "T1.Price, ISNULL(T1.EIVClassification, '') as EIVClassification, T1.Loc5Quantity, T1.OID, T0.DocNum, ISNULL(T2.Loc5, '') as Loc " +
+                                        "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SQDefaultWhs T2 on T0.DocType = T2.DocType " +
+                                        "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc5Quantity > 0 " +
+                                        "AND ISNULL(T1.GeneratedLoc5, 0) = 0 AND T1.GCRecord is null ";
+                                    DataTable dtline = new DataTable();
+                                    daline.Fill(dtline);
+
+                                    if (dtline.Rows.Count > 0)
+                                    {
+                                        foreach (DataRow details in dtline.Rows)
+                                        {
+                                            SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
+
+                                            newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(details["ItemCode"].ToString());
+                                            newsodetails.ItemDesc = details["ItemDesc"].ToString();
+                                            newsodetails.Model = details["Model"].ToString();
+                                            newsodetails.CatalogNo = details["CatalogNo"].ToString();
+                                            if (details["EIVClassification"].ToString() != "")
+                                            {
+                                                newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", details["EIVClassification"].ToString()));
+                                            }
+                                            if (details["Loc"].ToString() != "")
+                                            {
+                                                newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(details["Loc"].ToString());
+                                            }
+                                            newsodetails.Quantity = decimal.Parse(details["Loc5Quantity"].ToString());
+                                            newsodetails.Price = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.AdjustedPrice = decimal.Parse(details["Price"].ToString());
+                                            newsodetails.BaseDoc = details["DocNum"].ToString();
+                                            newsodetails.BaseId = details["OID"].ToString();
+                                            newSO.SalesOrderDetails.Add(newsodetails);
+                                        }
+                                    }
+                                }
+
+                                salesos.CommitChanges();
+
+                                #region Update INT Quotation Details Status
+                                UpdDetails = "UPDATE T1 SET T1.GeneratedLoc5 = 1  " +
+                                    "From [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                                    "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                                    "WHERE T1.SalesQuotation = '" + header["OID"].ToString() + "' AND T1.Loc5Quantity > 0 " +
+                                    "AND ISNULL(T1.GeneratedLoc5, 0) = 0 AND T1.GCRecord is null ";
+                                if (conn.State == ConnectionState.Open)
+                                {
+                                    conn.Close();
+                                }
+                                conn.Open();
+                                SqlCommand cmdupdLoc5 = new SqlCommand(UpdDetails, conn);
+                                SqlDataReader readerupdLoc5 = cmdupdLoc5.ExecuteReader();
+                                cmdupdLoc5.Dispose();
+                                conn.Close();
+                                #endregion
+                            }
+                        }
+                    }
+                    #endregion
+
+                    // Update all without qty
+                    #region Update INT Quotation Details Status
+                    UpdHeader = "UPDATE T1 SET " +
+                        "T1.GeneratedLoc1 = CASE WHEN T1.Loc1Quantity = 0 THEN 1 ELSE T1.GeneratedLoc1 END, " +
+                        "T1.GeneratedLoc2 = CASE WHEN T1.Loc2Quantity = 0 THEN 1 ELSE T1.GeneratedLoc2 END, " +
+                        "T1.GeneratedLoc3 = CASE WHEN T1.Loc3Quantity = 0 THEN 1 ELSE T1.GeneratedLoc3 END, " +
+                        "T1.GeneratedLoc4 = CASE WHEN T1.Loc4Quantity = 0 THEN 1 ELSE T1.GeneratedLoc4 END, " +
+                        "T1.GeneratedLoc5 = CASE WHEN T1.Loc5Quantity = 0 THEN 1 ELSE T1.GeneratedLoc5 END " +
+                        "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                        "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 AND T1.GCRecord is null ";
                     if (conn.State == ConnectionState.Open)
                     {
                         conn.Close();
                     }
                     conn.Open();
-                    SqlCommand cmdsq = new SqlCommand(getSQDoc, conn);
-                    SqlDataReader readersq = cmdsq.ExecuteReader();
-                    while (readersq.Read())
-                    {
-                        IObjectSpace sqos = ObjectSpaceProvider.CreateObjectSpace();
-                        SalesQuotation trx = sqos.FindObject<SalesQuotation>(new BinaryOperator("DocNum", readersq.GetString(0)));
-
-                        if (trx != null)
-                        {
-                            #region Add SO
-                            IObjectSpace salesos = ObjectSpaceProvider.CreateObjectSpace();
-                            SalesOrder newSO = salesos.CreateObject<SalesOrder>();
-
-                            GeneralControllers genCon = new GeneralControllers();
-                            string docprefix = GetDocPrefix();
-                            newSO.DocNum = genCon.GenerateDocNum(DocTypeList.SO, salesos, TransferType.NA, 0, docprefix);
-
-                            if (trx.Customer != null)
-                            {
-                                newSO.Customer = newSO.Session.GetObjectByKey<vwBusniessPartner>(trx.Customer.BPCode);
-                            }
-                            newSO.CustomerName = trx.CustomerName;
-                            if (trx.Transporter != null)
-                            {
-                                newSO.Transporter = newSO.Session.GetObjectByKey<vwTransporter>(trx.Transporter.TransporterID);
-                            }
-                            newSO.ContactNo = trx.ContactNo;
-                            if (trx.ContactPerson != null)
-                            {
-                                newSO.ContactPerson = newSO.Session.GetObjectByKey<vwSalesPerson>(trx.ContactPerson.SlpCode);
-                            }
-                            if (trx.PaymentTerm != null)
-                            {
-                                newSO.PaymentTerm = newSO.Session.GetObjectByKey<vwPaymentTerm>(trx.PaymentTerm.GroupNum);
-                            }
-                            if (trx.Series != null)
-                            {
-                                newSO.Series = newSO.Session.GetObjectByKey<vwSeries>(trx.Series.Series);
-                            }
-                            if (trx.Priority != null)
-                            {
-                                newSO.Priority = newSO.Session.GetObjectByKey<PriorityType>(trx.Priority.Oid);
-                            }
-                            if (trx.BillingAddress != null)
-                            {
-                                newSO.BillingAddress = newSO.Session.GetObjectByKey<vwBillingAddress>(trx.BillingAddress.PriKey);
-                            }
-                            newSO.BillingAddressfield = trx.BillingAddressfield;
-                            if (trx.ShippingAddress != null)
-                            {
-                                newSO.ShippingAddress = newSO.Session.GetObjectByKey<vwShippingAddress>(trx.ShippingAddress.PriKey);
-                            }
-                            newSO.ShippingAddressfield = trx.ShippingAddressfield;
-                            newSO.Remarks = trx.Remarks;
-                            newSO.Attn = trx.Attn;
-                            newSO.RefNo = trx.RefNo;
-                            // Start ver 1.0.8.1
-                            newSO.SQNumber = trx.DocNum;
-                            // End ver 1.0.8.1
-                            // Start ver 1.0.18
-                            // Buyer
-                            if (trx.EIVConsolidate != null)
-                            {
-                                newSO.EIVConsolidate = newSO.Session.FindObject<vwYesNo>(CriteriaOperator.Parse("Code = ?", trx.EIVConsolidate.Code));
-                            }
-                            if (trx.EIVType != null)
-                            {
-                                newSO.EIVType = newSO.Session.FindObject<vwEIVType>(CriteriaOperator.Parse("Code = ?", trx.EIVType.Code));
-                            }
-                            if (trx.EIVFreqSync != null)
-                            {
-                                newSO.EIVFreqSync = newSO.Session.FindObject<vwEIVFreqSync>(CriteriaOperator.Parse("Code = ?", trx.EIVFreqSync.Code));
-                            }
-                            newSO.EIVBuyerName = trx.EIVBuyerName;
-                            newSO.EIVBuyerTIN = trx.EIVBuyerTIN;
-                            newSO.EIVBuyerRegNum = trx.EIVBuyerRegNum;
-                            if (trx.EIVBuyerRegTyp != null)
-                            {
-                                newSO.EIVBuyerRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVBuyerRegTyp.Code));
-                            }
-                            newSO.EIVBuyerSSTRegNum = trx.EIVBuyerSSTRegNum;
-                            newSO.EIVBuyerEmail = trx.EIVBuyerEmail;
-                            newSO.EIVBuyerContact = trx.EIVBuyerContact;
-                            newSO.EIVAddressLine1B = trx.EIVAddressLine1B;
-                            newSO.EIVAddressLine2B = trx.EIVAddressLine2B;
-                            newSO.EIVAddressLine3B = trx.EIVAddressLine3B;
-                            newSO.EIVPostalZoneB = trx.EIVPostalZoneB;
-                            newSO.EIVCityNameB = trx.EIVCityNameB;
-                            if (trx.EIVStateB != null)
-                            {
-                                newSO.EIVStateB = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateB.Code));
-                            }
-                            if (trx.EIVCountryB != null)
-                            {
-                                newSO.EIVCountryB = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryB.Code));
-                            }
-                            //Recipient
-                            newSO.EIVShippingName = trx.EIVShippingName;
-                            newSO.EIVShippingTin = trx.EIVShippingTin;
-                            newSO.EIVShippingRegNum = trx.EIVShippingRegNum;
-                            if (trx.EIVShippingRegTyp != null)
-                            {
-                                newSO.EIVShippingRegTyp = newSO.Session.FindObject<vwEIVRegType>(CriteriaOperator.Parse("Code = ?", trx.EIVShippingRegTyp.Code));
-                            }
-                            newSO.EIVAddressLine1S = trx.EIVAddressLine1S;
-                            newSO.EIVAddressLine2S = trx.EIVAddressLine2S;
-                            newSO.EIVAddressLine3S = trx.EIVAddressLine3S;
-                            newSO.EIVPostalZoneS = trx.EIVPostalZoneS;
-                            newSO.EIVCityNameS = trx.EIVCityNameS;
-                            if (trx.EIVStateS != null)
-                            {
-                                newSO.EIVStateS = newSO.Session.FindObject<vwState>(CriteriaOperator.Parse("Code = ?", trx.EIVStateS.Code));
-                            }
-                            if (trx.EIVCountryS != null)
-                            {
-                                newSO.EIVCountryS = newSO.Session.FindObject<vwCountry>(CriteriaOperator.Parse("Code = ?", trx.EIVCountryS.Code));
-                            }
-                            // End ver 1.0.18
-
-                            foreach (SalesQuotationDetails dtl in trx.SalesQuotationDetails)
-                            {
-                                SalesOrderDetails newsodetails = salesos.CreateObject<SalesOrderDetails>();
-
-                                newsodetails.ItemCode = newsodetails.Session.GetObjectByKey<vwItemMasters>(dtl.ItemCode.ItemCode);
-                                newsodetails.ItemDesc = dtl.ItemDesc;
-                                newsodetails.Model = dtl.Model;
-                                newsodetails.CatalogNo = dtl.CatalogNo;
-                                // Start ver 1.0.18
-                                if (dtl.EIVClassification != null)
-                                {
-                                    newsodetails.EIVClassification = newsodetails.Session.FindObject<vwEIVClass>(CriteriaOperator.Parse("Code = ?", dtl.EIVClassification.Code));
-                                }
-                                // End ver 1.0.18
-                                if (dtl.Location != null)
-                                {
-                                    newsodetails.Location = newsodetails.Session.GetObjectByKey<vwWarehouse>(dtl.Location.WarehouseCode);
-                                }
-                                newsodetails.Quantity = dtl.Quantity;
-                                newsodetails.Price = dtl.Price;
-                                newsodetails.AdjustedPrice = dtl.AdjustedPrice;
-                                newsodetails.BaseDoc = trx.DocNum;
-                                newsodetails.BaseId = dtl.Oid.ToString();
-                                newSO.SalesOrderDetails.Add(newsodetails);
-                            }
-
-                            salesos.CommitChanges();
-                            #endregion
-                        }
-                    }
-                    cmdsq.Dispose();
+                    SqlCommand cmdupdDStatus = new SqlCommand(UpdHeader, conn);
+                    SqlDataReader readerupdDStatus = cmdupdDStatus.ExecuteReader();
+                    cmdupdDStatus.Dispose();
                     conn.Close();
+                    #endregion
+
+                    #region Update INT Quotation Header Status
+                    UpdHeader = "UPDATE T0 SET T0.GeneratedINT = 1 " +
+                        "FROM [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotation T0 " +
+                        "INNER JOIN [" + ConfigurationManager.AppSettings["B2BPortalDB"].ToString() + "]..SalesQuotationDetails T1 on T0.OID = T1.SalesQuotation " +
+                        "WHERE T0.Status = 1 AND ISNULL(T0.GeneratedINT, 0) = 0 " +
+                        "AND T1.GeneratedLoc1 = 1 AND T1.GeneratedLoc2 = 1 AND T1.GeneratedLoc3 = 1 " +
+                        "AND T1.GeneratedLoc4 = 1 AND T1.GeneratedLoc5 = 1 " +
+                        "AND T1.GCRecord is null AND T0.GCRecord is null";
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        conn.Close();
+                    }
+                    conn.Open();
+                    SqlCommand cmdupdH = new SqlCommand(UpdHeader, conn);
+                    SqlDataReader readerupdH = cmdupdH.ExecuteReader();
+                    cmdupdH.Dispose();
+                    conn.Close();
+                    #endregion
+
+                    WriteLog("[INFO]", "--Create INT Quotation End--");
 
                     #endregion
                 }
