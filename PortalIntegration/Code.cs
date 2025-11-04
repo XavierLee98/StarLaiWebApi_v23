@@ -114,9 +114,8 @@ namespace PortalIntegration
                     IObjectSpace updso = ObjectSpaceProvider.CreateObjectSpace();
                     SalesOrder updtrx = updso.FindObject<SalesOrder>(new BinaryOperator("Oid", readerso.GetInt32(0)));
 
-                    GeneralControllers genCon = new GeneralControllers();
                     string docprefix = GetDocPrefix();
-                    updtrx.DocNum = genCon.GenerateSODocNum(DocTypeList.SO, updso, TransferType.NA, 0, docprefix);
+                    updtrx.DocNum = GenerateSODocNum(DocTypeList.SO, updso, TransferType.NA, 0, docprefix);
 
                     updso.CommitChanges();
                 }
@@ -1243,9 +1242,10 @@ namespace PortalIntegration
                             if (doobj.SapINV == false && doobj.SapDO == true)
                             {
                                 // Start ver 1.0.24
-                                if (doobj.Customer.GroupName != "Trade AR InterCo" 
-                                    && doobj.Customer.GroupName != "Non Trade AR InterCo" 
-                                    && doobj.Customer.GroupName != "AR InterCo Loan")
+                                //if (doobj.Customer.GroupName != "Trade AR InterCo" 
+                                //    && doobj.Customer.GroupName != "Non Trade AR InterCo" 
+                                //    && doobj.Customer.GroupName != "AR InterCo Loan")
+                                if (doobj.Customer.AutoInvoice == "Y")
                                 {
                                 // End ver 1.0.24
                                     #region Post INV
@@ -3489,6 +3489,68 @@ namespace PortalIntegration
             conn1.Close();
 
             return prefix;
+        }
+
+        public string GenerateSODocNum(DocTypeList doctype, IObjectSpace os, TransferType transfertype, int series, string companyprefix)
+        {
+            string DocNum = null;
+
+            try
+            {
+                if (doctype == DocTypeList.WT)
+                {
+                    DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and TransferType = ?", doctype, transfertype));
+
+                    if (DocNum == null)
+                    {
+                        DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                    }
+
+                    snumber.CurrectDocNum = snumber.NextDocNum;
+                    snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                    os.CommitChanges();
+
+                }
+                else
+                {
+                    if (series != 0)
+                    {
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ? and Series.Oid = ?", doctype, series));
+
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
+
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
+                    }
+                    else
+                    {
+                        DocTypes snumber = os.FindObject<DocTypes>(CriteriaOperator.Parse("BoCode = ?", doctype));
+
+                        if (DocNum == null)
+                        {
+                            DocNum = snumber.BoName + "-" + companyprefix + "-" + snumber.NextDocNum;
+                        }
+
+                        snumber.CurrectDocNum = snumber.NextDocNum;
+                        snumber.NextDocNum = snumber.NextDocNum + 1;
+
+                        os.CommitChanges();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                DocNum = null;
+                return DocNum;
+            }
+
+            return DocNum;
         }
         // End ver 1.0.13
 

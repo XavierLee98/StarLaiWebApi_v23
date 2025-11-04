@@ -363,9 +363,9 @@ namespace StarLaiPortal.Module.Controllers
                         showMsg("Success", "Copy Success.", InformationType.Success);
                     //}
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    showMsg("Fail", "Copy Fail.", InformationType.Error);
+                    showMsg("Fail", "Copy Fail - " + ex.Message, InformationType.Error);
                 }
             }
         }
@@ -674,9 +674,9 @@ namespace StarLaiPortal.Module.Controllers
                     showMsg("Success", "Copy Success.", InformationType.Success);
                     //}
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    showMsg("Fail", "Copy Fail.", InformationType.Error);
+                    showMsg("Fail", "Copy Fail - " + ex.Message, InformationType.Error);
                 }
             }
         }

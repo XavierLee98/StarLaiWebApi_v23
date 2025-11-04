@@ -18,6 +18,7 @@ using System.Text;
 // 2024-04-01 add U_blockSales ver 1.0.15
 // 2024-06-12 e-invoice - ver 1.0.18
 // 2024-07-29 add DfltWhs - ver 1.0.19
+// 2025-11-03 add AutoInvoice - ver 1.0.24
 
 namespace StarLaiPortal.Module.BusinessObjects.View
 {
@@ -332,6 +333,16 @@ namespace StarLaiPortal.Module.BusinessObjects.View
             get; set;
         }
         // End ver 1.0.19
+
+        // Start ver 1.0.24
+        [XafDisplayName("AutoInvoice")]
+        [Appearance("AutoInvoice", Enabled = false)]
+        [Index(60), VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(true)]
+        public string AutoInvoice
+        {
+            get; set;
+        }
+        // End ver 1.0.24
 
         [Index(88), VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(true)]
         public string BoFullName
