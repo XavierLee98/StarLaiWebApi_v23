@@ -24,6 +24,7 @@ namespace StarLaiPortal.Module.Web.Editors
                 ASPxDateEdit dateEdit = (ASPxDateEdit)control;
                 dateEdit.TimeSectionProperties.Visible = true;
                 dateEdit.UseMaskBehavior = true;
+                dateEdit.MinDate = DateTime.Parse("01/01/1900");
             }
         }
     }

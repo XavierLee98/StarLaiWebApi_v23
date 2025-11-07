@@ -1072,6 +1072,13 @@ namespace StarLaiPortal.Module.Web.Controllers
                     CurrObject.DocNum = genCon.GenerateDocNum(DocTypeList.CT, ObjectSpace, TransferType.NA, 0, docprefix);
                 }
 
+                if (CurrObject.PurchaseDeptStatus == ContainerStatus.Pending &&
+                    CurrObject.AccDeptStatus == ContainerStatus.Pending &&
+                    CurrObject.WhsDeptStatus == ContainerStatus.Pending)
+                {
+                    CurrObject.Status = DocStatus.New;
+                }
+
                 if (CurrObject.PurchaseDeptStatus == ContainerStatus.Completed || 
                     CurrObject.AccDeptStatus == ContainerStatus.Completed || 
                     CurrObject.WhsDeptStatus == ContainerStatus.Completed)

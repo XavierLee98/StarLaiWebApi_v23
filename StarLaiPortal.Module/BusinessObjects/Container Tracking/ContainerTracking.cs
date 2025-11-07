@@ -240,7 +240,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
         }
 
         private string _Forwarded;
-        [XafDisplayName("Forwarded")]
+        [XafDisplayName("Forwarder")]
         [Appearance("Forwarded", Enabled = false, Criteria = "IsValidHdr = 0")]
         [Index(20), VisibleInDetailView(true), VisibleInListView(false), VisibleInLookupListView(false)]
         public string Forwarded

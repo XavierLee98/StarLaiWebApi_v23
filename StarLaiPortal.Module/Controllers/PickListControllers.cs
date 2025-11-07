@@ -1759,6 +1759,7 @@ namespace StarLaiPortal.Module.Controllers
                 // Start ver 1.0.25
                 //int cnt = 1;
                 ArrayList docentry = new ArrayList();
+                string cdocentry = "";
                 // End ver 1.0.25
                 SqlConnection conn = new SqlConnection(genCon.getConnectionString());
                 ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
@@ -1767,6 +1768,15 @@ namespace StarLaiPortal.Module.Controllers
                 foreach (PickList dtl in e.SelectedObjects)
                 {
                     docentry.Add(dtl.Oid);
+
+                    if (cdocentry == "")
+                    {
+                        cdocentry = dtl.Oid.ToString();
+                    }
+                    else
+                    {
+                        cdocentry = cdocentry + "," + dtl.Oid.ToString();
+                    }
                 }
 
                 if (docentry.Count == 0)
@@ -1803,7 +1813,8 @@ namespace StarLaiPortal.Module.Controllers
 
                     // Start ver 1.0.25
                     //doc.SetParameterValue("dockey@", pl.Oid);
-                    doc.SetParameterValue("dockey@", docentry.ToArray());
+                    //doc.SetParameterValue("dockey@", docentry.ToArray());
+                    doc.SetParameterValue("dockey@", cdocentry);
                     // End ver 1.0.25
                     doc.SetParameterValue("dbName@", conn.Database);
 
@@ -1882,6 +1893,7 @@ namespace StarLaiPortal.Module.Controllers
                 // Start ver 1.0.25
                 //int cnt = 1;
                 ArrayList docentry = new ArrayList();
+                string cdocentry = "";
                 // End ver 1.0.25
                 SqlConnection conn = new SqlConnection(genCon.getConnectionString());
                 ApplicationUser user = (ApplicationUser)SecuritySystem.CurrentUser;
@@ -1890,6 +1902,15 @@ namespace StarLaiPortal.Module.Controllers
                 foreach (PickList dtl in e.SelectedObjects)
                 {
                     docentry.Add(dtl.Oid);
+
+                    if (cdocentry == "")
+                    {
+                        cdocentry = dtl.Oid.ToString();
+                    }
+                    else
+                    {
+                        cdocentry = cdocentry + "," + dtl.Oid.ToString();
+                    }
                 }
 
                 if (docentry.Count == 0)
@@ -1926,7 +1947,8 @@ namespace StarLaiPortal.Module.Controllers
 
                     // Start ver 1.0.25
                     //doc.SetParameterValue("dockey@", pl.Oid);
-                    doc.SetParameterValue("dockey@", docentry.ToArray());
+                    //doc.SetParameterValue("dockey@", docentry.ToArray());
+                    doc.SetParameterValue("dockey@", cdocentry);
                     // End ver 1.0.25
                     doc.SetParameterValue("dbName@", conn.Database);
 
