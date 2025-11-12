@@ -178,6 +178,10 @@ namespace StarLaiPortal.WebApi.API.Controller
                 curobj = newObjectSpace.CreateObject<SalesReturns>();
                 ExpandoParser.ParseExObjectXPO<SalesReturns>(obj, curobj, newObjectSpace);
 
+                var companyPrefix = CompanyCommanHelper.GetCompanyPrefix(dynamicObj.companyDB);
+                GeneralControllers con = new GeneralControllers();
+                curobj.DocNum = con.GenerateDocNum(DocTypeList.SR, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.NA, 0, companyPrefix);
+
                 curobj.Salesperson = newObjectSpace.FindObject<vwSalesPerson>(CriteriaOperator.Parse("SlpCode = ?", requestor.SlpCode));
                 curobj.CreateUser = newObjectSpace.GetObjectByKey<ApplicationUser>(userId);
                 curobj.UpdateUser = newObjectSpace.GetObjectByKey<ApplicationUser>(userId);
@@ -189,10 +193,11 @@ namespace StarLaiPortal.WebApi.API.Controller
                 }
                 curobj.Save();
 
-                var companyPrefix = CompanyCommanHelper.GetCompanyPrefix(dynamicObj.companyDB);
+                if (string.IsNullOrEmpty(curobj.DocNum))
+                {
+                    curobj.DocNum = con.GenerateDocNum(DocTypeList.SR, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.NA, 0, companyPrefix);
+                }
 
-                GeneralControllers con = new GeneralControllers();
-                curobj.DocNum = con.GenerateDocNum(DocTypeList.SR, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.NA, 0, companyPrefix);
                 newObjectSpace.CommitChanges();
 
                 using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
