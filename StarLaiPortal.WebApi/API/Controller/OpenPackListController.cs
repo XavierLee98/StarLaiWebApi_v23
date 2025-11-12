@@ -204,8 +204,6 @@ namespace StarLaiPortal.WebApi.API.Controller
                     var userId = security.UserId;
                     var userName = security.UserName;
 
-                    LogHelper.CreateLog(Configuration.GetConnectionString("ConnectionString"), userId.ToString(), "Pack(Draft)", obj);
-
                     var isduplicatejson = detailsObject
                     .GroupBy(x => new { x.BaseId, x.Bundle })
                     .Any(g => g.Count() > 1);
@@ -216,6 +214,8 @@ namespace StarLaiPortal.WebApi.API.Controller
                     string packDocNumResult = "";
 
                     int isUpdate = -1;
+
+                    LogHelper.CreateLog(Configuration.GetConnectionString("ConnectionString"), userId.ToString(), "Pack(Draft)", obj);
 
                     //New Document
                     if (PackOid == -1) 
