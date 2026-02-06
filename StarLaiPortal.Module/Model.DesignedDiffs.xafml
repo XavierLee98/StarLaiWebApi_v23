@@ -1216,6 +1216,18 @@
         <ColumnInfo Id="Status" Index="2" />
         <ColumnInfo Id="ContainerNo" Index="3" />
         <ColumnInfo Id="DocDate" Index="4" />
+        <ColumnInfo Id="StorageFreeDay" Index="20" />
+        <ColumnInfo Id="DemmurrageFreeDays" Index="21" />
+        <ColumnInfo Id="DetentionFreeDays" Index="22" />
+        <ColumnInfo Id="FreeTimeExpiry" Index="23" />
+        <ColumnInfo Id="Remarks" Index="24" />
+        <ColumnInfo Id="ParkingAtPort" Index="25" />
+        <ColumnInfo Id="StorageFreeDueDate" Index="26" />
+        <ColumnInfo Id="DMFreeDueDate" Index="27" />
+        <ColumnInfo Id="DTFreeDueDate" Index="28" />
+        <ColumnInfo Id="StorageChargeDay" Index="29" />
+        <ColumnInfo Id="DMFreeDelayDay" Index="30" />
+        <ColumnInfo Id="DTFreeDelayDay" Index="31" />
       </Columns>
     </ListView>
     <DetailView Id="ContainerTrackingInquiryResult_DetailView" AllowEdit="False" />

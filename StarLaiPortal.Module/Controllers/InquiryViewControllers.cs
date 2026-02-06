@@ -52,6 +52,7 @@ using System.Collections;
 // 2024-08-20 - add EIVValidatedStatus - ver 1.0.19
 // 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
 // 2025-09-22 - add Container Tracking Inquiry - ver 1.0.25
+// 2026-02-06 - add new field - ver 1.0.26
 
 namespace StarLaiPortal.Module.Controllers
 {
@@ -2041,6 +2042,13 @@ namespace StarLaiPortal.Module.Controllers
                             {
                                 result.CreateDate = DateTime.Parse(row.Values[30].ToString());
                             }
+                            // Start ver 1.0.26
+                            result.StorageFreeDay = int.Parse(row.Values[31].ToString());
+                            if (DateTime.Parse(row.Values[32].ToString()).Date.ToString("MM/dd/yyyy") != "01/01/1900")
+                            {
+                                result.StorageFreeDueDate = DateTime.Parse(row.Values[30].ToString());
+                            }
+                            // End ver 1.0.26
 
                             currObject.Results.Add(result);
                         }

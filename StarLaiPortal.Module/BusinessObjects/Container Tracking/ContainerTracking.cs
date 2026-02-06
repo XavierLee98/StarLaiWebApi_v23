@@ -22,6 +22,8 @@ using System.Net.NetworkInformation;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
 
+// 2026-02-06 - change formula - ver 1.0.26
+
 namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 {
     [XafDisplayName("Container Tracking")]
@@ -1064,14 +1066,16 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                         ForwardedToPort = 1;
                     }
 
-                    if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
-                    {
-                        WhsProcessing = (GRPOReturnBack - ReqReturnBack).Days + 1;
-                    }
-                    else
-                    {
-                        WhsProcessing = 1;
-                    }
+                    // Start ver 1.0.26
+                    //if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
+                    //{
+                    //    WhsProcessing = (GRPOReturnBack.AddDays(1) - ReqReturnBack).Days + 1;
+                    //}
+                    //else
+                    //{
+                    //    WhsProcessing = 1;
+                    //}
+                    // End ver 1.0.26
                 }
             }
         }
@@ -1117,6 +1121,17 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + 1;
                     }
+
+                    // Start ver 1.0.26
+                    if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
+                    {
+                        WhsProcessing = (GRPOReturnBack.AddDays(1) - ActualReturnBack).Days + 1;
+                    }
+                    else
+                    {
+                        WhsProcessing = 1;
+                    }
+                    // End ver 1.0.26
                 }
             }
         }
@@ -1136,7 +1151,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 {
                     if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsProcessing = (GRPOReturnBack - ReqReturnBack).Days + 1;
+                        // Start ver 1.0.26
+                        //WhsProcessing = (GRPOReturnBack.AddDays(1) - ReqReturnBack).Days + 1;
+                        WhsProcessing = (GRPOReturnBack.AddDays(1) - ActualReturnBack).Days + 1;
+                        // End ver 1.0.26
                     }
                     else
                     {
