@@ -69,6 +69,10 @@ namespace StarLaiPortal.WebApi.API.Controller
                 curobj = newObjectSpace.CreateObject<WarehouseTransfers>();
                 ExpandoParser.ParseExObjectXPO<WarehouseTransfers>(obj, curobj, newObjectSpace);
 
+                var companyPrefix = CompanyCommanHelper.GetCompanyPrefix(dynamicObj.companyDB);
+                GeneralControllers con = new GeneralControllers();
+                curobj.DocNum = con.GenerateDocNum(DocTypeList.WT, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.BT, 0, companyPrefix);
+
                 curobj.Picker = userName;
                 curobj.CreateUser = newObjectSpace.GetObjectByKey<ApplicationUser>(userId);
                 curobj.UpdateUser = newObjectSpace.GetObjectByKey<ApplicationUser>(userId);
@@ -82,10 +86,11 @@ namespace StarLaiPortal.WebApi.API.Controller
 
                 curobj.Save();
 
-                var companyPrefix = CompanyCommanHelper.GetCompanyPrefix(dynamicObj.companyDB);
+                if (string.IsNullOrEmpty(curobj.DocNum))
+                {
+                    curobj.DocNum = con.GenerateDocNum(DocTypeList.WT, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.BT, 0, companyPrefix);
+                }
 
-                GeneralControllers con = new GeneralControllers();
-                curobj.DocNum = con.GenerateDocNum(DocTypeList.WT, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.BT, 0, companyPrefix);
                 newObjectSpace.CommitChanges();
 
                 return Ok(new { oid = curobj.Oid, docnum = curobj.DocNum });
