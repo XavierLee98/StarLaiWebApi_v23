@@ -19,7 +19,7 @@ using System.Text;
 // 2024-08-20 - add EIV-Validated Status    - ver 1.0.19
 // 2025-08-18 - add Item Bin Inquiry Status - ver 1.0.24
 // 2025-09-22 - add Container Tracking Inquiry - ver 1.0.25
-// 2026-02-06 - add new field - ver 1.0.26
+// 2026-02-06 - add new field - ver 1.0.27
 
 namespace StarLaiPortal.Module.BusinessObjects
 {
@@ -4586,7 +4586,7 @@ namespace StarLaiPortal.Module.BusinessObjects
             get; set;
         }
 
-        // Start ver 1.0.26
+        // Start ver 1.0.27
         [XafDisplayName("Storage Free Day")]
         [Appearance("StorageFreeDay", Enabled = false)]
         [Index(75)]
@@ -4602,7 +4602,7 @@ namespace StarLaiPortal.Module.BusinessObjects
         {
             get; set;
         }
-        // End ver 1.0.26
+        // End ver 1.0.27
     }
     #endregion
     // End ver 1.0.25

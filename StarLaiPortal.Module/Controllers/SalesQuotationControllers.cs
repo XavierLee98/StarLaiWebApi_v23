@@ -1123,10 +1123,20 @@ namespace StarLaiPortal.Module.Controllers
                                     //    }
                                     //}
 
-                                    string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
-                                        "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
-                                        "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
-                                        "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + dtl.Oid;
+                                    //string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
+                                    //    "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
+                                    //    "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
+                                    //    "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + dtl.Oid;
+                                    string getnostock = "SELECT 1 " + 
+                                        "FROM ( " + 
+                                        "SELECT T0.Itemcode, T0.Location, SUM(T0.Quantity) AS [Quantity] " + 
+                                        "FROM SalesQuotationDetails T0 " + 
+                                        "WHERE T0.SalesQuotation = " + dtl.Oid + " AND T0.GCRecord IS NULL " + 
+                                        "GROUP BY T0.Itemcode, T0.Location " + 
+                                        ") T0 " + 
+                                        "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " + 
+                                        "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " + 
+                                        "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) ";
                                     if (conn.State == ConnectionState.Open)
                                     {
                                         conn.Close();
@@ -1488,10 +1498,20 @@ namespace StarLaiPortal.Module.Controllers
                                 //    }
                                 //}
 
-                                string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
+                                //string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
+                                //    "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
+                                //    "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
+                                //    "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + dtl.Oid;
+                                string getnostock = "SELECT 1 " +
+                                    "FROM ( " +
+                                    "SELECT T0.Itemcode, T0.Location, SUM(T0.Quantity) AS [Quantity] " +
+                                    "FROM SalesQuotationDetails T0 " +
+                                    "WHERE T0.SalesQuotation = " + dtl.Oid + " AND T0.GCRecord IS NULL " +
+                                    "GROUP BY T0.Itemcode, T0.Location " +
+                                    ") T0 " +
                                     "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
                                     "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
-                                    "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + dtl.Oid;
+                                    "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) ";
                                 if (conn.State == ConnectionState.Open)
                                 {
                                     conn.Close();
@@ -1975,10 +1995,16 @@ namespace StarLaiPortal.Module.Controllers
                     //{
                     if (selectedObject.Series.SeriesName != "BackOrdP" && selectedObject.Series.SeriesName != "BackOrdS")
                     {
-                        string getnostock = "SELECT 1 From SalesQuotationDetails T0 " +
-                             "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
-                             "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
-                             "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) AND T0.GCRecord is null AND T0.SalesQuotation = " + selectedObject.Oid;
+                        string getnostock = "SELECT 1 " +
+                            "FROM ( " +
+                            "SELECT T0.Itemcode, T0.Location, SUM(T0.Quantity) AS [Quantity] " +
+                            "FROM SalesQuotationDetails T0 " +
+                            "WHERE T0.SalesQuotation = " + selectedObject.Oid + " AND T0.GCRecord IS NULL " +
+                            "GROUP BY T0.Itemcode, T0.Location " +
+                            ") T0 " +
+                            "LEFT JOIN vwStockBalance T1 on T0.ItemCode = T1.ItemCode COLLATE DATABASE_DEFAULT " +
+                            "AND T0.[Location] = T1.WhsCode COLLATE DATABASE_DEFAULT " +
+                            "WHERE ISNULL(T0.Quantity, 0) > ISNULL(T1.InStock, 0) ";
                         if (conn.State == ConnectionState.Open)
                         {
                             conn.Close();
