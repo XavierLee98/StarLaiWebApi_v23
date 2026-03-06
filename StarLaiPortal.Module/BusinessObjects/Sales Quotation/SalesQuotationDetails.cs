@@ -21,6 +21,7 @@ using System.Text;
 // 2024-05-16 - enhance speed - ver 1.0.15
 // 2024-06-12 - e-invoice - ver 1.0.18
 // 2024-10-08 - warehouse exclude SQ - ver 1.0.21
+// 2026-03-06 - no allow decimal place in decimal variable - ver 1.0.27
 
 namespace StarLaiPortal.Module.BusinessObjects.Sales_Quotation
 {
@@ -320,6 +321,13 @@ namespace StarLaiPortal.Module.BusinessObjects.Sales_Quotation
                 SetPropertyValue("Quantity", ref _Quantity, value);
                 if (!IsLoading && value != 0)
                 {
+                    // Start 1.0.27
+                    if (Quantity != (int)Quantity)
+                    {
+                        Quantity = (int)Quantity;
+                    }
+                    // End ver 1.0.27
+
                     if (Customer != null)
                     {
                         //vwPrice tempprice = Session.FindObject<vwPrice>(CriteriaOperator.Parse("ItemCode = ? and PriceList = ?",

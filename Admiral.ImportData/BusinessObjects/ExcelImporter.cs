@@ -20,6 +20,7 @@ using DevExpress.Xpo;
 // 2023-11-06 - not allow zero - ver 1.0.12
 // 2024-01-30 - add SQ and PO update - ver 1.0.14
 // 2025-02-25 - block add item if not in draft - ver 1.0.22
+// 2026-03-06 - no allow decimal place in decimal variable - ver 1.0.27
 
 namespace Admiral.ImportData
 {
@@ -632,7 +633,17 @@ namespace Admiral.ImportData
                                         else
                                         {
                                         // End ver 1.0.12
-                                            value = Convert.ChangeType(cell.Value.NumericValue, field.MemberInfo.MemberType);
+                                        // Start ver 1.0.27
+                                            decimal validatenum = (decimal)(cell.Value.NumericValue - (int)cell.Value.NumericValue);
+                                            if (validatenum != 0)
+                                            {
+                                                result.AddErrorMessage(string.Format("No allow decimal value.", field.Name), cell);
+                                            }
+                                            else
+                                            {
+                                                value = Convert.ChangeType(cell.Value.NumericValue, field.MemberInfo.MemberType);
+                                            }
+                                        // End ver 1.0.27
                                         // Start ver 1.0.12
                                         }
                                         // End ver 1.0.12

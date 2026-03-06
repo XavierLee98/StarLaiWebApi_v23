@@ -909,7 +909,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays + 1);
+                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays - 1);
                     }
                     else
                     {
@@ -1057,7 +1057,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays + 1);
+                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays - 1);
                     }
                     else
                     {
@@ -1268,7 +1268,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsProcessing = (GRPOReturnBack.AddDays(1) - ActualReturnBack).Days + 1;
+                        WhsProcessing = (GRPOReturnBack - ActualReturnBack).Days + 1;
                     }
                     else
                     {
@@ -1296,7 +1296,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //WhsProcessing = (GRPOReturnBack.AddDays(1) - ReqReturnBack).Days + 1;
-                        WhsProcessing = (GRPOReturnBack.AddDays(1) - ActualReturnBack).Days + 1;
+                        WhsProcessing = (GRPOReturnBack - ActualReturnBack).Days + 1;
                         // End ver 1.0.27
                     }
                     else

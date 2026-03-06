@@ -345,6 +345,18 @@ namespace StarLaiPortal.Web {
             SqlDataReader readerinsHis = cmdinsHis.ExecuteReader();
             cmdinsHis.Dispose();
             conn.Close();
+
+            query = "UPDATE [" + ConfigurationManager.AppSettings["PortalDB"].ToString() + "]..PermissionPolicyUser set LoginFailedCount = 0 " +
+                "WHERE UserName = '" + user.UserName + "'";
+            if (conn.State == ConnectionState.Open)
+            {
+                conn.Close();
+            }
+            conn.Open();
+            SqlCommand cmdupdsucc = new SqlCommand(query, conn);
+            SqlDataReader readupdsucc = cmdupdsucc.ExecuteReader();
+            cmdupdsucc.Dispose();
+            conn.Close();
         }
 
         private void Application_LoggingOff(object sender, LoggingOffEventArgs e)

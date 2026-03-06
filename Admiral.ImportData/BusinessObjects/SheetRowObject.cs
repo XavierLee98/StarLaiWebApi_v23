@@ -33,7 +33,7 @@ namespace Admiral.ImportData
             errorCell.Font.Color = Color.White;
             var s = errorCell.Worksheet;
             var tipCell = s.Cells[errorCell.RowIndex, 0];
-            tipCell.Value = tipCell.DisplayText + "\n" + msg;
+            tipCell.Value = tipCell.DisplayText + "//" + msg;
         }
 
         public void AddErrorMessage(string msg, IEnumerable<string> properties)

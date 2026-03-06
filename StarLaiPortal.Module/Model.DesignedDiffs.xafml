@@ -1028,6 +1028,53 @@
       </Columns>
     </ListView>
     <ListView Id="BundleType_ListView" DataAccessMode="Client" />
+    <DetailView Id="ChangePasswordOnLogonParameters_DetailView">
+      <Items>
+        <StaticImage Id="ChangePasswordImage" Caption="ChangePasswordImage(3)" />
+        <StaticText Id="ChangePasswordText" Caption="ChangePasswordText(4)" />
+        <StaticText Id="PasswordPattern" Caption="PasswordPattern" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Static" RelativeSize="9.9593495934959346">
+            <LayoutItem Id="ChangePasswordImage" RelativeSize="6.9306930693069306" />
+            <LayoutItem Id="ChangePasswordText" RelativeSize="93.069306930693074" />
+          </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="90.040650406504071">
+            <LayoutGroup Id="ChangePasswordOnLogonParameters" RelativeSize="100">
+              <LayoutItem Id="PasswordPattern" ViewItem="PasswordPattern" Index="0" RelativeSize="2.4830699774266365" IsNewNode="True" />
+              <LayoutItem Id="NewPassword" Index="1" RelativeSize="5.8690744920993225" />
+              <LayoutItem Id="ConfirmPassword" Index="2" RelativeSize="91.647855530474047" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="ChangePasswordParameters_DetailView">
+      <Items>
+        <StaticImage Id="ChangePasswordImage" Caption="ChangePasswordImage(3)" />
+        <StaticText Id="ChangePasswordText" Caption="ChangePasswordText(4)" />
+        <StaticText Id="PasswordPattern" Caption="PasswordPattern" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Static" RelativeSize="9.9593495934959346">
+            <LayoutItem Id="ChangePasswordImage" RelativeSize="6.9306930693069306" />
+            <LayoutItem Id="ChangePasswordText" RelativeSize="93.069306930693074" />
+          </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="90.040650406504071">
+            <LayoutGroup Id="ChangePasswordParameters" RelativeSize="9.0293453724604973" Caption="Old Password">
+              <LayoutItem Id="PasswordPattern" ViewItem="PasswordPattern" Index="0" RelativeSize="27.5" IsNewNode="True" />
+              <LayoutItem Id="OldPassword" Index="1" RelativeSize="72.5" />
+            </LayoutGroup>
+            <LayoutGroup Id="ChangePasswordOnLogonParameters" RelativeSize="90.9706546275395">
+              <LayoutItem Id="NewPassword" RelativeSize="7.1960297766749379" />
+              <LayoutItem Id="ConfirmPassword" RelativeSize="92.803970223325067" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="ContainerTracking_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

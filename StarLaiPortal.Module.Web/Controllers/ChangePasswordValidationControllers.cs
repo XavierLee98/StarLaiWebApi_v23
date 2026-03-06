@@ -71,41 +71,50 @@ namespace StarLaiPortal.Module.Web.Controllers
             SqlDataReader readersecurity = cmdsecurity.ExecuteReader();
             while (readersecurity.Read())
             {
-                if (parameters != null && parameters.NewPassword.Length < readersecurity.GetInt32(0))
+                if (error == "")
                 {
-                    if (error == "")
+                    if (parameters != null && parameters.NewPassword == null)
+                    {
+                        error = "Please key in new password.";
+                    }
+                }
+                
+
+                if (error == "")
+                {
+                    if (parameters != null && parameters.NewPassword.Length < readersecurity.GetInt32(0))
                     {
                         error = "Password too short.";
                     }
                 }
 
-                if (parameters != null && parameters.NewPassword.Count(char.IsUpper) < readersecurity.GetInt32(1))
+                if (error == "")
                 {
-                    if (error == "")
+                    if (parameters != null && parameters.NewPassword.Count(char.IsUpper) < readersecurity.GetInt32(1))
                     {
                         error = "Password must contain at least " + readersecurity.GetInt32(1) + " upper case.";
                     }
                 }
 
-                if (parameters != null && parameters.NewPassword.Count(char.IsLower) < readersecurity.GetInt32(2))
+                if (error == "")
                 {
-                    if (error == "")
+                    if (parameters != null && parameters.NewPassword.Count(char.IsLower) < readersecurity.GetInt32(2))
                     {
                         error = "Password must contain at least " + readersecurity.GetInt32(2) + " lower case.";
                     }
                 }
 
-                if (parameters != null && parameters.NewPassword.Count(char.IsDigit) < readersecurity.GetInt32(3))
+                if (error == "")
                 {
-                    if (error == "")
+                    if (parameters != null && parameters.NewPassword.Count(char.IsDigit) < readersecurity.GetInt32(3))
                     {
                         error = "Password must contain at least " + readersecurity.GetInt32(3) + " digit.";
                     }
                 }
 
-                if (parameters != null && parameters.NewPassword.Where(x => !char.IsLetterOrDigit(x)).Count() < readersecurity.GetInt32(4))
+                if (error == "")
                 {
-                    if (error == "")
+                    if (parameters != null && parameters.NewPassword.Where(x => !char.IsLetterOrDigit(x)).Count() < readersecurity.GetInt32(4))
                     {
                         error = "Password must contain at least " + readersecurity.GetInt32(4) + " special character.";
                     }
