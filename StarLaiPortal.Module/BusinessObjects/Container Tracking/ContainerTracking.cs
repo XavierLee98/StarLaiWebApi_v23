@@ -895,7 +895,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1004,7 +1004,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1035,7 +1035,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DetentionFreeDelay = ((ActualPullOutDateTime - ActualReturnBack).Days) - WhsDetentionFreeDays + 1;
-                        DetentionFreeDelay = (((ActualReturnBack - ActualPullOutDateTime).Days) + 1) - WhsDetentionFreeDays;
+                        DetentionFreeDelay = (((ActualReturnBack.Date - ActualPullOutDateTime.Date).Days) + 1) - WhsDetentionFreeDays;
                         // End veer 1.0.27
                     }
                     else
@@ -1046,7 +1046,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
                     }
                     else
                     {
@@ -1114,7 +1114,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DetentionFreeDelay = ((ActualPullOutDateTime - ActualReturnBack).Days) - WhsDetentionFreeDays + 1;
-                        DetentionFreeDelay = (((ActualReturnBack - ActualPullOutDateTime).Days) + 1) - WhsDetentionFreeDays;
+                        DetentionFreeDelay = (((ActualReturnBack.Date - ActualPullOutDateTime.Date).Days) + 1) - WhsDetentionFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1233,7 +1233,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DetentionFreeDelay = ((ActualPullOutDateTime - ActualReturnBack).Days) - WhsDetentionFreeDays + 1;
-                        DetentionFreeDelay = (((ActualReturnBack - ActualPullOutDateTime).Days) + 1) - WhsDetentionFreeDays;
+                        DetentionFreeDelay = (((ActualReturnBack.Date - ActualPullOutDateTime.Date).Days) + 1) - WhsDetentionFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1254,7 +1254,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1268,7 +1268,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsProcessing = (GRPOReturnBack - ActualReturnBack).Days + 1;
+                        WhsProcessing = (GRPOReturnBack.Date - ActualReturnBack.Date).Days + 1;
                     }
                     else
                     {
@@ -1292,11 +1292,11 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 SetPropertyValue("GRPOReturnBack", ref _GRPOReturnBack, value);
                 if (!IsLoading)
                 {
-                    if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
+                    if (GRPOReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
                         // Start ver 1.0.27
                         //WhsProcessing = (GRPOReturnBack.AddDays(1) - ReqReturnBack).Days + 1;
-                        WhsProcessing = (GRPOReturnBack - ActualReturnBack).Days + 1;
+                        WhsProcessing = (GRPOReturnBack.Date - ActualReturnBack.Date).Days + 1;
                         // End ver 1.0.27
                     }
                     else
