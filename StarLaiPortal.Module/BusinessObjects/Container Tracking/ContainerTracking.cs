@@ -508,7 +508,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //PendingDocDays = (SoftcopyBLRecFrmPur.Date - BLRecvDate.Date).Days;
-                        PendingDocDays = (SoftcopyBLRecFrmPur.Date - InvSettDate.Date).Days + 1;
+                        PendingDocDays = (InvSettDate.Date - SoftcopyBLRecFrmPur.Date).Days + 1;
                         // End ver 1.0.27
                     }
                     else
@@ -754,7 +754,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 {
                     if (SoftcopyBLRecFrmPur.Date.ToString("MM/dd/yyyy") != "01/01/0001" && InvSettDate.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        PendingDocDays = (SoftcopyBLRecFrmPur.Date - InvSettDate.Date).Days + 1;
+                        PendingDocDays = (InvSettDate.Date - SoftcopyBLRecFrmPur.Date).Days + 1;
                     }
                     else
                     {
@@ -855,9 +855,13 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                    // End ver 1.0.27
-                        StorageFreeDue = WhsStakeOnDateTime.AddDays(WhsStorageFreeDays - 1);
-                        DemmurrageFreeDue = WhsStakeOnDateTime.AddDays(WhsDemmurrageFreeDays - 1);
+                        // End ver 1.0.27
+                        // Start ver 1.0.27
+                        //StorageFreeDue = WhsStakeOnDateTime.AddDays(WhsStorageFreeDays - 1);
+                        //DemmurrageFreeDue = WhsStakeOnDateTime.AddDays(WhsDemmurrageFreeDays - 1);
+                        StorageFreeDue = WhsStakeOnDateTime.Date.AddDays(WhsStorageFreeDays - 1);
+                        DemmurrageFreeDue = WhsStakeOnDateTime.Date.AddDays(WhsDemmurrageFreeDays - 1);
+                        // End ver 1.0.27
                     }
                     // Start ver 1.0.27
                     else
@@ -871,7 +875,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //StorageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsStorageFreeDays + 1;
-                        StorageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsStorageFreeDays;
+                        StorageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsStorageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -883,7 +887,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays;
+                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -895,21 +899,21 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - (WhsDemmurrageFreeDays + WhsDetentionFreeDays);
                         // End ver 1.0.27
                     }
                     else
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + WhsDetentionFreeDays + 1;
+                        DemmurrageDETFreeDelayDays = (WhsDemmurrageFreeDays + WhsDetentionFreeDays) + 1;
                         // End ver 1.0.27
                     }
 
                     // Start ver 1.0.27
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays - 1);
+                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.Date.AddDays(WhsDetentionFreeDays - 1);
                     }
                     else
                     {
@@ -937,7 +941,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
                     // End ver 1.0.27
-                        StorageFreeDue = WhsStakeOnDateTime.AddDays(WhsStorageFreeDays - 1);
+                    // Start ver 1.0.27
+                        //StorageFreeDue = WhsStakeOnDateTime.AddDays(WhsStorageFreeDays - 1);
+                        StorageFreeDue = WhsStakeOnDateTime.Date.AddDays(WhsStorageFreeDays - 1);
+                    // End ver 1.0.27
                     // Start ver 1.0.27
                     }
                     else
@@ -951,7 +958,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //StorageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsStorageFreeDays + 1;
-                        StorageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsStorageFreeDays;
+                        StorageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsStorageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -979,7 +986,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
                         // End ver 1.0.27
-                        DemmurrageFreeDue = WhsStakeOnDateTime.AddDays(WhsDemmurrageFreeDays - 1);
+                        // Start ver 1.0.27
+                        //DemmurrageFreeDue = WhsStakeOnDateTime.AddDays(WhsDemmurrageFreeDays - 1);
+                        DemmurrageFreeDue = WhsStakeOnDateTime.Date.AddDays(WhsDemmurrageFreeDays - 1);
+                        // End ver 1.0.27
                         // Start ver 1.0.27
                     }
                     else
@@ -992,7 +1002,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays;
+                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1004,14 +1014,14 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - (WhsDemmurrageFreeDays + WhsDetentionFreeDays);
                         // End ver 1.0.27
                     }
                     else
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + WhsDetentionFreeDays + 1;
+                        DemmurrageDETFreeDelayDays = (WhsDemmurrageFreeDays + WhsDetentionFreeDays) + 1;
                         // End ver 1.0.27
                     }
                 }
@@ -1046,18 +1056,18 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     // Start ver 1.0.27
                     if (ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - (WhsDemmurrageFreeDays + WhsDetentionFreeDays);
                     }
                     else
                     {
-                        DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + WhsDetentionFreeDays + 1;
+                        DemmurrageDETFreeDelayDays = (WhsDemmurrageFreeDays + WhsDetentionFreeDays) + 1;
                     }
                     // End ver 1.0.27
 
                     // Start ver 1.0.27
                     if (WhsStakeOnDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.AddDays(WhsDetentionFreeDays - 1);
+                        WhsDetentionFreeDueDate = WhsStakeOnDateTime.Date.AddDays(WhsDetentionFreeDays - 1);
                     }
                     else
                     {
@@ -1085,7 +1095,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 {
                     if (ActualPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        ForwardedFrmPort = (ActualPullOutDateTime - ReqPullOutDateTime).Days + 1;
+                        // Start ver 1.0.27
+                        //ForwardedFrmPort = (ActualPullOutDateTime - ReqPullOutDateTime).Days + 1;
+                        ForwardedFrmPort = (ActualPullOutDateTime.Date - ReqPullOutDateTime.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1124,7 +1137,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
                     if (ActualPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        ForwardedFrmPort = (ActualPullOutDateTime - ReqPullOutDateTime).Days + 1;
+                        // Start ver 1.0.27
+                        //ForwardedFrmPort = (ActualPullOutDateTime - ReqPullOutDateTime).Days + 1;
+                        ForwardedFrmPort = (ActualPullOutDateTime.Date - ReqPullOutDateTime.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1133,7 +1149,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
                     if (ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsUnload = (ReqReturnBack - ActualPullOutDateTime).Days + 1;
+                        // Start ver 1.0.27
+                        //WhsUnload = (ReqReturnBack - ActualPullOutDateTime).Days + 1;
+                        WhsUnload = (ReqReturnBack.Date - ActualPullOutDateTime.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1144,7 +1163,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //StorageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsStorageFreeDays + 1;
-                        StorageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsStorageFreeDays;
+                        StorageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsStorageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1156,7 +1175,7 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageFreeDelayDays = ((ActualPullOutDateTime - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime - WhsStakeOnDateTime).Days) + 1) - WhsDemmurrageFreeDays;
+                        DemmurrageFreeDelayDays = (((ActualPullOutDateTime.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays;
                         // End ver 1.0.27
                     }
                     else
@@ -1184,7 +1203,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                 {
                     if (ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ActualPullOutDateTime.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        WhsUnload = (ReqReturnBack - ActualPullOutDateTime).Days + 1;
+                        // Start ver 1.0.27
+                        //WhsUnload = (ReqReturnBack - ActualPullOutDateTime).Days + 1;
+                        WhsUnload = (ReqReturnBack.Date - ActualPullOutDateTime.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1193,7 +1215,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
                     if (ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        ForwardedToPort = (ActualReturnBack - ReqReturnBack).Days + 1;
+                        // Start ver 1.0.27
+                        //ForwardedToPort = (ActualReturnBack - ReqReturnBack).Days + 1;
+                        ForwardedToPort = (ActualReturnBack.Date - ReqReturnBack.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1243,7 +1268,10 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
 
                     if (ActualReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001" && ReqReturnBack.Date.ToString("MM/dd/yyyy") != "01/01/0001")
                     {
-                        ForwardedToPort = (ActualReturnBack - ReqReturnBack).Days + 1;
+                        // Start ver 1.0.27
+                        //ForwardedToPort = (ActualReturnBack - ReqReturnBack).Days + 1;
+                        ForwardedToPort = (ActualReturnBack.Date - ReqReturnBack.Date).Days + 1;
+                        // End ver 1.0.27
                     }
                     else
                     {
@@ -1254,14 +1282,14 @@ namespace StarLaiPortal.Module.BusinessObjects.Container_Tracking
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = ((ActualReturnBack - WhsStakeOnDateTime).Days) - WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - WhsDemmurrageFreeDays + WhsDetentionFreeDays;
+                        DemmurrageDETFreeDelayDays = (((ActualReturnBack.Date - WhsStakeOnDateTime.Date).Days) + 1) - (WhsDemmurrageFreeDays + WhsDetentionFreeDays);
                         // End ver 1.0.27
                     }
                     else
                     {
                         // Start ver 1.0.27
                         //DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + 1;
-                        DemmurrageDETFreeDelayDays = WhsDemmurrageFreeDays + WhsDetentionFreeDays + 1;
+                        DemmurrageDETFreeDelayDays = (WhsDemmurrageFreeDays + WhsDetentionFreeDays) + 1;
                         // End ver 1.0.27
                     }
 
