@@ -135,8 +135,6 @@ namespace StarLaiPortal.WebApi.API.Controller
 
                 try
                 {
-
-
                     using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
                     {
                         string jsonString = JsonConvert.SerializeObject(obj);
@@ -172,26 +170,11 @@ namespace StarLaiPortal.WebApi.API.Controller
                     throw new Exception("Validation Error. " + excep.Message);
                 }
 
-                //using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
-                //{
-                //    string jsonString = JsonConvert.SerializeObject(obj);
-
-                //    jsonString = jsonString.Replace("'", "''");
-
-                //    var insertResult = conn.Execute($"exec sp_App_InsertAppPostLog 'Loading', '{userId}', '{jsonString}'");
-                //    if (insertResult < 0)
-                //    {
-                //        return Problem("Fail to insert Log.");
-                //    }
-                //}
-
                 IObjectSpace newObjectSpace = objectSpaceFactory.CreateObjectSpace<Load>();
-
 
                 LogHelper.CreateLog(Configuration.GetConnectionString("ConnectionString"), userId.ToString(), "Loading", obj);
 
                 Load curobj = null;
-                //curobj = new PickListDetailsActual(((DevExpress.ExpressApp.Xpo.XPObjectSpace)newObjectSpace).Session);
                 curobj = newObjectSpace.CreateObject<Load>();
 
                 ExpandoParser.ParseExObjectXPO<Load>(obj, curobj, newObjectSpace);
@@ -211,7 +194,6 @@ namespace StarLaiPortal.WebApi.API.Controller
                 var isduplicate = curobj.LoadDetails
                                     .GroupBy(x => new { x.PackList, x.Bundle })
                                     .Any(g => g.Count() > 1);
-                //var duplicateItemCount = curobj.LoadDetails.GroupBy(x => new { x.PackList, x.Bundle }).Where(y => y.Count() > 1).Count();
 
                 if (isduplicate)
                 {
@@ -251,7 +233,18 @@ namespace StarLaiPortal.WebApi.API.Controller
                 if (string.IsNullOrEmpty(curobj.DocNum))
                 {
                     curobj.DocNum = con.GenerateDocNum(DocTypeList.Load, objectSpaceFactory.CreateObjectSpace<DocTypes>(), TransferType.NA, 0, companyPrefix);
+                    curobj.Save();
                 }
+
+                IObjectSpace loados = objectSpaceFactory.CreateObjectSpace<Load>();
+                IObjectSpace packos = objectSpaceFactory.CreateObjectSpace<PackList>();
+                IObjectSpace pickos = objectSpaceFactory.CreateObjectSpace<PickList>();
+                IObjectSpace soos = objectSpaceFactory.CreateObjectSpace<SalesOrder>();
+
+                var result = con.GenerateDO
+                    (Configuration.GetConnectionString("ConnectionString"), curobj, newObjectSpace, loados, packos, pickos, soos, companyPrefix);
+
+                if (result == 0) throw new Exception($"Fail to generate Delivery for Load ({curobj.DocNum}). Please retry again.");
 
                 newObjectSpace.CommitChanges();
 
@@ -261,18 +254,7 @@ namespace StarLaiPortal.WebApi.API.Controller
                     conn.Query($"exec sp_afterdatasave 'Loading', '{json}'");
                 }
 
-                IObjectSpace loados = objectSpaceFactory.CreateObjectSpace<Load>();
-                IObjectSpace packos = objectSpaceFactory.CreateObjectSpace<PackList>();
-                IObjectSpace pickos = objectSpaceFactory.CreateObjectSpace<PickList>();
-                IObjectSpace soos = objectSpaceFactory.CreateObjectSpace<SalesOrder>();
-
-
-                var result = con.GenerateDO(Configuration.GetConnectionString("ConnectionString"), curobj, newObjectSpace, loados, packos, pickos, soos, companyPrefix);
-
-                if (result == 0) throw new Exception($"Fail to generate Delivery for Load ({curobj.DocNum}). ");
-
                 return Ok(new { oid = curobj.Oid, docnum = curobj.DocNum });
-
             }
             catch (Exception ex)
             {
