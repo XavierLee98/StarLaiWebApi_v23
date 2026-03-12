@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StarLaiPortal.Module.BusinessObjects;
+using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using StarLaiPortal.Module.BusinessObjects.Load;
 using StarLaiPortal.Module.BusinessObjects.Pack_List;
 using StarLaiPortal.Module.BusinessObjects.Pick_List;
@@ -236,13 +237,13 @@ namespace StarLaiPortal.WebApi.API.Controller
                     curobj.Save();
                 }
 
-                IObjectSpace loados = objectSpaceFactory.CreateObjectSpace<Load>();
+                IObjectSpace deliveryos = objectSpaceFactory.CreateObjectSpace<DeliveryOrder>();
                 IObjectSpace packos = objectSpaceFactory.CreateObjectSpace<PackList>();
                 IObjectSpace pickos = objectSpaceFactory.CreateObjectSpace<PickList>();
                 IObjectSpace soos = objectSpaceFactory.CreateObjectSpace<SalesOrder>();
 
                 var result = con.GenerateDO
-                    (Configuration.GetConnectionString("ConnectionString"), curobj, newObjectSpace, loados, packos, pickos, soos, companyPrefix);
+                    (Configuration.GetConnectionString("ConnectionString"), curobj, deliveryos, newObjectSpace, packos, pickos, soos, companyPrefix);
 
                 if (result == 0) throw new Exception($"Fail to generate Delivery for Load ({curobj.DocNum}). Please retry again.");
 
