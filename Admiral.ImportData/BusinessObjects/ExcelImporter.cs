@@ -625,28 +625,39 @@ namespace Admiral.ImportData
                                     }
                                     else
                                     {
-                                        // Start ver 1.0.12
-                                        if (cell.Value.NumericValue == 0)
-                                        {
-                                            result.AddErrorMessage(string.Format("No allow 0 qty.", field.Name), cell);
-                                        }
-                                        else
-                                        {
-                                        // End ver 1.0.12
                                         // Start ver 1.0.27
-                                            decimal validatenum = (decimal)(cell.Value.NumericValue - (int)cell.Value.NumericValue);
-                                            if (validatenum != 0)
+                                        if (field.Name == "Quantity")
+                                        {
+                                          // End ver 1.0.27
+                                            // Start ver 1.0.12
+                                            if (cell.Value.NumericValue == 0)
                                             {
-                                                result.AddErrorMessage(string.Format("No allow decimal value.", field.Name), cell);
+                                                result.AddErrorMessage(string.Format("No allow 0 qty.", field.Name), cell);
                                             }
                                             else
                                             {
-                                                value = Convert.ChangeType(cell.Value.NumericValue, field.MemberInfo.MemberType);
+                                                // End ver 1.0.12
+                                                // Start ver 1.0.27
+                                                decimal validatenum = (decimal)(cell.Value.NumericValue - (int)cell.Value.NumericValue);
+                                                if (validatenum != 0)
+                                                {
+                                                    result.AddErrorMessage(string.Format("No allow decimal value.", field.Name), cell);
+                                                }
+                                                else
+                                                {
+                                                    value = Convert.ChangeType(cell.Value.NumericValue, field.MemberInfo.MemberType);
+                                                }
+                                                // End ver 1.0.27
+                                                // Start ver 1.0.12
                                             }
-                                        // End ver 1.0.27
-                                        // Start ver 1.0.12
+                                            // End ver 1.0.12
+                                        // Start ver 1.0.27
                                         }
-                                        // End ver 1.0.12
+                                        else
+                                        {
+                                            value = Convert.ChangeType(cell.Value.NumericValue, field.MemberInfo.MemberType);
+                                        }
+                                        // End ver 1.0.27
                                     }
                                 }
                                 else if (memberType == typeof(bool))

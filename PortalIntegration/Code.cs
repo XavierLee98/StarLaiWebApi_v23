@@ -65,6 +65,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 // 2025-08-18 Do not create Invoice for interco invoice- ver 1.0.24
 // 2025-09-12 Auto create picking for SO with transporter with OC type - ver 1.0.25
 // 2025-10-30 Auto create INT Quotation from B2B portal - ver 1.0.26
+// 2026-03-18 Update loading missing doc num - ver 1.0.27
 
 namespace PortalIntegration
 {
@@ -123,6 +124,31 @@ namespace PortalIntegration
                 conn.Close();
                 #endregion
                 // End ver 1.0.23
+
+                // Start ver 1.0.27
+                #region Update Loading DocNum
+                string getLoad = "SELECT OID FROM Load WHERE DocNum is null and GCRecord is null and Status = 1";
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+                conn.Open();
+                SqlCommand cmdload = new SqlCommand(getLoad, conn);
+                SqlDataReader readerload = cmdload.ExecuteReader();
+                while (readerload.Read())
+                {
+                    IObjectSpace updload = ObjectSpaceProvider.CreateObjectSpace();
+                    Load updloadtrx = updload.FindObject<Load>(new BinaryOperator("Oid", readerso.GetInt32(0)));
+
+                    string docprefix = GetDocPrefix();
+                    updloadtrx.DocNum = GenerateSODocNum(DocTypeList.Load, updload, TransferType.NA, 0, docprefix);
+
+                    updload.CommitChanges();
+                }
+                cmdload.Dispose();
+                conn.Close();
+                #endregion
+                // End ver 1.0.27
 
                 temp = ConfigurationManager.AppSettings["SOPost"].ToString().ToUpper();
                 if (temp == "Y" || temp == "YES" || temp == "TRUE" || temp == "1")
