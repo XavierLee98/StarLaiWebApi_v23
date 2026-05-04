@@ -108,7 +108,7 @@ namespace StarLaiPortal.WebApi.API.Controller
                 .OrderBy(x => x));
 
             var gate = _soLocks.GetOrAdd(lockKey, _ => new SemaphoreSlim(1, 1));
-            bool acquired = await gate.WaitAsync(TimeSpan.FromSeconds(30));
+            bool acquired = await gate.WaitAsync(TimeSpan.FromSeconds(60));
             if (!acquired)
                 return Problem("Another submission for the same pick is in progress. Please try again.");
             try
