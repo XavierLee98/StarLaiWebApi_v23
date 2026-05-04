@@ -97,7 +97,7 @@ namespace StarLaiPortal.WebApi.API.Controller
         }
 
         [HttpPost()]
-        public IActionResult Post([FromBody] ExpandoObject obj)
+        public async Task<IActionResult> Post([FromBody] ExpandoObject obj)
         {
             dynamic dynamicObj = obj;
 
@@ -108,7 +108,9 @@ namespace StarLaiPortal.WebApi.API.Controller
                 .OrderBy(x => x));
 
             var gate = _soLocks.GetOrAdd(lockKey, _ => new SemaphoreSlim(1, 1));
-            gate.Wait();
+            bool acquired = await gate.WaitAsync(TimeSpan.FromSeconds(30));
+            if (!acquired)
+                return Problem("Another submission for the same pick is in progress. Please try again.");
             try
             {
                 using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
