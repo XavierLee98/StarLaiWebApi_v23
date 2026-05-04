@@ -18,6 +18,7 @@ using StarLaiPortal.Module.BusinessObjects.Pack_List;
 using StarLaiPortal.Module.BusinessObjects.Load;
 using StarLaiPortal.Module.BusinessObjects.Delivery_Order;
 using StarLaiPortal.Module.BusinessObjects.Setup;
+using System.Collections.Concurrent;
 
 namespace StarLaiPortal.WebApi.API.Controller
 {
@@ -26,6 +27,8 @@ namespace StarLaiPortal.WebApi.API.Controller
     [Authorize]
     public class OpenPLController : ControllerBase
     {
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _soLocks = new();
+
         private IConfiguration Configuration { get; }
         IObjectSpaceFactory objectSpaceFactory;
         ISecurityProvider securityProvider;
@@ -96,9 +99,18 @@ namespace StarLaiPortal.WebApi.API.Controller
         [HttpPost()]
         public IActionResult Post([FromBody] ExpandoObject obj)
         {
+            dynamic dynamicObj = obj;
+
+            var lockKey = string.Join(",",
+                ((IEnumerable<dynamic>)dynamicObj.PickListDetailsActuals)
+                .Select(x => $"{x.PickList}_{x.PickListDetailOid}")
+                .Distinct()
+                .OrderBy(x => x));
+
+            var gate = _soLocks.GetOrAdd(lockKey, _ => new SemaphoreSlim(1, 1));
+            gate.Wait();
             try
             {
-                dynamic dynamicObj = obj;
                 using (SqlConnection conn = new SqlConnection(Configuration.GetConnectionString("ConnectionString")))
                 {
                     string jsonString = JsonConvert.SerializeObject(obj);
@@ -250,6 +262,10 @@ namespace StarLaiPortal.WebApi.API.Controller
             catch (Exception ex)
             {
                 return Problem(ex.Message);
+            }
+            finally
+            {
+                gate.Release();
             }
         }
     }
