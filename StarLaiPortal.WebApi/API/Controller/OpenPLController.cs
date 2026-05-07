@@ -268,6 +268,8 @@ namespace StarLaiPortal.WebApi.API.Controller
             finally
             {
                 gate.Release();
+                if (gate.CurrentCount == 1)
+                    _soLocks.TryRemove(new KeyValuePair<string, SemaphoreSlim>(lockKey, gate));
             }
         }
     }
