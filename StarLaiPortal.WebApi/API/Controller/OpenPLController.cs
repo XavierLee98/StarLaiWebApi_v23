@@ -103,12 +103,12 @@ namespace StarLaiPortal.WebApi.API.Controller
 
             var lockKey = string.Join(",",
                 ((IEnumerable<dynamic>)dynamicObj.PickListDetailsActuals)
-                .Select(x => $"{x.PickList}_{x.PickListDetailOid}")
+                .Select(x => $"{x.SOBaseId}")
                 .Distinct()
                 .OrderBy(x => x));
 
             var gate = _soLocks.GetOrAdd(lockKey, _ => new SemaphoreSlim(1, 1));
-            bool acquired = await gate.WaitAsync(TimeSpan.FromSeconds(30));
+            bool acquired = await gate.WaitAsync(TimeSpan.FromSeconds(15));
             if (!acquired)
                 return Problem("Another submission for the same pick is in progress. Please try again.");
             try
