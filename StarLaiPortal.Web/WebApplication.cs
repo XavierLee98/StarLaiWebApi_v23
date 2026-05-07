@@ -13,7 +13,6 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Web;
 using System.Net.Http;
-using Microsoft.Owin;
 
 // 2024-04-04 - add login new loginpage - ver 1.0.15
 // 2025-11-04 - Add Security control - ver 1.0.26
